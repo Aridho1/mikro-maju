@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" class="!scroll-smooth">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Mikro Maju</title>
+        <link rel="stylesheet" href="./src/css/output.css" />
+        <link rel="manifest" href="./manifest.json" />
+        <link rel="icon" href="./src/img/app/icon.jpeg" />
+
+        <!-- <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" /> -->
+        <!-- <script src="https://unpkg.com/@alpinejs/tooltip@3.x.x/dist/cdn.min.js" defer></script> -->
+        <!-- <script src="./../node_modules/sweetalert2/dist/sweetalert2.all.min.js" defer></script> -->
+
+        <!-- <script src="./node_modules/sweetalert2/dist/sweetalert2.all.min.js" defer></script> -->
+        <script src="./pkg/sweetalert2-11.22.2/package/dist/sweetalert2.all.js" defer></script>
+
+        <script src="./node_modules/flowbite/dist/flowbite.js" defer></script>
+        <!-- <script src="./pkg/flowbite-3.1.2/package/dist/flowbite.js" defer></script> -->
+
+        <script src="./pkg/alpinejs-3.14.9/package/dist/cdn.min.js" defer></script>
+        <script src="./pkg/jspdf-3.0.1/package/dist/jspdf.umd.min.js" defer></script>
+
+        <script src="./src/js/app.js" type="module"></script>
+        <script>
+            document.addEventListener("alpine:init", () => {
+                console.log("alpine init");
+            });
+
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker
+                    .register("./src/js/service-worker.js")
+                    .then(() => console.log("SERVICE WORKER REGISTERED"))
+                    .catch((e) => console.warn("ERROR SERVICE WORKER:", e));
+            }
+        </script>
+    </head>
+    <body class="!scroll-smooth"></body>
+</html>

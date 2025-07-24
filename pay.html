@@ -1,0 +1,111 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- @TODO: replace SET_YOUR_CLIENT_KEY_HERE with your client key -->
+  <!-- <script type="text/javascript"
+		src="https://app.stg.midtrans.com/snap/snap.js"
+    data-client-key="SB-Mid-client-uj7hKX_GDknpM6wl"></script> -->
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-uj7hKX_GDknpM6wl"></script>
+
+    
+    <script src="./node_modules/sweetalert2/dist/sweetalert2.all.min.js" defer></script>
+  <!-- Note: replace with src="https://app.midtrans.com/snap/snap.js" for Production environment -->
+</head>
+
+<body>
+  <!-- <button id="pay-button">Pay!</button> -->
+
+  <!-- @TODO: You can add the desired ID as a reference for the embedId parameter. -->
+  <div id="snap-container"></div>
+
+  <script type="text/javascript">
+      
+    const urlSearchParams = new URLSearchParams(location.search)
+    const url_param = {}
+    urlSearchParams.forEach((val, key) => (url_param[key] = val, true))
+
+    const { token } = url_param
+      
+    // For example trigger on button clicked, or any time you need
+    // var payButton = document.getElementById('pay-button');
+    document.addEventListener('DOMContentLoaded', async function () {
+
+        if (token) {
+            // const CLIENT_KEY = "SB-Mid-client-uj7hKX_GDknpM6wl"
+    
+            // const el = document.createElement('script');
+            // // el.src = 'https://example.com/script.js';
+            // el.type = 'text/javascript';
+            // el.src = 'https://app.stg.midtrans.com/snap/snap.js'
+            // el.setAttribute('data-client-key', CLIENT_KEY)
+    
+            // document.body.appendChild(el)
+
+            setTimeout(snap(token), 2000)
+    
+    
+    
+          // Trigger snap popup. @TODO: Replace TRANSACTION_TOKEN_HERE with your transaction token.
+          // Also, use the embedId that you defined in the div above, here.
+          
+        }
+        
+    });
+    
+    const snap = (token) => {
+        window.snap.pay(token, {
+            // embedId: 'snap-container',
+            onSuccess: async function (result) {
+              /* You may add your own implementation here */
+            //   alert("payment success!"); 
+                console.log(result);
+                
+                const { order_id } = result
+                
+                const formData = new FormData()
+                formData.append('payment_key', order_id)
+                
+                const text = await (await fetch('./src/php/transactions.php?m=check-status', { method: "POST", body: formData })).text()
+                
+                
+                console.log(text)
+                try {
+                    const json = JSON.parse(text)
+
+                    const { status, msg } = json
+                    console.log(json)
+
+                    if (!status) throw new Error(msg)
+                    
+                    Swal.fire({ text: "Selamat", icon: "success", text: msg })
+
+                } catch(e) {
+                    console.error(e)
+                }
+
+
+
+
+            },
+            onPending: function (result) {
+              /* You may add your own implementation here */
+              alert("wating your payment!"); console.log(result);
+            },
+            onError: function (result) {
+              /* You may add your own implementation here */
+              alert("payment failed!"); console.log(result);
+            },
+            onClose: function () {
+              /* You may add your own implementation here */
+              alert('you closed the popup without finishing the payment');
+            }
+        });
+
+    }
+
+
+
+  </script>
+</body>
+
+</html>

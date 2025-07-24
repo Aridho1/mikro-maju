@@ -1,0 +1,36 @@
+<div class="overflow-x-auto w-full">
+  <table class="min-w-max w-full table-auto border-collapse">
+    <thead class="bg-blue-500 text-white">
+      <tr>
+        <th class="px-6 py-3 text-left whitespace-nowrap">Nama</th>
+        <th class="px-6 py-3 text-left whitespace-nowrap">Alamat Lengkap</th>
+        <th class="px-6 py-3 text-left whitespace-nowrap">Email</th>
+        <th class="px-6 py-3 text-left whitespace-nowrap">Telepon</th>
+        <th class="px-6 py-3 text-left whitespace-nowrap">Catatan Pelanggan</th>
+      </tr>
+    </thead>
+    <tbody class="bg-white text-gray-800">
+      <tr class="border-b">
+        <td class="px-6 py-4 whitespace-nowrap">Budi</td>
+<td class="px-6 py-4 max-w-xs [display:-webkit-box] [overflow:hidden] [text-overflow:ellipsis] [word-break:break-word] [-webkit-line-clamp:3] [-webkit-box-orient:vertical]">
+  Teks panjang banget sampai perlu lebih dari tiga baris supaya bisa muat dan tidak meledak ke layout sebelah.
+</td>
+        <td class="px-6 py-4 whitespace-nowrap">budi@example.com</td>
+        <td class="px-6 py-4 whitespace-nowrap">0812-3456-7890</td>
+        <!-- <td class="px-6 py-4 [display:-webkit-box] [overflow:hidden] [text-overflow:ellipsis] [word-break:break-word] [-webkit-line-clamp:3] [-webkit-box-orient:vertical]">Pelanggan sering mencuci dalam jumlah besar dan suka layanan kilat ekspres dengan tambahan parfum khusus lemon lavender</td>
+      </tr> -->
+      <!-- <td class="px-6 py-4 whitespace-normal break-words">
+        <div class="w-[30ch]">
+          Teks panjang yang kamu masukkan akan membungkus otomatis dan bisa menjadi maksimal 3 baris (kalau panjangnya cukup), tapi tidak akan terpotong. Pelanggan sering mencuci dalam jumlah besar dan suka layanan kilat ekspres dengan tambahan parfum khusus lemon lavender
+        </div> -->
+        <td class="px-6 py-4">
+          <div class="flex min-w-0">
+            <div class="line-clamp-3 min-w-0">
+              Teks panjang yang kamu masukkan akan membungkus otomatis dan bisa menjadi maksimal 3 baris (kalau panjangnya cukup), tapi tidak akan terpotong. Pelanggan sering mencuci dalam jumlah besar dan suka layanan kilat ekspres dengan tambahan parfum khusus lemon lavender
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

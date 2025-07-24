@@ -1,0 +1,16 @@
+*.log
+*.tmp
+
+dis/
+build/
+
+config.json
+.env
+
+vendor/
+node_modules/
+
+.cache
+
+# pkg
+pkg/*/

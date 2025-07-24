@@ -1,0 +1,167 @@
+<div x-data="transactionaddComponent" class="py-6 px-4 relative">
+    <h2 class="text-2xl font-bold mb-4" x-data="{ init() { $watch('quantity', () => setCart()) } }">Tambah Transaksi</h2>
+
+    <a href="#cart-list" class="z-50 block bottom-8 right-8 bg-white shadow-xl rounded-full p-3 hover:bg-gray-100 transition fixed">
+        <div class="relative">
+            <!-- Cart SVG -->
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+                <path
+                    d="M6.29977 5H21L19 12H7.37671M20 16H8L6 3H3M9 20C9 20.5523 8.55228 21 8 21C7.44772 21 7 20.5523 7 20C7 19.4477 7.44772 19 8 19C8.55228 19 9 19.4477 9 20ZM20 20C20 20.5523 19.5523 21 19 21C18.4477 21 18 20.5523 18 20C18 19.4477 18.4477 19 19 19C19.5523 19 20 19.4477 20 20Z"
+                    stroke="#000000"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+
+            <!-- Badge -->
+            <span x-show="quantity > 0" x-text="quantity" class="absolute -bottom-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full text-center"></span>
+        </div>
+    </a>
+
+    <section id="filter" class="mx-auto border border-slate-300 rounded-lg bg-slate-100 p-4 pb-8 flex flex-col gap-5">
+        <form @submit.prevent @change="" id="filter-category" class="flex flex-col gap-3">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white">Filter Kategori</h2>
+
+            <div class="flex flex-wrap gap-x-2 gap-y-4">
+                <template x-for="(subcategory, category) in categories" :key="category">
+                    <div>
+                        <input type="checkbox" :id="`category-${category}`" x-model="filterCategories[category].enabled" class="hidden peer" />
+                        <label
+                            :for="`category-${category}`"
+                            x-text="category"
+                            class="box-border px-3 py-1 text-sm bg-slate-200 rounded-lg cursor-pointer border-2 border-gray-200 peer-checked:border-blue-600"></label>
+                    </div>
+                </template>
+            </div>
+        </form>
+
+        <template x-for="(subcategory, category) in categories" :key="category">
+            <template x-if="filterCategories[category].enabled">
+                <form @submit.prevent @change="filterSubcategory" class="flex flex-col gap-4">
+                    <h3 class="text-md font-medium text-gray-900 dark:text-white">
+                        Filter Kategori
+                        <span x-text="category"></span>
+                    </h3>
+                    <div class="flex flex-wrap gap-x-2 gap-y-4">
+                        <template x-for="(subcategory, num) in categories[category]" :key="subcategory + index + num">
+                            <div>
+                                <input type="checkbox" :id="`category-${category}-${subcategory}`" x-model="filterCategories[category].items" :value="subcategory" class="hidden peer" />
+                                <label
+                                    :for="`category-${category}-${subcategory}`"
+                                    x-text="subcategory"
+                                    class="box-border px-3 py-1 text-sm bg-slate-200 rounded-lg cursor-pointer border-2 border-gray-200 peer-checked:border-blue-600"></label>
+                            </div>
+                        </template>
+                    </div>
+                </form>
+            </template>
+        </template>
+    </section>
+
+    <div class="mx-auto flex flex-wrap py-4 justify-center gap-4">
+        <template x-for="(product, index) in products" :key="product.name + index">
+            <div
+                @click="selectItem(product)"
+                x-show="filterCategories[product.category]?.enabled && filterCategories[product.category].items.includes(product.subcategory)"
+                class="bg-white shadow rounded-lg overflow-hidden cursor-pointer flex-1 basis-36 max-w-[12rem]">
+                <div class="h-28 md:h-32 bg-gray-100 overflow-hidden flex items-center justify-center relative">
+                    <img
+                        @click="selectItem(product)"
+                        :src="`./src/img/db/${product.image}`"
+                        :alt="product.name"
+                        loading="lazy"
+                        class="w-full h-full object-cover duration-300 hover:scale-105 cursor-pointer text-center"
+                        @error="e => (e.target.classList.remove('w-full'), e.target.classList.remove('h-full'))" />
+
+                    <div class="absolute bottom-0 w-full">
+                        <div class="scale-75 translate-x-[10%] mr-0 relative flex items-center justify-end gap-1 flex-wrap p-1">
+                            <div class="text-xs text-yellow-700 bg-yellow-100 rounded px-2 py-1" x-text="product.category"></div>
+                            <div class="text-xs text-cyan-700 bg-cyan-100 rounded px-2 py-1" x-text="product.subcategory"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="py-4 px-2 flex flex-col gap-2">
+                    <h3 class="text-xs md:text-sm font-semibold text-gray-900 truncate" x-text="product.name">Nama Produk Contoh</h3>
+                    <p class="text-xs md:text-sm font-bold text-blue-600" x-text="IDR.format(product.price)">Rp 25.000</p>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Cart -->
+    <ul id="cart-list" class="scroll-mt-16 mx-auto max-w-xl divide-y divide-gray-200 dark:divide-gray-700 mb-20 mt-8">
+        <template x-for="(item, index) in cart" :key="item.id + ' ' + index">
+            <li class="py-3 sm:py-4">
+                <div class="grid justify-between place-content-center grid-cols-[auto_1fr_5rem_5.5rem] gap-1">
+                    <!-- Gambar -->
+                    <div class="w-12 shrink-0 flex items-center">
+                        <img class="w-8 aspect-square rounded-full object-cover object-center" :src="`./src/img/db/${item.image}`" :alt="item.name" loading="lazy" />
+                    </div>
+
+                    <!-- Nama produk + harga satuan -->
+                    <div class="min-w-0">
+                        <p class="text-xs md:text-sm font-medium text-gray-900 truncate dark:text-white" x-tooltip="'Tooltip ini muncul saat tap atau hover'" x-text="item.name"></p>
+                        <p class="text-xs md:text-sm text-gray-500 truncate dark:text-gray-400">
+                            <span x-text="IDR.format(item.price)"></span>
+                            x
+                            <span x-text="item.quantity"></span>
+                        </p>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="change-quantity flex justify-center items-center gap-2">
+                        <button @click="removeQuantity(item)" class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded">&minus;</button>
+                        <span class="text-sm md:text-xs w-4 text-center" x-text="item.quantity"></span>
+                        <button @click="addQuantity(item)" class="w-6 h-6 flex items-center justify-center bg-gray-200 rounded">+</button>
+                    </div>
+
+                    <!-- Subtotal -->
+                    <div class="inline-flex items-center text-right text-xs md:text-sm font-semibold text-gray-900 dark:text-white truncate pl-1" x-tooltip="IDR.format(item.sub_total)">
+                        <span x-text="IDR.format(item.sub_total)">$999,999,999</span>
+                    </div>
+                </div>
+            </li>
+        </template>
+        <li x-show="cart.length" class="pb-3 sm:pb-4 relative">
+            <div class="absolute right-0 inline-flex items-center border-b-2 border-black text-lg font-bold text-gray-900 dark:text-white" x-text="IDR.format(total)">$999</div>
+        </li>
+    </ul>
+
+    <!-- Form -->
+    <div class="py-8 mx-auto max-w-2xl lg:py-16">
+        <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Transaksi</h2>
+        <form action="#" id="form-transaction" @submit.prevent="submit">
+            <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
+                <div class="w-full">
+                    <label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Total</label>
+                    <input
+                        type="text"
+                        name="IDR-total"
+                        id="disabled-input-2"
+                        x-model="IDR.format(total)"
+                        aria-label="disabled input 2"
+                        class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        readonly />
+                    <input type="hidden" name="total" x-model="total" />
+                </div>
+
+                <div>
+                    <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Metode Pembayaran</label>
+                    <select
+                        id="category"
+                        name="payment_method"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                        <option selected="" value="Tunai">Tunai</option>
+                        <option value="Transfer">Transfer</option>
+                    </select>
+                </div>
+            </div>
+            <button
+                type="submit"
+                class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center bg-blue-600 hover:bg-blue-500 text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+                Pesan!
+            </button>
+        </form>
+    </div>
+</div>

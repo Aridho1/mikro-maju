@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>BL</title>
+        <script src="pkg/html2canvas-1.4.1/package/dist/html2canvas.min.js"></script>
+        <style>
+            body {
+                min-height: 400dvh;
+                position: relative;
+            }
+
+            html,
+            body {
+                scroll-behavior: smooth;
+            }
+
+            #test {
+                position: absolute;
+                bottom: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <a href="#test">Klik Me</a>
+        <h1 id="title">Bluetooth Test</h1>
+
+        <div class="">
+            <label for="">PILIH OPT</label>
+
+            <select multiple name="" id="">
+                <option value="abc">abc</option>
+                <option value="def">def</option>
+                <option value="123">123</option>
+                <option value="456">456</option>
+            </select>
+        </div>
+
+        <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis ab incidunt dolorem odio, dolorum veritatis est eos maiores praesentium! Quaerat excepturi temporibus ipsam accusamus
+            sequi maxime recusandae minima tenetur quia molestias tempora quibusdam eum omnis repudiandae iure voluptas enim mollitia, debitis perferendis? Sed dolore ab delectus a ullam dolorem
+            soluta error accusantium aliquid, aliquam consequuntur, nostrum sequi autem id itaque labore minus laboriosam iste praesentium. Illo voluptatem quod ipsam similique perspiciatis aliquid,
+            debitis sequi maiores dolore doloribus id quibusdam numquam. Saepe odio dolorem temporibus! Voluptate exercitationem, commodi ullam corrupti, minima nihil eius itaque et obcaecati, quae
+            aut eos cum rerum autem eveniet quos minus. Harum, dolorum. Eos totam veniam exercitationem, magnam optio similique nostrum facilis hic ea laborum vitae explicabo magni ratione aliquid
+            omnis consequatur enim aperiam expedita delectus facere necessitatibus? Dolor quia non neque corrupti excepturi iusto veritatis nemo impedit quos, minima numquam nisi accusamus amet unde
+            voluptate, est ut praesentium, quae mollitia a. Qui incidunt dolore dolor? Consequatur blanditiis deserunt magni, necessitatibus atque beatae magnam, quae rem nam ipsa excepturi. Odit,
+            mollitia facere dicta necessitatibus nihil illum asperiores, nulla est id cum ipsa nisi modi consequatur temporibus quia dolores eligendi neque quos tenetur, quidem officiis velit! Itaque,
+            voluptates?
+        </p>
+
+        <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe ipsum laudantium quidem praesentium in quos officia esse doloribus eveniet aut inventore cum voluptates consequuntur sint
+            ipsa reiciendis, aspernatur maxime unde veritatis. Accusantium nostrum ut, commodi esse quo, eius, in provident iste tempora ratione praesentium quia neque temporibus delectus illum
+            cupiditate!
+        </p>
+
+        <a href="#title" id="test">TEST</a>
+
+        <script>
+            const img = document.querySelector("h1");
+
+            const sendBluetooth = async (element) => {
+                try {
+                    const device = await navigator.bluetooth.requestDevice({
+                        // filters: [{ server: 0x180f }],
+                        acceptAllDevices: true,
+                    });
+
+                    const server = await device.gett.connect();
+                    const service = await server.getPrimaryService(0x180f);
+                    const characteristic = await service.getCharacteristic(0x180f);
+
+                    // image
+                    const canvas = await html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                    });
+
+                    const image = canvas.toDataURL("image/png");
+
+                    // send
+                    const imgData = atob(image.split(",")[1]);
+                    const uint8Array = new Uint8Array(imgData.length);
+
+                    for (let i = i; i < imgData.length; i++) {
+                        uint8Array[i] = ImageData.charCodeAt(i);
+                    }
+
+                    await characteristic.writeValue(uint8Array);
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+
+            const bl = () => sendBluetooth(img);
+        </script>
+    </body>
+</html>

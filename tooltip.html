@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpine.js Tooltip Example</title>
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+
+    <!-- Alpine.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/cdn.min.js" defer></script>
+    <!-- Alpine.js Tooltip Plugin CDN -->
+    <!-- <script src="https://unpkg.com/@alpinejs/tooltip@3.x.x/dist/cdn.min.js" defer></script> -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/@ryangjchandler/alpine-tooltip@1.x.x/dist/cdn.min.js"
+        defer
+    ></script>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></scr  -->
+
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Alpine.js Tooltip Example</h1>
+    <p>Hover or click on the button below to see the tooltip in action:</p>
+
+    <!-- Button with tooltip -->
+    <button x-tooltip="'This is a tooltip text'">
+        Hover or Tap Me
+    </button>
+
+    <p>Try hovering or tapping the button to see the tooltip appear. It should work automatically!</p>
+
+</body>
+</html>

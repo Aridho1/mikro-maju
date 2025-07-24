@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Test</title>
+        <style>
+            html,
+            body {
+                scroll-behavior: smooth;
+                overflow: auto;
+            }
+
+            #conn {
+                min-height: 1000dvh;
+                background-color: #eaeaea;
+
+                display: grid;
+            }
+
+            #conn > div {
+                border: 1px solid black;
+                border-radius: 0.5rem;
+
+                &:not(:first-of-type) {
+                    & > p:first-of-type {
+                        scroll-margin-top: 2rem;
+                        color: green;
+                    }
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="conn">
+            <div>
+                <p id="cp1">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Impedit, at dolor? Maiores quos ad in. Quas minus fugiat iusto asperiores.</p>
+                <p>CP 1</p>
+                <a href="#cp2">goto cp2</a>
+            </div>
+
+            <div>
+                <p id="cp2">
+                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Exercitationem sunt illo earum veritatis dolorum, reiciendis asperiores repellendus maxime rem quis cum odit aperiam ea
+                    temporibus optio fuga sed et doloribus, itaque voluptas? Cupiditate laborum est voluptatum non iusto, adipisci mollitia?
+                </p>
+                <p>CP 2</p>
+                <a href="#cp3">goto cp3</a>
+            </div>
+
+            <div>
+                <p id="cp3">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Veritatis dolore enim ad!</p>
+                <p>CP 3</p>
+                <a href="#cp4">goto cp4</a>
+            </div>
+
+            <div>
+                <p id="cp4">
+                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vero illo aut voluptate numquam ut modi! Ratione, nostrum, labore aut possimus voluptatibus sint quam autem magni
+                    voluptate ad ea mollitia. Cumque debitis veritatis, beatae alias quis expedita numquam, autem ipsam modi, dolores non placeat quos.
+                </p>
+                <p>CP 4</p>
+                <a href="#cp5">goto cp5</a>
+            </div>
+
+            <div>
+                <p id="cp5">
+                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quae voluptate odit officiis odio magni, perspiciatis reprehenderit exercitationem architecto, nam, debitis fugiat
+                    aspernatur ipsum.
+                </p>
+                <p>CP 5</p>
+                <a href="#cp1">goto cp1</a>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                let clicked = 0;
+
+                document.addEventListener("click", () => {
+                    clicked++;
+                    console.log({ clicked });
+                });
+
+                document.addEventListener("dblclick", () => {
+                    console.log("dblick!");
+                });
+
+                const links = document.querySelectorAll('a[href^="#"]');
+                links?.forEach((el, i) => {
+                    console.log(i, el);
+                    el.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        const target = document.querySelector(e.target.getAttribute("href"));
+                        console.log("target", target);
+                        target.scrollIntoView({ behavior: "smooth", block: "start" });
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
