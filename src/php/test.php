@@ -1,6 +1,6 @@
 <?php
 
-use Dom\AdjacentPosition;
+// use Dom\AdjacentPosition;
 
 // echo  json_encode(['data' => explode('duara', 'duar-meledak-3')]);
 
@@ -94,4 +94,9 @@ $txt4 = "hello world4";
 
 // echo ucfirst($txt);
 
-echo validateEmptyVar("txt|txtoo|txt3");
+// echo validateEmptyVar("txt|txtoo|txt3");
+
+
+// echo json_encode($_ENV ?? []);
+// echo json_encode($config ?? []);
+echo json_encode($config['pagination'] ?? []);

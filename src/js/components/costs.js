@@ -6,9 +6,12 @@ import rewriteUrl from "../libs/rewriteUrl.js";
 import { url_param } from "../libs/urlParam.js";
 import { deafultConfirmProps } from "../libs/swal2props.js";
 import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
+import { config, getConfigJson } from "../libs/getConfigJson.js";
 
 export default function () {
     const db_path = "./src/php/costs.php?m=";
+
+    // console.warn(config);
 
     const is_wait = {
         get: false,
@@ -48,7 +51,7 @@ export default function () {
             sort_desc: true,
             keyword: null,
         },
-        page: new Pagination(5, 5),
+        page: new Pagination(),
 
         categories: [],
 
@@ -61,6 +64,9 @@ export default function () {
         async init() {
             // get categories
             await this.getCategories(true);
+
+            const config = await getConfigJson();
+            console.warn("a", { config });
 
             // set filter by url param
             fillFormsByUrlParam(

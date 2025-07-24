@@ -1,0 +1,11 @@
+{
+    "pagination": {
+        "max_data": 10,
+        "max_button": 5
+    },
+    "midtrans": {
+        "is_production": false,
+        "server_key": "",
+        "client_key": ""
+    }
+}

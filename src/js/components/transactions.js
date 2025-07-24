@@ -62,7 +62,7 @@ export default function () {
             prev_payment_method: null,
             prev_payment_status: null,
         },
-        page: new Pagination(5, 5),
+        page: new Pagination(),
         formSearch: {
             payment_methods: [],
             payment_statuses: [],

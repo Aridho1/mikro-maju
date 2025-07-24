@@ -112,7 +112,11 @@ switch (M) {
 
         // Pagination
         $total_data = (Int) $db->query("SELECT COUNT(*) $sql")->fetch_assoc()["COUNT(*)"];
-        $max_data = 5;
+        try {
+            $max_data = $config['pagination']['max_data'];
+        } catch (Exception $e) {
+            $max_data = 5;
+        }
         $total_page = ceil($total_data / $max_data);
 
         $page = $page < 0 ? 1 : ($page > $total_page ? $total_page : $page);

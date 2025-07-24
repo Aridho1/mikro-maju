@@ -1,12 +1,30 @@
 <?php
 
-$db = new mysqli('localhost', 'root', '', 'mikro_maju');
-
+// session
 if (!session_id())
     session_start();
 
+// dotenv
+require_once "../../vendor/autoload.php";
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../..');
+$dotenv->load();
+
+// config.json
+$json = file_get_contents('../../config.json');
+$config = json_decode($json, true);
+
+if (json_last_error() !== JSON_ERROR_NONE) {
+    die("JSON LAST ERROR: " . json_last_error_msg());
+}
+
+// db
+$db = new mysqli('localhost', 'root', '', 'mikro_maju');
+
+// const
 Define('SECRET_KEY', 'MY_SUPER_SECRET_KEY_!@!@#$$123');
 
+// methods
 function encodeKey($val)
 {
     return base64_encode(base64_encode(SECRET_KEY . $val));

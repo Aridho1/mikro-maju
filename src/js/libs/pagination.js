@@ -1,4 +1,8 @@
-export default function Pagination(max_data, max_button) {
+import { config } from "./getConfigJson.js";
+
+const { max_data: _max_data, max_button: _max_button } = config.pagination;
+
+export default function Pagination(max_data = _max_data, max_button = _max_button) {
     return {
         page: 1,
         total_data: 5,

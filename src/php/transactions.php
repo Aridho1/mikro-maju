@@ -255,7 +255,11 @@ switch (M) {
         // echo "(t) $total_data (t)";
         // die;
         // die($total_data);
-        $max_data = 5;
+        try {
+            $max_data = $config['pagination']['max_data'];
+        } catch (Exception $e) {
+            $max_data = 5;
+        }
         // $total_page = ceil($total_data / $max_data);
 
         $page = $page < 0 ? 1 : $page;

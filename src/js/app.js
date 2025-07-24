@@ -1,6 +1,7 @@
 import encodeFetchedJson from "./libs/encodeFetchedJson.js";
 import { deafultConfirmProps } from "./libs/swal2props.js";
 import { url_param } from "./libs/urlParam.js";
+import { getConfigJson } from "./libs/getConfigJson.js";
 
 console.log("App");
 
@@ -126,6 +127,9 @@ const IDR = new Intl.NumberFormat("id-ID", {
 // Alpine init
 const alpineInitCallback = async () => {
     console.log("ALPINE");
+
+    // const config = await getConfigJson();
+    // console.log({ config });
 
     Alpine.data("conn", function () {
         return {

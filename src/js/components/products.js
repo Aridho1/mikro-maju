@@ -44,7 +44,7 @@ export default function () {
             sort_desc: true,
             keyword: null,
         },
-        page: new Pagination(5, 5),
+        page: new Pagination(),
 
         async init() {
             this.$watch("form.price", (curr, prev) => {
