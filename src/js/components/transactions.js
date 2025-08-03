@@ -486,7 +486,7 @@ export default function () {
 
             if (!id || !payment_key || !payment_status || !total || !payment_method || !transaction_details) return;
 
-            if (!is_wait.remakeTransaction) return Swal.fire({ ...defaultErrorProps, text: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
+            if (is_wait.remakeTransaction) return Swal.fire({ ...defaultErrorProps, text: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
 
             is_wait.remakeTransaction = true;
 
