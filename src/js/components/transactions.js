@@ -7,7 +7,8 @@ import { deafultConfirmProps, defaultErrorProps } from "../libs/swal2props.js";
 import { calculateTimeDifference, sleep } from "../libs/sleep.js";
 
 // import Datepicker from "../../../node_modules/flowbite-datepicker/js/Datepicker.js";
-import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
+// import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
+import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/DateRangePicker.js";
 import { oneDayOfTimestamp, timestampToDate } from "../libs/getDatepickerDate.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
 

@@ -5,7 +5,8 @@ import Pagination from "../libs/pagination.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
 import { url_param } from "../libs/urlParam.js";
 import { deafultConfirmProps } from "../libs/swal2props.js";
-import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
+// import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
+import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/DateRangePicker.js";
 import { config, getConfigJson } from "../libs/getConfigJson.js";
 
 export default function () {
