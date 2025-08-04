@@ -3703,6 +3703,10 @@ tr {
     width: 7rem;
   }
 
+  .sm\:w-32 {
+    width: 8rem;
+  }
+
   .sm\:translate-x-0 {
     --tw-translate-x: 0px;
     transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -3770,6 +3774,10 @@ tr {
 
   .md\:w-28 {
     width: 7rem;
+  }
+
+  .md\:w-36 {
+    width: 9rem;
   }
 
   .md\:flex-row {
