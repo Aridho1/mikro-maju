@@ -1957,6 +1957,14 @@ input:checked + .toggle-bg {
   width: 3rem;
 }
 
+.w-32 {
+  width: 8rem;
+}
+
+.w-28 {
+  width: 7rem;
+}
+
 .min-w-\[15rem\] {
   min-width: 15rem;
 }
@@ -3700,6 +3708,10 @@ tr {
     gap: 1.5rem;
   }
 
+  .sm\:gap-8 {
+    gap: 2rem;
+  }
+
   .sm\:rounded-lg {
     border-radius: 0.5rem;
   }
@@ -3726,6 +3738,10 @@ tr {
 
   .md\:h-32 {
     height: 8rem;
+  }
+
+  .md\:w-44 {
+    width: 11rem;
   }
 
   .md\:flex-row {
