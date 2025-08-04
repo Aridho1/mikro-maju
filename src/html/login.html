@@ -1,6 +1,10 @@
 <!-- pw: PW@&&midtrans@77 -->
-<div x-data="loginComponent" class="h-screen flex items-center justify-center bg-gradient-to-r from-blue-400 to-blue-600">
+<div x-data="loginComponent" class="h-screen flex items-center justify-center bg-gradient-to-r from-blue-400 to-blue-600 px-6">
     <div id="wrapper" class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+        <div class="conn-image flex justify-center mb-4">
+            <img src="./src/img/app/icon.jpeg" alt="Icon image" class="h-28 object-cover object-center" />
+        </div>
+
         <h2 class="text-2xl font-bold text-center text-blue-600 mb-4">Login</h2>
 
         <form @submit.prevent="login" class="flex flex-col gap-4 space-y-4">

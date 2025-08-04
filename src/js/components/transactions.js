@@ -12,7 +12,7 @@ import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/D
 import { oneDayOfTimestamp, timestampToDate } from "../libs/getDatepickerDate.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
 
-import html2canvas from "../../../pkg/html2canvas-1.4.1/package/dist/html2canvas.esm.js";
+// import html2canvas from "../../../pkg/html2canvas-1.4.1/package/dist/html2canvas.esm.js";
 // import { DateRangePicker } from "../../../pkg/flowbite-3.1.2/package/lib/esm/components/datepicker/index.js";
 
 export default function () {

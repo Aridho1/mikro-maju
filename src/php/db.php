@@ -5,10 +5,10 @@ if (!session_id())
     session_start();
 
 // dotenv
-require_once "../../vendor/autoload.php";
+// require_once "../../vendor/autoload.php";
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../..');
-$dotenv->load();
+// $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../..');
+// $dotenv->load();
 
 // config.json
 $json = file_get_contents('../../config.json');
@@ -18,8 +18,20 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     die("JSON LAST ERROR: " . json_last_error_msg());
 }
 
+Define("IS_PRODUCTION", $config['is_production'] ?? false);
+
+Define("HOST_NAME", "localhost");
+Define("USER_NAME", IS_PRODUCTION ? "mobo7639_mikro_maju_ku" : "root");
+Define("PASSWORD", IS_PRODUCTION ? "mobo7639_mikro_maju_ku" : "");
+Define("DB_NAME", IS_PRODUCTION ? "mobo7639_mikro_maju" : "mikro_maju");
+
+// force_debug
+if (IS_PRODUCTION && ($config['is_force_debug'] ?? false)) {
+
+}
+
 // db
-$db = new mysqli('localhost', 'root', '', 'mikro_maju');
+$db = new mysqli(HOST_NAME, USER_NAME, PASSWORD, DB_NAME);
 
 // const
 Define('SECRET_KEY', 'MY_SUPER_SECRET_KEY_!@!@#$$123');
