@@ -2203,6 +2203,10 @@ input:checked + .toggle-bg {
   justify-content: space-between;
 }
 
+.justify-around {
+  justify-content: space-around;
+}
+
 .gap-3 {
   gap: 0.75rem;
 }
@@ -2229,6 +2233,10 @@ input:checked + .toggle-bg {
 
 .gap-12 {
   gap: 3rem;
+}
+
+.gap-8 {
+  gap: 2rem;
 }
 
 .gap-x-5 {
@@ -2722,6 +2730,11 @@ input:checked + .toggle-bg {
 .py-0 {
   padding-top: 0px;
   padding-bottom: 0px;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
 }
 
 .pl-4 {
@@ -3719,6 +3732,14 @@ tr {
     flex-direction: row;
   }
 
+  .md\:gap-8 {
+    gap: 2rem;
+  }
+
+  .md\:gap-12 {
+    gap: 3rem;
+  }
+
   .md\:space-y-0 > :not([hidden]) ~ :not([hidden]) {
     --tw-space-y-reverse: 0;
     margin-top: calc(0px * calc(1 - var(--tw-space-y-reverse)));
@@ -3738,6 +3759,11 @@ tr {
   .md\:px-4 {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  .md\:px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 
   .md\:text-left {

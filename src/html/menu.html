@@ -1,0 +1,59 @@
+<div class="py-12 px-2 md:px-6 flex flex-col gap-12" x-data>
+    <section id="head-section" class="py-4 px-6 flex justify-center rounded-lg shadow-lg">
+        <h2 class="flex gap-2 font-bold text-xl">
+            Halo selamat datang
+            <span x-text="auth?.username"></span>
+        </h2>
+    </section>
+
+    <!-- <section id="list-menu" class="flex flex-wrap w-full gap-8 md:gap-12">
+        <div class="flex-1">
+            <a href="?c=dashboard">
+                <img src="./src/img/app/dashboard.png" alt="Dashboard" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+        <div class="flex-1">
+            <a href="?c=transaction">
+                <img src="./src/img/app/transaksi.png" alt="Transaksi" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+        <div class="flex-1">
+            <a href="?c=dashboard">
+                <img src="./src/img/app/dashboard.png" alt="Dashboard" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+        <div class="flex-1">
+            <a href="?c=dashboard">
+                <img src="./src/img/app/dashboard.png" alt="Dashboard" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+    </section> -->
+
+    <section id="list-menu" class="flex flex-wrap justify-around gap-8 md:gap-12">
+        <div>
+            <a href="?c=dashboard">
+                <img src="./src/img/app/dashboard.png" alt="Dashboard" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+        <div>
+            <a href="?c=transactions">
+                <img src="./src/img/app/transaksi.png" alt="Transaksi" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+        <div>
+            <a href="?c=transaction-add">
+                <img src="./src/img/app/menu.png" alt="Pembelian" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+        <div>
+            <a href="?c=products">
+                <img src="./src/img/app/barangstok.png" alt="Product" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+        <div>
+            <a href="?c=costs">
+                <img src="./src/img/app/pengeluaran.png" alt="Pengeluaran" class="w-44 object-cover object-center" />
+            </a>
+        </div>
+    </section>
+</div>

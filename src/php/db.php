@@ -27,7 +27,9 @@ Define("DB_NAME", IS_PRODUCTION ? "mobo7639_mikro_maju" : "mikro_maju");
 
 // force_debug
 if (IS_PRODUCTION && ($config['is_force_debug'] ?? false)) {
-
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
 }
 
 // db
