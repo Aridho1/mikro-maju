@@ -123,7 +123,7 @@ switch (M) {
 
         switch ($payment_method) {
             case 'Tunai': {
-                $db->query("INSERT INTO $table SET date='$date', total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key=''");
+                $db->query("INSERT INTO $table SET date='$date', total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token =''");
                 break;
             }
             case 'Transfer': {
@@ -184,7 +184,7 @@ switch (M) {
     case 'search': {
 
         $page ??= false;
-        $page = (Int) ($page ?? 1);
+        $page = (int) ($page ?? 1);
         $keyword ??= false;
 
         $payment_methods ??= false;
@@ -194,16 +194,19 @@ switch (M) {
         $conditions = [];
 
         if ($keyword) {
-            if ($name ?? false)
+            if ($name ?? false) {
                 $conditions[] = "t.name LIKE '%$keyword%'";
+            }
 
-            if ($payment_status ?? false)
+            if ($payment_status ?? false) {
                 $conditions[] = "t.payment_status LIKE '%$keyword%'";
+            }
 
         }
 
-        if (!empty($conditions))
+        if (!empty($conditions)) {
             $sql .= " AND (" . implode(' OR ', $conditions) . ")";
+        }
 
 
         // Filter paymet_methods
@@ -314,7 +317,7 @@ switch (M) {
         //             '}',
         // 		'}'
         // 	)
-        // ) AS transaction_details, 
+        // ) AS transaction_details,
         // SUM((CAST(p.price AS SIGNED) - CAST(p.purchase_price AS SIGNED)) * CAST(td.quantity AS SIGNED)) AS profit
 
         // " . $sql . " GROUP BY t.id " . ($sort_desc ?? false ? 'ORDER BY id DESC' : '') . " LIMIT $offset, $max_data";
@@ -331,8 +334,9 @@ switch (M) {
             $row['td'] = $row['transaction_details'];
             $row['transaction_details'] = json_decode('[' . $row['transaction_details'] . ']', true);
 
-            if ($row['payment_key'] ?? false)
+            if ($row['payment_key'] ?? false) {
                 $row['data_url'] = encodeKey2($row['id']);
+            }
 
             $data[] = $row;
 
@@ -369,8 +373,9 @@ switch (M) {
         $raw = $db->query("SELECT * FROM $table");
 
         $data = [];
-        while ($row = mysqli_fetch_assoc($raw))
+        while ($row = mysqli_fetch_assoc($raw)) {
             $data[] = $row;
+        }
 
         echo json_encode(['status' => true, 'data' => $data]);
 
@@ -418,13 +423,15 @@ switch (M) {
         // Hapus method ini nanti atau khusus admin
         $encode = $_GET['data'] ?? false;
 
-        if (!$encode)
+        if (!$encode) {
             die("Invalid data!");
+        }
 
         $decoded = decodeKey2($encode);
 
-        if (!$decoded)
+        if (!$decoded) {
             die("Invalid data!");
+        }
 
         $raw = $db->query("
 		    SELECT IDR(t.total) AS total, GROUP_CONCAT(
@@ -455,8 +462,9 @@ switch (M) {
 
         // echo json_encode(['res' => $res]);
 
-        if (empty($res))
+        if (empty($res)) {
             die;
+        }
 
         require_once 'midtrans.php';
 
