@@ -21,18 +21,6 @@ SET time_zone = "+00:00";
 -- Database: `mikro_maju`
 --
 
-DELIMITER $$
---
--- Functions
---
-CREATE DEFINER=`root`@`localhost` FUNCTION `IDR` (`price` DECIMAL(20,0)) RETURNS VARCHAR(30) CHARSET utf8mb4 COLLATE utf8mb4_general_ci  BEGIN
-    DECLARE formated_price VARCHAR(30);
-    SET formated_price = CONCAT('RP ', REPLACE(FORMAT(price, 0), ',', '.'));
-    RETURN formated_price;
-END$$
-
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --

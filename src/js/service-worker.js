@@ -6,7 +6,7 @@ const ASSET_TO_CACHE = ["/", "index.html"];
 self.addEventListener("install", (e) => {
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSET_TO_CACHE);
+            return cache?.addAll?.(ASSET_TO_CACHE);
         })
     );
 });
