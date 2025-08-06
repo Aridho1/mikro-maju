@@ -31,17 +31,18 @@ async function safeImport(url) {
 }
 
 async function loadXData(name) {
-    console.log("try load xdata");
-
+    console.log("try load xdata:", name);
+    
     const imported = await safeImport(`./components/${name}.js`);
-
+    
     if (!imported || !imported.default) return console.log("xdata not found");
-
+    
     const { default: xData } = imported;
     const xDataName = `${name}Component`.replace(/[\-]/g, "");
-
+    
     Alpine.data(xDataName, xData);
-    console.log("xdata successfully");
+    console.log("xdata successfully", { xDataName, xData });
+    console.log("THISISISIS")
 }
 
 const exlusiveComponent = ["login", "pay"];
