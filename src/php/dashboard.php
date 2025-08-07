@@ -24,7 +24,7 @@ switch (M) {
             FROM transactions 
             WHERE date >= CURDATE() - INTERVAL 30 DAY
             GROUP BY date 
-            ORDER BY date
+            ORDER BY date DESC LIMIT 15
         ";
 
         $raw = $db->query($sql);

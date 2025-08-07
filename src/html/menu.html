@@ -2,6 +2,13 @@
     <section id="head-section" class="py-2 sm:py-4 px-4 sm:px-6 flex justify-center rounded-lg shadow-lg">
         <h2 class="flex gap-2 font-bold text-sm sm:text-lg md:text-xl" x-text="`Halo selamat datang ${auth?.username}`">
         </h2>
+
+        <button x-show="false"
+            class="fixed top-5 right-5 sm:top-6 sm:right-6 self-end bg-red-500 text-white text-xs sm:text-sm px-3 py-1 rounded hover:bg-red-600 transition"
+            @click="menuOpen = false"
+        >
+            ✖ Tutup Menu
+        </button>
     </section>
 
     <!-- <section id="list-menu" class="flex flex-wrap w-full gap-8 md:gap-12">

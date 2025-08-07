@@ -7,8 +7,8 @@
     <section id="oterview-section" class="grid gap-8">
         <h2 class="font-semibold text-3xl sm:text-4xl">Overview</h2>
 
-        <div class="cards-overview grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-8">
-            <div class="card grid grid-rows-[auto,1fr] rounded-lg bg-gradient-to-b from-pink-400 to-purple-600 p-2 px-4">
+        <div class="cards-overview grid grid-cols-[repeat(auto-fit,minmax(18rem,1fr))] gap-8">
+            <div x-show="false" class="card grid grid-rows-[auto,1fr] gap-4 rounded-lg bg-gradient-to-b from-pink-400 to-purple-600 p-4">
                 <div class="card-head flex flex-wrap gap-2 sm:gap-4">
                     <div class="icon grid place-content-center">
                         <svg class="text-white aspect-square w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M6.29977 5H21L19 12H7.37671M20 16H8L6 3H3M9 20C9 20.5523 8.55228 21 8 21C7.44772 21 7 20.5523 7 20C7 19.4477 7.44772 19 8 19C8.55228 19 9 19.4477 9 20ZM20 20C20 20.5523 19.5523 21 19 21C18.4477 21 18 20.5523 18 20C18 19.4477 18.4477 19 19 19C19.5523 19 20 19.4477 20 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
@@ -18,31 +18,31 @@
                         <p class="text-base text-slate-300">Product Terjual</p>
                     </div>
                 </div>
-                <div class="card-body w-full text-white">
-                    <div class="grid place-content-center">
-                        <canvas id="chart-1"></canvas>
+                <div class="card-body w-full flex justify-center items-center text-white">
+                    <div class="aspect-square w-full mx-auto">
+                        <canvas class="max-w-full mx-auto w-full" id="chart-1"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="card grid grid-rows-[auto,1fr] rounded-lg bg-gradient-to-b from-teal-300 to-emerald-500 p-2 px-4">
+            <div class="card grid grid-rows-[auto,1fr] gap-4 rounded-lg bg-gradient-to-b from-teal-300 to-emerald-500 p-4">
                 <div class="card-head flex flex-wrap gap-2 sm:gap-4">
                     <div class="icon grid place-content-center">
                         <svg class="text-white aspect-square w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M6.29977 5H21L19 12H7.37671M20 16H8L6 3H3M9 20C9 20.5523 8.55228 21 8 21C7.44772 21 7 20.5523 7 20C7 19.4477 7.44772 19 8 19C8.55228 19 9 19.4477 9 20ZM20 20C20 20.5523 19.5523 21 19 21C18.4477 21 18 20.5523 18 20C18 19.4477 18.4477 19 19 19C19.5523 19 20 19.4477 20 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                     </div>
                     <div class="">
                         <p class="text-lg text-white" x-text="IDR.format(revenue)"></p>
-                        <p class="text-base text-slate-300">Profit Bulanan</p>
+                        <p class="text-base text-white  ">Profit Bulanan</p>
                     </div>
                 </div>
-                <div class="card-body w-full text-white">
-                    <div class="grid place-content-center">
-                        <canvas id="chart-2" class="h-40"></canvas>
+                <div class="card-body w-full flex justify-center items-center text-white">
+                    <div class="aspect-square w-full mx-auto">
+                        <canvas class="max-w-full mx-auto w-full" id="chart-2"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="card grid grid-rows-[auto,1fr] rounded-lg bg-gradient-to-b from-orange-400 to-pink-500 p-2 px-4">
+            <div class="card grid grid-rows-[auto,1fr] gap-4 rounded-lg bg-gradient-to-b from-orange-400 to-pink-500 p-4">
                 <div class="card-head flex flex-wrap gap-2 sm:gap-4">
                     <div class="icon grid place-content-center">
                         <svg class="text-white aspect-square w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M6.29977 5H21L19 12H7.37671M20 16H8L6 3H3M9 20C9 20.5523 8.55228 21 8 21C7.44772 21 7 20.5523 7 20C7 19.4477 7.44772 19 8 19C8.55228 19 9 19.4477 9 20ZM20 20C20 20.5523 19.5523 21 19 21C18.4477 21 18 20.5523 18 20C18 19.4477 18.4477 19 19 19C19.5523 19 20 19.4477 20 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
@@ -52,9 +52,9 @@
                         <p class="text-base text-slate-300">Pengeluaran Bulanan</p>
                     </div>
                 </div>
-                <div class="card-body w-full text-white">
-                    <div class="grid place-content-center">
-                        <canvas id="chart-3" class="h-40"></canvas>
+                <div class="card-body w-full flex justify-center items-center text-white">
+                    <div class="aspect-square w-full mx-auto">
+                        <canvas class="max-w-full mx-auto w-full" id="chart-3"></canvas>
                     </div>
                 </div>
             </div>

@@ -6,6 +6,8 @@ export default function() {
 
     const db_path = "./src/php/dashboard.php?m="
 
+    const dateNow = new Date().toISOString().split("T")[0]
+
     // Sold product count
     const elChart1 = document.querySelector("#chart-1")
     const elChart2 = document.querySelector("#chart-2")
@@ -135,6 +137,8 @@ export default function() {
 
             encodeFetchedJson(await (await fetch(db_path + "get-revenue")).text(), "get-revenue", ({ revenue, revenues }) => {
                 
+                revenues.reverse()
+                
                 this.revenues = revenues
 
                 this.revenue = revenue
@@ -146,15 +150,19 @@ export default function() {
                 //     type: ''
                 // })
 
-                const labels = revenues.map(({ date }) => date)
+                console.log("revenues", revenues)
+
+                
+
+                const labels = revenues.map(({ date }) => date == dateNow ? "Hari Ini" : date)
                 const tunai = revenues.map(({ tunai }) => tunai)
                 const transfer = revenues.map(({ transfer }) => transfer)
                 const total = revenues.map(({ total }) => total)
 
-                // console.log("labels", labels)
-                // console.log("tunai", tunai)
-                // console.log("transfer", transfer)
-                // console.log("total", total)
+                console.log("labels", labels)
+                console.log("tunai", tunai)
+                console.log("transfer", transfer)
+                console.log("total", total)
 
                 chart2 = new Chart(elChart2, {
                     type: 'line',
@@ -195,6 +203,9 @@ export default function() {
                             x: {
                                 ticks: {
                                     color: '#fff',
+                                    autoSkip: false,  // tampilkan semua label meski mepet
+                                    maxRotation: 180,  // putar label supaya lebih muat
+                                    minRotation: 0,
                                 }
                             },
                             y: {
@@ -217,7 +228,6 @@ export default function() {
                                     label: function(context) {
                                         const label = context.dataset.label || '';
                                         const value = context.parsed.y || 0;
-                                        console.log("hai.s")
                                         return `${label}: Rp ${value.toLocaleString('id-ID')}`;
                                     }
                                 }
@@ -225,7 +235,6 @@ export default function() {
                         }
                     },
                 })
-                
             })
             
         },

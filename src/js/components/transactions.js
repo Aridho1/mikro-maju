@@ -441,8 +441,8 @@ export default function () {
             return is_wait.syncTransactionStatus;
         },
 
-        async syncTransactionStatus({ id, payment_key } = {}) {
-            if (!id || !payment_key) return;
+        async syncTransactionStatus({ id, payment_key, payment_status } = {}) {
+            if (!id || !payment_key || !payment_status) return;
 
             if (is_wait.syncTransactionStatus) return Swal.fire({ ...defaultErrorProps, text: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
 
@@ -469,6 +469,7 @@ export default function () {
 
             const formData = new FormData();
             formData.append("payment_key", payment_key);
+            formData.append("payment_status", payment_status);
 
             Object.assign(_cache, { [id]: now });
             localStorage.setItem(cache_name, JSON.stringify(_cache));

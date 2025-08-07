@@ -476,25 +476,28 @@ switch (M) {
         $validated = validateEmptyVar('payment_key', true);
 
         if ($validated !== true) {
-            echo json_encode(['status' => false, 'msg' => $validated, 'post' => $_POST, 'res' => $res]);
+            echo json_encode(['status' => false, 'msg' => $validated, 'post' => $_POST]);
             die;
         }
 
         $key = $payment_key;
 
-        $raw = $db->query("SELECT * FROM $table WHERE payment_key='$key' LIMIT 1");
-        $res = [];
-
-        while ($row = mysqli_fetch_assoc($raw)) {
-            $res = $row;
-            break;
-        }
+        $res = $db->query("SELECT * FROM $table WHERE payment_key='$key' LIMIT 1")->fetch_assoc();
 
         if (empty($res)) {
             echo json_encode(['status' => false, 'msg' => "MISING DATA!", 'post' => $_POST, 'res' => $res]);
             die;
-
         }
+
+        // case: where payment_status is not sync or delay to current data
+        $payment_status ??= '';
+        $curr_payment_status = $res['payment_status'];
+
+        if ($payment_status && $payment_status != $curr_payment_status) {
+            echo json_encode(['status' => true, 'msg' => "Transaksi berhasil di sinkron dari '$payment_status' ke '$curr_payment_status'", 'post' => $_POST, 'res' => $res]);
+            die;
+        }
+
         // echo json_encode(['status' => false, 'msg' => "CUKUP DATA", 'post' => $_POST, 'res' => $res]);
         // die;
 
@@ -512,13 +515,13 @@ switch (M) {
         $id = $res['id'];
 
         if ($prev_status == $status) {
-            echo json_encode(['status' => false, 'msg' => "Tidak ada perubahan status.", 'post' => $_POST]);
+            echo json_encode(['status' => false, 'msg' => "Tidak ada perubahan status.", 'post' => $_POST,"payment_status" => $payment_status, "curr_payment_status" => $curr_payment_status ]);
             die;
         }
 
         $db->query("UPDATE $table SET payment_status='$status' WHERE id='$id'");
 
-        echo json_encode(['status' => true, 'msg' => "Transaksi berhasil di ubah dari '$prev_status' ke '$status'"]);
+        echo json_encode(['status' => true, 'msg' => "Transaksi berhasil di ubah dari '$prev_status' ke '$status'", "payment_status" => $payment_status, "curr_payment_status" => $curr_payment_status]);
 
         break;
     }
