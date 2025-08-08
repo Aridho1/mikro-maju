@@ -1581,6 +1581,14 @@ input:checked + .toggle-bg {
   top: 0.75rem;
 }
 
+.top-5 {
+  top: 1.25rem;
+}
+
+.right-5 {
+  right: 1.25rem;
+}
+
 .right-0 {
   right: 0px;
 }
@@ -1615,34 +1623,6 @@ input:checked + .toggle-bg {
 
 .bottom-\[60px\] {
   bottom: 60px;
-}
-
-.top-4 {
-  top: 1rem;
-}
-
-.right-4 {
-  right: 1rem;
-}
-
-.top-8 {
-  top: 2rem;
-}
-
-.top-6 {
-  top: 1.5rem;
-}
-
-.right-6 {
-  right: 1.5rem;
-}
-
-.top-5 {
-  top: 1.25rem;
-}
-
-.right-5 {
-  right: 1.25rem;
 }
 
 .z-10 {
@@ -1836,8 +1816,12 @@ input:checked + .toggle-bg {
   height: 0.75rem;
 }
 
-.h-40 {
-  height: 10rem;
+.h-64 {
+  height: 16rem;
+}
+
+.h-full {
+  height: 100%;
 }
 
 .h-6 {
@@ -1848,20 +1832,12 @@ input:checked + .toggle-bg {
   height: 100vh;
 }
 
-.h-full {
-  height: 100%;
-}
-
 .h-5 {
   height: 1.25rem;
 }
 
 .h-28 {
   height: 7rem;
-}
-
-.h-64 {
-  height: 16rem;
 }
 
 .h-20 {
@@ -1874,6 +1850,10 @@ input:checked + .toggle-bg {
 
 .h-12 {
   height: 3rem;
+}
+
+.\!h-full {
+  height: 100% !important;
 }
 
 .max-h-full {
@@ -1985,6 +1965,10 @@ input:checked + .toggle-bg {
   width: 3rem;
 }
 
+.\!w-full {
+  width: 100% !important;
+}
+
 .min-w-\[15rem\] {
   min-width: 15rem;
 }
@@ -2043,8 +2027,8 @@ input:checked + .toggle-bg {
   max-width: 36rem;
 }
 
-.max-w-\[25rem\] {
-  max-width: 25rem;
+.\!max-w-full {
+  max-width: 100% !important;
 }
 
 .flex-1 {
@@ -2171,8 +2155,8 @@ input:checked + .toggle-bg {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
-.grid-cols-\[repeat\(auto-fit\2c minmax\(20rem\2c 1fr\)\)\] {
-  grid-template-columns: repeat(auto-fit,minmax(20rem,1fr));
+.grid-cols-\[repeat\(auto-fit\2c minmax\(18rem\2c 1fr\)\)\] {
+  grid-template-columns: repeat(auto-fit,minmax(18rem,1fr));
 }
 
 .grid-cols-1 {
@@ -2199,20 +2183,8 @@ input:checked + .toggle-bg {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.grid-cols-\[repeat\(auto-fit\2c minmax\(15rem\2c 1fr\)\)\] {
-  grid-template-columns: repeat(auto-fit,minmax(15rem,1fr));
-}
-
-.grid-cols-\[repeat\(auto-fit\2c minmax\(15rem\2c min\(25rem\2c 1fr\)\)\)\] {
-  grid-template-columns: repeat(auto-fit,minmax(15rem,min(25rem,1fr)));
-}
-
-.grid-cols-\[repeat\(auto-fit\2c minmax\(15rem\2c 25rem\)\)\] {
-  grid-template-columns: repeat(auto-fit,minmax(15rem,25rem));
-}
-
-.grid-cols-\[repeat\(auto-fit\2c minmax\(18rem\2c 1fr\)\)\] {
-  grid-template-columns: repeat(auto-fit,minmax(18rem,1fr));
+.grid-cols-\[repeat\(auto-fit\2c minmax\(20rem\2c 1fr\)\)\] {
+  grid-template-columns: repeat(auto-fit,minmax(20rem,1fr));
 }
 
 .grid-rows-\[auto\2c 1fr\] {
@@ -2233,10 +2205,6 @@ input:checked + .toggle-bg {
 
 .place-content-center {
   place-content: center;
-}
-
-.place-items-center {
-  place-items: center;
 }
 
 .items-start {
@@ -2387,6 +2355,10 @@ input:checked + .toggle-bg {
 
 .overflow-y-auto {
   overflow-y: auto;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden;
 }
 
 .\!scroll-smooth {
@@ -3350,6 +3322,11 @@ tr {
   background-color: rgb(30 64 175 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-red-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(220 38 38 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-blue-500:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(59 130 246 / var(--tw-bg-opacity));
@@ -3358,11 +3335,6 @@ tr {
 .hover\:bg-white:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-red-600:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(220 38 38 / var(--tw-bg-opacity));
 }
 
 .hover\:text-gray-700:hover {
@@ -3766,6 +3738,10 @@ tr {
     display: none;
   }
 
+  .sm\:h-80 {
+    height: 20rem;
+  }
+
   .sm\:w-auto {
     width: auto;
   }
@@ -3783,6 +3759,10 @@ tr {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .sm\:grid-cols-\[repeat\(auto-fit\2c minmax\(20rem\2c 1fr\)\)\] {
+    grid-template-columns: repeat(auto-fit,minmax(20rem,1fr));
+  }
+
   .sm\:gap-4 {
     gap: 1rem;
   }
@@ -3793,6 +3773,10 @@ tr {
 
   .sm\:gap-6 {
     gap: 1.5rem;
+  }
+
+  .sm\:gap-8 {
+    gap: 2rem;
   }
 
   .sm\:rounded-lg {
@@ -3909,6 +3893,10 @@ tr {
 }
 
 @media (min-width: 1024px) {
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .lg\:px-5 {
     padding-left: 1.25rem;
     padding-right: 1.25rem;
