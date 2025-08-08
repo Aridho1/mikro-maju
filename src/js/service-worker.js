@@ -13,7 +13,7 @@ self.addEventListener("install", (e) => {
 
 // hadle request connection | jaringan
 self.addEventListener("fetch", (e) => {
-    e.reponWith(
+    e.responWith(
         caches.match(e.request).then((res) => {
             if (res) return res;
             return fetch(e.request);
@@ -22,7 +22,7 @@ self.addEventListener("fetch", (e) => {
 });
 
 // delete prev cache
-self.addEventListener("active", (e) => {
+self.addEventListener("activate", (e) => {
     e.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(cacheNames.filter((cacheName) => cacheName !== CACHE_NAME).map((cacheName) => caches.delete(cacheName)));

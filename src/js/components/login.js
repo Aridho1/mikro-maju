@@ -15,6 +15,10 @@ export default function () {
             password: null,
         },
 
+        init() {
+            this.$refs.inputUsername.focus()
+        },
+
         async login() {
             if (is_wait.login) return await Swal.fire({ ...defaultErrorProps, text: "Mohon Tunggu. Sedang memproses aksi sebelumnya!" });
 
