@@ -1,0 +1,56 @@
+<div x-data="login2Component" class="relative overflow-y-auto min-h-[100dvh] overflow-hidden">
+
+    <!-- ball -->
+    <section id="ball-section" class="absolute w-full h-full top-0 left-0 overflow-hidden">
+        <!-- ball mobile -->
+        <!-- <div class="absolute md:-translate-x-full aspect-square w-[50rem] bg-blue-600 rounded-full transition-all duration-[3s] translate-x-[-30%] translate-y-[-70%] ease-out delay-1000 md:delay-[0]" x-transition></div> -->
+        <div class="absolute md:-translate-x-full aspect-square w-[calc(60vw+40rem)] bg-blue-600 rounded-full transition-all duration-[3s] translate-x-[calc(-30%-(0.1vw*-1))] translate-y-[-80%] ease-out delay-1000 md:delay-[0]" x-transition></div>
+        
+        <!-- ball dekstop -->
+        <!-- <div class="absolute aspect-square w-[70rem] bg-blue-600 rounded-full transition-all duration-[2s] md:duration-[3s] md:translate-x-[-60%] md:translate-y-[-45%] translate-y-full md:delay-1000 ease-in" x-transition></div> -->
+        <div class="absolute aspect-square w-[calc(75vw+45rem)] bg-blue-600 rounded-full transition-all duration-[2s] md:duration-[3s] md:translate-x-[calc(-65%-(3vw*-1))] md:translate-y-[calc(-55%-(1.2vw*-1))] translate-y-full md:delay-1000 ease-in" x-transition></div>
+
+    </section>
+    
+    <section id="form-section" class="absolute bottom-10 left-1/2 -translate-x-1/2 grid place-content-center gap-2 sm:gap-4 p-5 px-2 max-w-md border border-b-0 md:border-[1px] md:border-r-0 rounded-lg transition-all delay-1000 duration-[2.5s] md:bottom-1/2 md:left-full md:-translate-x-[(calc(100%+1rem))] md:translate-y-1/2 ease-in-out">
+        <div class="conn-image-logo w-[6.5rem] mx-auto">
+            <img src="./src/img/app/icon.jpeg" alt="icon app" class="w-full object-cover object-center">
+        </div>
+
+        <div class="grid gap-5 max-w-[25rem]">
+            <h2 class="text-center text-2xl sm:text-3xl md:text-4xl font-bold">Form Login</h2>
+            <form @submit.prevent="login" class="grid gap-4">
+                <div class="input-group input-username flex items-center p-2  px-5 sm:px-6 rounded-full bg-gray-200" style="--tw-bg-opacity: .6;">
+                    <span>
+                        <svg class="aspect-square w-6 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                    </span>
+                    <input x-model="form.username" type="text" autocomplete="off" class="bg-transparent outline-none border-none font-semibold placeholder-opacity-75" placeholder="Username" required>
+                </div>
+                <div class="input-group input-username flex items-center p-2 px-5 sm:px-6 rounded-full bg-gray-200" style="--tw-bg-opacity: .6;" x-data="{ inputMode: 'password' }">
+                    <span>
+                        <svg class="aspect-square w-6 text-gray-500" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><defs><style>.a{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}</style></defs><path class="a" d="M24,25.28a3.26,3.26,0,0,0-1.64,6.07V36h3.32V31.35a3.28,3.28,0,0,0,1.61-2.8v0A3.27,3.27,0,0,0,24,25.28Z"></path><rect class="a" x="7.38" y="17.77" width="33.23" height="25.73" rx="4.32"></rect><path class="a" d="M13.35,17.77V15.16a10.66,10.66,0,0,1,21.32,0v2.61"></path></g></svg>
+                    </span>
+                    <input x-model="form.password" :type="inputMode" x-ref="inputPassword" autocomplete="off" class="bg-transparent outline-none border-none font-semibold placeholder-opacity-75" placeholder="Password" required>
+                    <span class="cursor-pointer" @click="() => {
+                        inputMode = inputMode == 'password' ? 'text' : 'password'
+                        $nextTick(() => {
+                            $refs.inputPassword.focus()
+                            $refs.inputPassword.setSelectionRange(
+                                $refs.inputPassword.value.length,
+                                $refs.inputPassword.value.length
+                            )
+                        })
+                    }">
+                        <svg x-show="inputMode == 'password'" class="aspect-square w-6 text-gray-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.0007 12C15.0007 13.6569 13.6576 15 12.0007 15C10.3439 15 9.00073 13.6569 9.00073 12C9.00073 10.3431 10.3439 9 12.0007 9C13.6576 9 15.0007 10.3431 15.0007 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12.0012 5C7.52354 5 3.73326 7.94288 2.45898 12C3.73324 16.0571 7.52354 19 12.0012 19C16.4788 19 20.2691 16.0571 21.5434 12C20.2691 7.94291 16.4788 5 12.0012 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+
+                        <svg x-show="inputMode == 'text'" class="aspect-square w-6 text-gray-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M2.99902 3L20.999 21M9.8433 9.91364C9.32066 10.4536 8.99902 11.1892 8.99902 12C8.99902 13.6569 10.3422 15 11.999 15C12.8215 15 13.5667 14.669 14.1086 14.133M6.49902 6.64715C4.59972 7.90034 3.15305 9.78394 2.45703 12C3.73128 16.0571 7.52159 19 11.9992 19C13.9881 19 15.8414 18.4194 17.3988 17.4184M10.999 5.04939C11.328 5.01673 11.6617 5 11.9992 5C16.4769 5 20.2672 7.94291 21.5414 12C21.2607 12.894 20.8577 13.7338 20.3522 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                    </span>
+                </div>
+                
+                <div class="button-group mt-2 w-full flex justify-center">
+                    <button type="submit" class="w-32 p-2 px-4 rounded-full bg-gradient-to-br from-blue-500 via-blue-400 to-blue-700 text-white font-semibold">Login</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>

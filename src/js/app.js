@@ -45,7 +45,7 @@ async function loadXData(name) {
     console.log("THISISISIS")
 }
 
-const exlusiveComponent = ["login", "pay"];
+const exlusiveComponent = ["login", "login2", "pay"];
 
 async function loadComponent() {
     const { c: componentName } = url_param;
@@ -70,7 +70,7 @@ async function loadComponent() {
 
         if (!is_continue)
             return setTimeout(() => {
-                location.href = "?c=login";
+                location.href = "?c=login2";
             }, 3000);
 
         console.log("WUUUUHUUUUUU", is_continue);
