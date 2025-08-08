@@ -149,7 +149,7 @@ const alpineInitCallback = async () => {
                     this.auth.username = null;
 
                     setTimeout(() => {
-                        location.href = "?c=login";
+                        location.href = "?c=login2";
                     }, 3000);
                 });
             },
