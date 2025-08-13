@@ -1,6 +1,6 @@
 import bindAndFillFormData from "../libs/bindAndFillFormData.js";
 import encodeFetchedJson from "../libs/encodeFetchedJson.js";
-import { defaultErrorProps } from "../libs/swal2props";
+import { defaultErrorProps } from "../libs/swal2props.js";
 
 export default function() {
 
