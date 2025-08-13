@@ -28,7 +28,7 @@ export default function() {
 
             encodeFetchedJson(await (await fetch(db_path + "login", { method: "POST", body: formData })).text(), "Login", () => {
                 setTimeout(() => {
-                    location.href = "?c=dashboard";
+                    location.href = "?c=menu";
                 }, 3000);
             });
 
