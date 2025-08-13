@@ -1,6 +1,6 @@
 const CACHE_NAME = "MM-CACHE";
 
-const ASSET_TO_CACHE = ["/", "index.html"];
+const ASSET_TO_CACHE = ["/", "/index.html"];
 
 // cache asset
 self.addEventListener("install", (e) => {
@@ -13,7 +13,7 @@ self.addEventListener("install", (e) => {
 
 // hadle request connection | jaringan
 self.addEventListener("fetch", (e) => {
-    e.responWith(
+    e.respondWith(
         caches.match(e.request).then((res) => {
             if (res) return res;
             return fetch(e.request);
