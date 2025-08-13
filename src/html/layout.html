@@ -1,4 +1,4 @@
-<div id="conn" x-data="conn">
+<div id="conn" x-data="conn" class="min-h-[100dvh] flex flex-col">
     <template x-if="url_param['c'] != 'menu'">
         <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
             <div class="px-3 py-3 lg:px-5 lg:pl-3">
@@ -294,7 +294,7 @@
         </aside>
     </template>
 
-    <div class="p-2 sm:p-4">
-        <div class="p-3 pt-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700" :class="{ 'mt-16': url_param['c'] != 'menu' }" id="app"></div>
+    <div class="p-2 sm:p-4 flex-1 flex flex-col" x-ref="childOfConn" x-init="console.log('childOfConn:', $refs.childOfConn)">
+        <div class="p-3 pt-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 min-h-full" :class="{ 'mt-16': url_param['c'] != 'menu' }" id="app"></div>
     </div>
 </div>

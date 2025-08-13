@@ -1,7 +1,15 @@
-<div class="py-4 px-2 md:px-6 flex flex-col gap-12" x-data>
-    <section id="head-section" class="py-2 sm:py-4 px-4 sm:px-6 flex justify-center rounded-lg shadow-lg">
-        <h2 class="flex gap-2 font-bold text-sm sm:text-lg md:text-xl" x-text="`Halo selamat datang ${auth?.username}`">
-        </h2>
+<div class="py-4 px-2 md:px-6 flex flex-col gap-12 bg-gray-200" x-data x-init="() => {
+    console.log('childOfConn:', $refs.childOfConn)
+    $refs.childOfConn.classList.add('bg-gray-200')
+}">
+    <section id="head-section" class="py-2 sm:py-4 px-4 sm:px-6 flex bg-white">
+        <div class="bg-[rgb(212,237,218)] p-3 w-full rounded-sm">
+            <h2 class="flex gap-2 font-bold text-sm sm:text-lg md:text-xl text-green-700" x-text="`Halo selamat datang ${auth?.username}`">
+            </h2>
+    
+            <p class="text-xs sm:text-sm text-base text-green-700">Banyak diskon hari ini, silahkan buka lihat menu ready stock barang ya.</p>
+
+        </div>
 
         <button x-show="false"
             class="fixed top-5 right-5 sm:top-6 sm:right-6 self-end bg-red-500 text-white text-xs sm:text-sm px-3 py-1 rounded hover:bg-red-600 transition"
@@ -34,28 +42,28 @@
         </div>
     </section> -->
 
-    <section id="list-menu" class="flex flex-wrap justify-center gap-8 sm:gap-12 md:gap-16">
-        <div>
+    <section id="list-menu" class="flex flex-wrap justify-between gap-8 sm:gap-12 md:gap-16">
+        <div class="bg-white p-3">
             <a href="?c=dashboard">
                 <img src="./src/img/app/dashboard.png" alt="Dashboard" class="aspect-square w-24 sm:w-28 md:w-32 object-cover object-center" />
             </a>
         </div>
-        <div>
+        <div class="bg-white p-3">
             <a href="?c=transactions">
                 <img src="./src/img/app/transaksi.png" alt="Transaksi" class="aspect-square w-24 sm:w-28 md:w-32 object-cover object-center" />
             </a>
         </div>
-        <!-- <div>
+        <!-- <div class="bg-white p-3">
             <a href="?c=transaction-add">
                 <img src="./src/img/app/menu.png" alt="Pembelian" class="aspect-square w-24 sm:w-28 md:w-32 object-cover object-center" />
             </a>
         </div> -->
-        <div>
+        <div class="bg-white p-3">
             <a href="?c=products">
                 <img src="./src/img/app/barangstok.png" alt="Product" class="aspect-square w-24 sm:w-28 md:w-32 object-cover object-center" />
             </a>
         </div>
-        <div>
+        <div class="bg-white p-3">
             <a href="?c=costs">
                 <img src="./src/img/app/pengeluaran.png" alt="Pengeluaran" class="aspect-square w-24 sm:w-28 md:w-32 object-cover object-center" />
             </a>
