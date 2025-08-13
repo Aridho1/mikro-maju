@@ -1633,6 +1633,10 @@ input:checked + .toggle-bg {
   bottom: 60px;
 }
 
+.right-2 {
+  right: 0.5rem;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -2005,6 +2009,34 @@ input:checked + .toggle-bg {
   width: 3rem;
 }
 
+.\!w-\[100dvw\] {
+  width: 100dvw !important;
+}
+
+.w-\[6rem\2c 40wc\2c 20rem\] {
+  width: 6rem,40wc,20rem;
+}
+
+.w-\[6rem\2c 40vw\2c 20rem\] {
+  width: 6rem,40vw,20rem;
+}
+
+.w-\[max\(40vw\2c 6rem\)\] {
+  width: max(40vw,6rem);
+}
+
+.w-\[max\(30vw\2c 6rem\)\] {
+  width: max(30vw,6rem);
+}
+
+.w-\[clamp\(6rem\2c 30vw\2c 16rem\)\] {
+  width: clamp(6rem,30vw,16rem);
+}
+
+.w-\[clamp\(6rem\2c 30vw\2c 10rem\)\] {
+  width: clamp(6rem,30vw,10rem);
+}
+
 .min-w-\[15rem\] {
   min-width: 15rem;
 }
@@ -2020,6 +2052,10 @@ input:checked + .toggle-bg {
 
 .min-w-full {
   min-width: 100%;
+}
+
+.\!min-w-\[100dvw\] {
+  min-width: 100dvw !important;
 }
 
 .max-w-md {

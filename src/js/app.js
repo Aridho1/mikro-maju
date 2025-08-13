@@ -45,7 +45,7 @@ async function loadXData(name) {
     console.log("THISISISIS")
 }
 
-const exlusiveComponent = ["login", "login2", "pay"];
+const exlusiveComponent = ["login", "login2", "login3", "pay"];
 
 async function loadComponent() {
     const { c: componentName } = url_param;
@@ -70,7 +70,7 @@ async function loadComponent() {
 
         if (!is_continue)
             return setTimeout(() => {
-                location.href = "?c=login2";
+                location.href = "?c=login3";
             }, 3000);
 
         console.log("WUUUUHUUUUUU", is_continue);
@@ -149,7 +149,7 @@ const alpineInitCallback = async () => {
                     this.auth.username = null;
 
                     setTimeout(() => {
-                        location.href = "?c=login2";
+                        location.href = "?c=login3";
                     }, 3000);
                 });
             },
