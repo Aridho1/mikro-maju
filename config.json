@@ -8,6 +8,6 @@
         "server_key": "",
         "client_key": ""
     },
-    "is_production": false,
+    "is_production": true,
     "is_force_debug": false
 }
