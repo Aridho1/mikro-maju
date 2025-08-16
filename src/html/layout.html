@@ -1,6 +1,6 @@
 <div id="conn" x-data="conn" class="min-h-[100dvh] flex flex-col pt-10">
     <template x-if="true">
-        <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+        <nav class="fixed top-0 z-50 w-full bg-[rgb(245,245,245)] shadow-sm border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
             <div class="px-3 py-3 lg:px-5 lg:pl-3">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center justify-start rtl:justify-end">
@@ -24,18 +24,19 @@
                     </div>
                     <div class="flex items-center gap-2 sm:gap-4 font-semibold">
                         <a :href="url_param['c'] != 'menu' ? '?c=menu': ''" class="text-xs sm:text-base order-2 bg-blue-700 rounded-lg px-3 py-1 text-white" x-show="url_param['c'] != 'menu'">Return</a>
-                        <div class="flex items-center">
-                            <div>
+                        <div>
+                            <div class="flex gap-2 items-center">
                                 <button
                                     type="button"
-                                    class="p-1 flex text-sm rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                                    class="flex items-center gap-2 text-sm group"
                                     aria-expanded="false"
                                     data-dropdown-toggle="dropdown-user">
                                     <span class="sr-only">Open user menu</span>
                                     <!-- <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" /> -->
-                                    <div>
-                                        <div x-show="!auth.username" class="aspect-square w-8">
-                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <div class="flex items-center gap-2">
+                                        <div class="aspect-square w-8">
+                                            <img x-show="auth.username" class="w-full aspect-square" src="./src/img/app/avatar-01.jpg" alt="user photo" />
+                                            <svg x-show="!auth.username" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                                                 <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                                                 <g id="SVGRepo_iconCarrier">
@@ -44,9 +45,6 @@
                                                     fill="curentColor"></path>
                                                 </g>
                                             </svg>
-                                        </div>
-                                        <div x-show="auth.username" class="aspect-square w-8">
-                                            <img class="w-8 h-8 rounded-lg" src="./src/img/app/avatar-01.jpg" alt="user photo" />
                                             
                                             <!-- <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -61,6 +59,16 @@
                                                 </g>
                                             </svg> -->
                                         </div>
+
+                                        <div class="flex items-center gap-1 group-hover:opacity-75 transition-all duration-100">
+                                            <span x-text="auth.username || 'Anonymous'"></span>
+                                            <span class="rotate-90 text-xs self-center aspect-square font-bold">&gt;</span>
+                                        </div>
+
+                                        <!-- <div class="flex items-center gap-1"><div>
+                                            <span x-text="auth.username" class="text-xs sm:text-sm"></span>
+                                            <svg class="w-2 aspect-square text-black transform !rotate-90 font-bold" fill="currentColor" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M 13.8320 43.5625 C 14.4883 43.5625 14.9336 43.3516 15.4258 43.1172 L 41.7695 31.2813 C 43.1055 30.6484 44.1602 29.6172 44.1602 28.1172 C 44.1602 26.6406 43.1289 25.5625 41.7461 24.9532 L 15.4258 12.8359 C 14.9570 12.6016 14.5351 12.4375 13.9258 12.4375 C 12.7070 12.4375 11.8398 13.2813 11.8398 14.5235 C 11.8398 15.6016 12.4023 16.2110 13.3867 16.6797 L 38.6055 27.8125 L 38.6055 28.0703 L 13.3867 39.2969 C 12.4023 39.7656 11.8398 40.3750 11.8398 41.4531 C 11.8398 42.7422 12.6836 43.5625 13.8320 43.5625 Z"></path></g></svg>
+                                        </div> -->
                                     </div>
                                 </button>
                             </div>
@@ -193,7 +201,7 @@
                                 <g id="SVGRepo_iconCarrier">
                                     <title></title>
                                     <g fill="none" fill-rule="evenodd" id="页面-1" stroke="none" stroke-width="1">
-                                        <g id="导航图标" transform="translate(-325.000000, -80.000000)">
+                                        <g id="导航图标" transform="translate(-325currentColor, -80.000000)">
                                             <g id="编组" transform="translate(325.000000, 80.000000)">
                                                 <polygon fill="#FFFFFF" fill-opacity="0.01" fill-rule="nonzero" id="路径" points="24 0 0 0 0 24 24 24"></polygon>
                                                 <polygon id="路径" points="22 7 12 2 2 7 2 17 12 22 22 17" stroke="#212121" stroke-linejoin="round" stroke-width="1.5"></polygon>
