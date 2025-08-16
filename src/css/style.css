@@ -19,6 +19,8 @@ body {
 
 body {
     min-height: 100dvh;
+    font-family: "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      
 }
 
 [data-x-tooltip] {

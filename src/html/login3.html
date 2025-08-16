@@ -12,10 +12,12 @@
     <div class="forms-container">
         <div class="signin-signup">
 
-            <form @submit.prevent="login" method="post" class="sign-in-form" >
-                <img src="./src/img/app/icon.jpeg" width="120"> 
+            <form @submit.prevent="login" method="post" class="sign-in-form grid" >
+                <div class="flex items-center justify-center w-full">
+                    <img src="./src/img/app/logo-korma.png" width="120"> 
+                </div>
 
-                <h5 class="text-center">Login Kasir</h5>
+                <h5 class="text-center my-2">Login Admin</h5>
                 <div class="input-field">
                     <!-- <i class="fas fa-address-card"></i> -->
                     <span class="flex items-center justify-center">

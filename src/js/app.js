@@ -224,8 +224,9 @@ const alpineInitCallback = async () => {
         },
     }));
 
-    Alpine.data("Dropdown", () => ({
+    Alpine.data("Dropdown", ({ trigger = 'click' } = {}) => ({
         isOpen: false,
+        trigger: ['click', 'hover'].includes(trigger) ? trigger : 'click',
         positions: {
             bottom: 'top-full left-0',            // di bawah tombol
             'bottom-start': 'top-full left-0',    // di bawah, rata kiri
@@ -251,6 +252,30 @@ const alpineInitCallback = async () => {
         },
         deActivated() {
             this.isOpen = false
+        },
+        init() {
+
+            // add event for toggle
+            const { trigger } = this
+            const button = this.$refs.button
+            if (!button) {
+                console.warn("cannot find ref button in Dropdown!")
+            } else {
+                if (trigger == 'click') {
+                    button.addEventListener("click", () => {
+                        this.toggle()
+                    })
+                    console.log('setto click')
+                } else if (trigger == 'hover') {
+                    button.addEventListener("mouseenter", () => {
+                        this.activated()
+                    })
+                    button.addEventListener("mouseleave", () => {
+                        this.deActivated()
+                    })
+                }
+            }
+            
         },
     }))
 
