@@ -224,6 +224,36 @@ const alpineInitCallback = async () => {
         },
     }));
 
+    Alpine.data("Dropdown", () => ({
+        isOpen: false,
+        positions: {
+            bottom: 'top-full left-0',            // di bawah tombol
+            'bottom-start': 'top-full left-0',    // di bawah, rata kiri
+            'bottom-end': 'top-full right-0',     // di bawah, rata kanan
+        
+            top: 'bottom-full left-0',            // di atas tombol
+            'top-start': 'bottom-full left-0',    // di atas, rata kiri
+            'top-end': 'bottom-full right-0',     // di atas, rata kanan
+        
+            right: 'left-full top-1/2 -translate-y-1/2', // kanan, tengah
+            'right-start': 'left-full top-0',     // kanan, atas
+            'right-end': 'left-full bottom-0',    // kanan, bawah
+        
+            left: 'right-full top-1/2 -translate-y-1/2', // kiri, tengah
+            'left-start': 'right-full top-0',     // kiri, atas
+            'left-end': 'right-full bottom-0',    // kiri, bawah
+        },
+        toggle() {
+            this.isOpen = !this.isOpen
+        },
+        activated() {
+            this.isOpen = true
+        },
+        deActivated() {
+            this.isOpen = false
+        },
+    }))
+
     // Alpine.data('app', () => ({
     //     // isOpenBlackBarrier: true,
     //     // IDR,
