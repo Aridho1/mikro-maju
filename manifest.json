@@ -6,7 +6,7 @@
     "icons": [
         {
             "src": "./src/img/app/logo-korma.png",
-            "sizes": "512x512",
+            "sizes": "52x52",
             "type": "image/png"
         }
     ],
