@@ -1,11 +1,11 @@
 {
-    "name": "MikroMaju",
-    "short_name": "MikroMaju",
+    "name": "MO-Kasir",
+    "short_name": "MO-Kasir",
     "description": "Aplikasi Digital Manajemen UMKN",
     "start_url": "./",
     "icons": [
         {
-            "src": "./src/img/app/icon.png",
+            "src": "./src/img/app/logo-korma.png",
             "sizes": "512x512",
             "type": "image/png"
         }

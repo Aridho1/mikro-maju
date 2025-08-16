@@ -8,7 +8,7 @@ export const deafultConfirmProps = {
     text: "Data yang dihapus tidak bisa di kembalikan!",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: "#3085d6",
+    confirmButtonColor: "#62c700",
     cancelButtonColor: "#d33",
     confirmButtonText: "Ya, saya yakin!",
     cancelButtonText: "Batal",

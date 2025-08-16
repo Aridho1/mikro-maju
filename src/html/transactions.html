@@ -1,7 +1,7 @@
 <div x-data="transactionsComponent" class="py-4 px-0 md:px-2">
     <h2 id="app-title" class="text-2xl font-bold mb-8">Manajement Transaksi</h2>
 
-    <button id="button-add" @click="location.href = '?c=transaction-add'" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">Tambah Transaksi</button>
+    <button id="button-add" @click="location.href = '?c=transaction-add'" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded mb-4">Tambah Transaksi</button>
 
     <form id="formSearch" @submit.prevent="get(1)" class="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 bg-white dark:bg-gray-900 relative gap-3">
         <div class="sr-only">DOR</div>
@@ -121,7 +121,7 @@
                     placeholder="Cari Transaksi..."
                     autocomplete="off" />
             </div> -->
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded text-sm">Cari</button>
+            <button type="submit" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded text-sm">Cari</button>
         </div>
 
         <div class="sr-only">Dor</div>

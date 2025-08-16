@@ -30,7 +30,7 @@
                         </a>
                     </div>
                     <div class="flex items-center gap-2 sm:gap-4 font-semibold">
-                        <a :href="url_param['c'] != 'menu' ? '?c=menu': ''" class="text-xs sm:text-base order-2 bg-blue-700 rounded-lg px-3 py-1 text-white" x-show="url_param['c'] != 'menu'">Return</a>
+                        <a :href="url_param['c'] != 'menu' ? '?c=menu': ''" class="text-xs sm:text-base order-2 bg-[#62c700] rounded-lg px-3 py-1 text-white" x-show="url_param['c'] != 'menu'">Return</a>
                         <div>
                             <div class="flex gap-2 items-center">
                                 <div class="dropdown relative" x-data="Dropdown({ trigger: 'click' })" @click.outside="trigger == 'click' && deActivated">

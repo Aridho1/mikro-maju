@@ -4,7 +4,7 @@
         <span x-text="appName"></span>
     </h2>
 
-    <button id="button-add" @click="openModal" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+    <button id="button-add" @click="openModal" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded mb-4">
         Tambah
         <span x-text="appName"></span>
     </button>
@@ -30,7 +30,7 @@
                 </div>
 
                 <div x-show="false" class="absolute top-0 bottom-0 right-1 flex items-center pl-4">
-                    <button type="button" x-show="formSearch.date_start" @click="formSearch.date_start = null" class="font-bold text-gray-6border-gray-600 rounded-md px-2 scale-75">&cross;</button>
+                    <button type="button" x-show="formSearch.date_start" @click="formSearch.date_start = null" class="font-bold text-gray-6 border-gray-600 rounded-md px-2 scale-75">&cross;</button>
                 </div>
             </div>
 
@@ -150,7 +150,7 @@
                     autocomplete="off" />
             </div>
 
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded text-sm">Cari</button>
+            <button type="submit" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded text-sm">Cari</button>
         </div>
     </form>
 
@@ -347,7 +347,7 @@
                 <div class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
                     <button
                         type="submit"
-                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        class="text-white bg-[#62c700] hover:bg-green-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         x-text="form.id ? 'Ubah' : 'Tambah'"></button>
                 </div>
             </form>
