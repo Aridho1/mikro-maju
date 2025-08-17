@@ -153,6 +153,11 @@ const alpineInitCallback = async () => {
                     }, 3000);
                 });
             },
+            getReadMore(text, length = 100, endPrefix = '...') {
+                const slices = text.slice(0, length)
+
+                return text == slices ? text : slices.concat(endPrefix)
+            },
         };
     });
 
@@ -278,6 +283,53 @@ const alpineInitCallback = async () => {
             
         },
     }))
+
+    Alpine.data("Slide", () => {
+
+        const allowed_method = ['next', 'prev']
+
+        return {
+            currentSlide: 0,
+            slides: [],
+            _method: 'next',
+            set method(val) {
+                
+                if (!allowed_method.includes(val)) {
+                    return console.log('_method value allowed list is:', allowed_method)
+                }
+
+                if (val !== this._method)
+                    this._method = val
+
+                return val
+            },
+
+            get method() {
+                return this._method
+            },
+
+            get allowed_method() {
+                return allowed_method
+            },
+
+            init() {
+            },
+            nextSlide() {
+                this.method = "next"
+                this.$nextTick(() => {
+                    this.currentSlide = (this.currentSlide + 1) % this.slides.length
+                    
+                })
+            },
+            prevSlide() {
+                this.method = "prev"
+                this.$nextTick(() => {
+                    this.currentSlide = !this.currentSlide ? this.slides.length - 1 : (this.currentSlide - 1) % this.slides.length
+    
+                })
+            },
+        }
+    })
 
     // Alpine.data('app', () => ({
     //     // isOpenBlackBarrier: true,
