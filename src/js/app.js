@@ -260,9 +260,10 @@ const alpineInitCallback = async () => {
         },
         init() {
 
-            // add event for toggle
             const { trigger } = this
-            const button = this.$refs.button
+            const { button, dropdownMenu } = this.$refs
+
+            // add event for toggle
             if (!button) {
                 console.warn("cannot find ref button in Dropdown!")
             } else {
@@ -279,6 +280,17 @@ const alpineInitCallback = async () => {
                         this.deActivated()
                     })
                 }
+            }
+            
+            // event for hover
+            if (trigger == 'hover' && dropdownMenu) {
+                dropdownMenu.addEventListener("mouseenter", () => {
+                    this.activated()
+                })
+
+                dropdownMenu.addEventListener("mouseleave", () => {
+                    this.deActivated()
+                })
             }
             
         },
