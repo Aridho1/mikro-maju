@@ -241,9 +241,13 @@ switch (M) {
 
         // Handle deprecated | legacy
         if ($db->query("SELECT COUNT(*) AS total_data FROM transaction_details WHERE product_id = $id")->fetch_assoc()['total_data'] == 0)
-            $db->query("DELETE FROM $table WHERE id='$id'");
+            $db->query("DELETE FROM $table WHERE id='$id' ");
 
-        $db->query("UPDATE $table SET deprecated_code = 2 WHERE (origin_id = 0 AND id = $id) OR origin_id = WHEN origin_id IS NOT 0 THEN $origin_id END");
+        else {
+            $query = "UPDATE $table SET deprecated_code = 2 WHERE (origin_id = 0 AND id = $id) OR (origin_id != 0 AND origin_id = $origin_id)";
+            // die($query);
+            $db->query($query);
+        }
 
         echo json_encode(['status' => true, 'msg' => 'Item berhasil dihapus.']);
         break;
