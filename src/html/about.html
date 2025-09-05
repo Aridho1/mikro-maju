@@ -1,16 +1,15 @@
 <div x-data="aboutComponent" class="">
-    <section id="title-section" class="grid gap-6">
-        <h3 x-text="appName" class="sm:text-xl md:text-2xl font-bold mx-auto"></h3>
+	<section id="title-section" class="grid gap-6">
+		<h3 x-text="appName" class="sm:text-xl md:text-2xl font-bold mx-auto"></h3>
 
-        <section id="our-program-section" class="bg-gray-100 grid gap-5 py-4 px-2">
-            <h5 class="sm:text-xl md:text-2xl font-bold">Our Programs</h5>
+		<section id="our-program-section" class="bg-gray-100 grid gap-5 py-4 px-2">
+			<h5 class="sm:text-xl md:text-2xl font-bold">Our Programs</h5>
 
-            <div x-data="Slide" class="relative h-60 overflow-hidden">
-                <div class="sr-only">
-                    <span>
-                        Initial Slide
-                    </span>
-                    <span x-init="
+			<div x-data="Slide" class="relative h-60 overflow-hidden">
+				<div class="sr-only">
+					<span>Initial Slide</span>
+					<span
+						x-init="
                         slides = [
                             {
                                 id: 1,
@@ -44,10 +43,10 @@
                             },
                         ]
                     "></span>
-                </div>
-                <div class="slide-list border border-black relative h-full w-full">
-                    <template x-for="(slide, index) in slides" x-bind:key="slide.id">
-                        <!-- 
+				</div>
+				<div class="slide-list border border-black relative h-full w-full">
+					<template x-for="(slide, index) in slides" x-bind:key="slide.id">
+						<!-- 
                             x-transition:enter="transition ease-out duration-500"
                             x-transition:leave="transition ease-in duration-500"
 
@@ -80,19 +79,19 @@
 
                             :x-transition:leave-end="method == allowed_method[0] ? 'opacity-0 -translate-x-full' : method == allowed_method[1] ? 'opacity-0 translate-x-full' : ''"
                         -->
-                            
-                        <div
-                            x-data="{
+
+						<div
+							x-data="{
                                entering: false,
                                 leaving: false,
                                 entered: false,
                                 transitioning: false 
-                            }"      
-                            x-show="currentSlide === index"
-                            x-cloak
-                            class="absolute inset-0 flex items-center gap-3 transition-transform duration-1000 ease-in"
-                            x-transition
-                            :class="{
+                            }"
+							x-show="currentSlide === index"
+							x-cloak
+							class="absolute inset-0 flex items-center gap-3 transition-transform duration-1000 ease-in"
+							x-transition
+							:class="{
                                 'opacity-0 translate-x-full': transitioning && _method === 'next' && entering,
                                 'opacity-0 -translate-x-full': transitioning && _method === 'prev' && entering,
                                 'opacity-100 translate-x-0': transitioning && entered,
@@ -100,33 +99,31 @@
                                 'opacity-0 -translate-x-full': transitioning && _method === 'next' && leaving,
                                 'opacity-0 translate-x-full': transitioning && _method === 'prev' && leaving
                             }"
-                            @before-enter="entering = true; leaving = false; transitioning = true;"
-                            @after-enter="entering = false; entered = true; transitioning = false;"
-                            @before-leave="leaving = true; entering = false; transitioning = true;"
-                            @after-leave="leaving = false; entered = false; transitioning = false;"
-                        >
-
-                            <div class="sr-only" x-show="false">
-                                <span>Initial readMore</span>
-                                <span x-init="
+							@before-enter="entering = true; leaving = false; transitioning = true;"
+							@after-enter="entering = false; entered = true; transitioning = false;"
+							@before-leave="leaving = true; entering = false; transitioning = true;"
+							@after-leave="leaving = false; entered = false; transitioning = false;">
+							<div class="sr-only" x-show="false">
+								<span>Initial readMore</span>
+								<span
+									x-init="
                                     descReadMore = getReadMore(slide.desc, 60)
                                     isDescReadMore = descReadMore == slide.desc
                                     console.log('slide.desc:', slide.desc)
                                     console.log('descReadMore:', descReadMore)
                                 "></span>
-                            </div>
-                            <div class="flex-1 basis-[20%]">
-                                <img :src="`./src/img/db/${ slide.img }`" :alt="slide.title" class="!w-full h-full object-cover object-center">
-                            </div>
-                            <div class="flex-1 slide-content grid gap-3">
-                                <h6 class="font-semibold sm:text-lg" x-text="slide.title"></h6>
-                                <p class="text-xs sm:text-base font-normal leading-7" x-text="descReadMore"></p>
-                            </div>
-                        </div>
-                        
-                    </template>
-                </div>
-                <!-- <div class="overlay absolute inset-full flex items-center">
+							</div>
+							<div class="flex-1 basis-[20%]">
+								<img :src="`./src/img/db/${ slide.img }`" :alt="slide.title" class="!w-full h-full object-cover object-center" />
+							</div>
+							<div class="flex-1 slide-content grid gap-3">
+								<h6 class="font-semibold sm:text-lg" x-text="slide.title"></h6>
+								<p class="text-xs sm:text-base font-normal leading-7" x-text="descReadMore"></p>
+							</div>
+						</div>
+					</template>
+				</div>
+				<!-- <div class="overlay absolute inset-full flex items-center">
                     <div class="buttons-primary flex px-4 justify-between">
                         <button type="button" class="bg-white rounded-md px-2 py-1" @click="prevSlide">
                             Prev
@@ -136,19 +133,13 @@
                         </button>
                     </div>
                 </div> -->
-                <div class="overlay pointer-events-none absolute inset-0 flex items-center">
-                    <div class="buttons-primary flex px-4 justify-between w-full">
-                        <button type="button" class="bg-white rounded-md px-2 py-1 pointer-events-auto" @click="prevSlide">
-                            Prev
-                        </button>
-                        <button type="button" class="bg-white rounded-md px-2 py-1 pointer-events-auto" @click="nextSlide">
-                            Next
-                        </button>
-                    </div>
-
-                </div>
-
-            </div>
-        </section>
-    </section>
+				<div class="overlay pointer-events-none absolute inset-0 flex items-center">
+					<div class="buttons-primary flex px-4 justify-between w-full">
+						<button type="button" class="bg-white rounded-md px-2 py-1 pointer-events-auto" @click="prevSlide">Prev</button>
+						<button type="button" class="bg-white rounded-md px-2 py-1 pointer-events-auto" @click="nextSlide">Next</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	</section>
 </div>
