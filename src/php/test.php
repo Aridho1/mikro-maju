@@ -99,4 +99,6 @@ $txt4 = "hello world4";
 
 // echo json_encode($_ENV ?? []);
 // echo json_encode($config ?? []);
-echo json_encode($config['pagination'] ?? []);
+// echo json_encode($config['pagination'] ?? []);
+
+echo (int) microtime(true);
