@@ -104,7 +104,7 @@ switch (M) {
 
         foreach ($carts as $cart) {
 
-            $sub_profit = $cart['price'] * $cart['quantity'];
+            $sub_profit = ($cart['price'] - $cart['purchase_price']) * $cart['quantity'];
 
             $item_details[] = [
                 'id' => $cart['id'],
@@ -122,7 +122,7 @@ switch (M) {
         // die;
 
         switch ($payment_method) {
-            case 'Tunai': {
+            case 'Tunai': case 'QRIS': {
                 $db->query("INSERT INTO $table SET date='$date', total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token =''");
                 break;
             }

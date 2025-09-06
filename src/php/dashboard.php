@@ -19,6 +19,7 @@ switch (M) {
         $sql = "SELECT 
                 date,
                 SUM(CASE WHEN payment_method = 'Tunai' THEN total ELSE 0 END) as tunai,
+                SUM(CASE WHEN payment_method = 'QRIS' THEN total ELSE 0 END) as QRIS,
                 SUM(CASE WHEN payment_method = 'Transfer' THEN total ELSE 0 END) as transfer,
                 SUM(total) AS total 
             FROM transactions 
@@ -36,6 +37,7 @@ switch (M) {
             $revenues[] = [
                 "date" => $row['date'],
                 "tunai" => (int) $row['tunai'],
+                "QRIS" => (int) $row['QRIS'],
                 "transfer" => (int) $row['transfer'],
                 "total" => (int) $row['total'],
             ];

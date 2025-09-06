@@ -41,7 +41,7 @@ switch (M) {
             die;
         }
 
-        $query = "INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', image = '$image', category = '$category', deprecated_code = 0, origin_id = 0";
+        $query = "INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', image = '$image', category = '$category', subcategory = '', deprecated_code = 0, origin_id = 0";
 
         // die($query);
 
@@ -264,7 +264,7 @@ switch (M) {
         $res = [];
 
         while ($row = $raw->fetch_assoc()) {
-            $row['subcategory'] = explode(',', $row['subcategory']);
+            $row['subcategory'] = explode(',', $row['subcategory'] || '');
             $res[] = $row;
         }
 

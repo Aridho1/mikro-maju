@@ -80,14 +80,16 @@
 							</label>
 						</template>
 
-						<template x-for="(payment_status, index, all) in Object.keys(paymentMethods).map(prop => paymentMethods[prop]).flat()" :key="payment_status">
-							<label
-								x-show="all.length > 1"
-								:for="`payment_status-${ payment_status }`"
-								class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-								<input type="checkbox" :id="`payment_status-${ payment_status }`" x-model="formSearch.payment_statuses" :value="payment_status" />
-								<span x-text="payment_status"></span>
-							</label>
+						<template x-if="false">
+							<template x-for="(payment_status, index, all) in Object.keys(paymentMethods).map(prop => paymentMethods[prop]).flat()" :key="payment_status">
+								<label
+									x-show="all.length > 1"
+									:for="`payment_status-${ payment_status }`"
+									class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+									<input type="checkbox" :id="`payment_status-${ payment_status }`" x-model="formSearch.payment_statuses" :value="payment_status" />
+									<span x-text="payment_status"></span>
+								</label>
+							</template>
 						</template>
 
 						<li>
@@ -134,6 +136,7 @@
 					<th scope="col" class="px-4 py-3">No</th>
 					<th scope="col" class="px-6 py-3">Tanggal</th>
 					<th scope="col" class="px-6 py-3">Total</th>
+					<th scope="col" class="px-6 py-3">Profit</th>
 					<th scope="col" class="px-6 py-3">Pembayaran</th>
 					<th scope="col" class="px-6 py-3">Aksi</th>
 					<th scope="col" class="px-6 py-3">Aksi Tambahan</th>
@@ -145,6 +148,7 @@
 						<td class="px-4 py-4 text-xs" x-text="index + page.start_index"></td>
 						<td class="px-6 py-4 text-xs" x-text="transaction.date"></td>
 						<td class="px-6 py-4" x-text="IDR.format(transaction.total)"></td>
+						<td class="px-6 py-4" x-text="IDR.format(transaction.profit)"></td>
 						<td class="px-6 py-4 text-xs">
 							<span x-text="transaction.payment_method"></span>
 							>
@@ -154,13 +158,13 @@
 						<td class="px-6 py-4 text-xs">
 							<!-- Modal toggle -->
 							<button type="button" @click="openModalDetail(transaction)" class="btn-detail font-medium hover:underline">Detail</button>
-							<button type="button" @click="selectEdit(transaction)" class="btn-edit font-medium hover:underline">Ubah</button>
+							<!-- <button type="button" @click="selectEdit(transaction)" class="btn-edit font-medium hover:underline">Ubah</button> -->
 							<button type="button" @click="remove(transaction)" class="btn-remove font-medium hover:underline">Hapus</button>
 						</td>
 						<td class="px-6 py-4 text-xs">
 							<button type="button" @click="openStruct(transaction)" class="btn-struct font-medium hover:underline">Struk</button>
 							<button
-								x-show="transaction.payment_method == 'Tunai' && transaction.payment_status == 'Belum dibayar'"
+								x-show="(transaction.payment_method == 'Tunai' || transaction.payment_method == 'QRIS') && transaction.payment_status == 'Belum dibayar'"
 								type="button"
 								@click="bayar(transaction)"
 								class="btn-pay font-medium hover:underline">
@@ -190,6 +194,17 @@
 						</td>
 					</tr>
 				</template>
+				<tr x-show="transactions.length">
+					<th scope="col" colspan="1" class="px-4 py-4"></th>
+					<th scope="col" colspan="2" class="px-4 pr-6 py-4 text-end">
+						Total:
+						<span x-text="IDR.format(transactions.map(({ total }) => total).reduce((acc, curr) => (acc - 0) + (curr - 0), 0))"></span>
+					</th>
+					<th scope="col" colspan="2" class="px-4 pl-6 py-4 text-start">
+						Profit:
+						<span x-text="IDR.format(transactions.map(({ profit }) => profit).reduce((acc, curr) => (acc - 0) + (curr - 0), 0))"></span>
+					</th>
+				</tr>
 				<tr x-show="!transactions.length">
 					<th scope="col" colspan="6" class="px-4 py-4 text-xl font-bold text-center">Tidak ada data!</th>
 				</tr>
