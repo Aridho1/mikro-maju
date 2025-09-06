@@ -24,7 +24,7 @@ switch (M) {
         $purchase_price ??= false;
         $price ??= false;
         $category ??= false;
-        $subcategory ??= false;
+        // $subcategory ??= false;
 
         $uplodedFile = uploadFile('image', './../img/db/');
 
@@ -36,12 +36,16 @@ switch (M) {
         } else
             $image = $uplodedFile['data'];
 
-        if (!$name || !$purchase_price || !$price || !$category || !$subcategory) {
+        if (!$name || !$purchase_price || !$price || !$category) {
             echo json_encode(['status' => false, 'msg' => 'Kekurangan data required!', "post" => $_POST]);
             die;
         }
 
-        $db->query("INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', image = '$image', category = '$category', subcategory = '$subcategory'");
+        $query = "INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', image = '$image', category = '$category', deprecated_code = 0, origin_id = 0";
+
+        // die($query);
+
+        $db->query($query);
 
         echo json_encode(['status' => true, 'msg' => 'Item berhasil ditamahkan.']);
         break;
@@ -165,12 +169,12 @@ switch (M) {
     case 'edit': {
         $id ??= false;
         $name ??= false;
-        $description ??= false;
+        // $description ??= false;
         $price ??= false;
         $prevImage = $_POST['prev-image'] ?? false;
         $purchase_price ??= false;
         $category ??= false;
-        $subcategory ??= false;
+        // $subcategory ??= false;
 
         $prevPrice ??= false;
         $prevPurchasePrice ??= false;
@@ -178,7 +182,7 @@ switch (M) {
         $prev_id ??= false;
         $prev_origin_id ??= false;
 
-        $validated = validateEmptyVar("id|name|description|price|prevImage|prevPrice|prevPurchasePrice|category|subcategory|prev_id|prev_origin_id");
+        $validated = validateEmptyVar("id|name|price|prevImage|prevPrice|prevPurchasePrice|category|prev_id|prev_origin_id");
 
         // if (!$id || !$name || !$description || !$price || !$prevImage || !$prevPrice || !$prevPurchasePrice || !$category || !$subcategory || !$prev_id || !$prev_origin_id) {
         if ($validated !== true) {
@@ -217,12 +221,12 @@ switch (M) {
                 $db->query("UPDATE $table SET deprecated_code = 1, origin_id = CASE WHEN origin_id = 0 THEN $prev_id ELSE origin_id END WHERE id = $prev_id");
 
                 // Add edited product as new product
-                $db->query("INSERT INTO $table SET name = '$name', description = '$description', purchase_price = '$purchase_price', price = '$price', category = '$category', subcategory = '$subcategory', image = '$image', origin_id = $curr_origin_id");
+                $db->query("INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', category = '$category', image = '$image', origin_id = $curr_origin_id");
             }
         }
 
         if ($isEditAnyway)
-            $db->query("UPDATE $table SET name = '$name', description = '$description', purchase_price = '$purchase_price', price = '$price', category = '$category', subcategory = '$subcategory', image = '$image' WHERE id = '$id'");
+            $db->query("UPDATE $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', category = '$category', image = '$image' WHERE id = '$id'");
 
         echo json_encode(['status' => true, 'msg' => 'Item berhasil diubah.', 'post' => $_POST, 'isEditAnyway' => $isEditAnyway, 'total_data' => $total_data]);
 

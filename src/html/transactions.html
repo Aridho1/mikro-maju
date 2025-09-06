@@ -477,7 +477,10 @@
 																class="hover:text-blue-600 hover:underline"></a>
 															<span x-show="item.deprecated_code == 2" x-text="item.name"></span>
 														</div>
-														<div class="text-xs text-gray-500" x-text="`${item.product.category} › ${item.product.subcategory}`"></div>
+														<template x-if="false">
+															<div class="text-xs text-gray-500" x-text="`${item.product.category} › ${item.product.subcategory}`"></div>
+														</template>
+														<div class="text-xs text-gray-500" x-text="item.product.category"></div>
 														<template x-if="item.product.deprecated_code == 1">
 															<span class="text-xs text-yellow-700 bg-yellow-100 rounded px-2 py-0.5 mt-1 inline-block">Harga Berubah</span>
 														</template>

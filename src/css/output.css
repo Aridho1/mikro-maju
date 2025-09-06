@@ -2049,6 +2049,10 @@ input:checked + .toggle-bg {
   width: 3rem;
 }
 
+.w-60 {
+  width: 15rem;
+}
+
 .min-w-\[15rem\] {
   min-width: 15rem;
 }
