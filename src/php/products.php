@@ -20,7 +20,7 @@ switch (M) {
         // $price = $_POST['price'] ?? false;
 
         $name ??= false;
-        $description ??= false;
+        // $description ??= false;
         $purchase_price ??= false;
         $price ??= false;
         $category ??= false;
@@ -36,12 +36,12 @@ switch (M) {
         } else
             $image = $uplodedFile['data'];
 
-        if (!$name || !$description || !$purchase_price || !$price || !$category || !$subcategory) {
+        if (!$name || !$purchase_price || !$price || !$category || !$subcategory) {
             echo json_encode(['status' => false, 'msg' => 'Kekurangan data required!', "post" => $_POST]);
             die;
         }
 
-        $db->query("INSERT INTO $table SET name = '$name', description = '$description', purchase_price = '$purchase_price', price = '$price', image = '$image', category = '$category', subcategory = '$subcategory'");
+        $db->query("INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', image = '$image', category = '$category', subcategory = '$subcategory'");
 
         echo json_encode(['status' => true, 'msg' => 'Item berhasil ditamahkan.']);
         break;
