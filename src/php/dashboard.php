@@ -21,6 +21,7 @@ switch (M) {
                 SUM(CASE WHEN payment_method = 'Tunai' THEN total ELSE 0 END) as tunai,
                 SUM(CASE WHEN payment_method = 'QRIS' THEN total ELSE 0 END) as QRIS,
                 SUM(CASE WHEN payment_method = 'Transfer' THEN total ELSE 0 END) as transfer,
+                SUM(profit) AS profit,
                 SUM(total) AS total 
             FROM transactions 
             WHERE date >= CURDATE() - INTERVAL 30 DAY
@@ -39,6 +40,7 @@ switch (M) {
                 "tunai" => (int) $row['tunai'],
                 "QRIS" => (int) $row['QRIS'],
                 "transfer" => (int) $row['transfer'],
+                "profit" => (int) $row['profit'],
                 "total" => (int) $row['total'],
             ];
 
@@ -51,6 +53,41 @@ switch (M) {
             "revenues" => $revenues,
         ]);
 
+        break;
+    }
+
+    case "get-margin": {
+        $sql = "SELECT
+            date,
+            SUM(total) as total,
+            SUM(profit) as profit 
+        FROM transactions 
+        WHERE date >= CURDATE() - INTERVAL 30 DAY
+        GROUP BY date 
+        ORDER BY date DESC LIMIT 15
+        ";
+
+        $raw = $db->query($sql);
+
+        $margin = 0;
+        $margins = [];
+
+        while ($row = $raw->fetch_assoc()) {
+            $margins[] = [
+                "date" => $row['date'],
+                "total" => (int) $row['total'],
+                "profit" => (int) $row['profit'],
+            ];
+
+            $margin += $row['profit'] - 0;
+        }
+
+        echo json_encode([
+            "status" => true,
+            "margin" => $margin,
+            "margins" => $margins,
+        ]);
+        
         break;
     }
 

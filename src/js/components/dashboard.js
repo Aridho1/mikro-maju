@@ -12,8 +12,9 @@ export default function () {
 	const elChart1 = document.querySelector("#chart-1");
 	const elChart2 = document.querySelector("#chart-2");
 	const elChart3 = document.querySelector("#chart-3");
+	const elChart4 = document.querySelector("#chart-4");
 
-	let chart1, chart2, chart3;
+	let chart1, chart2, chart3, chart4;
 
 	if (elChart1) {
 		// const chart1 = new Chart(elChart1, {
@@ -126,11 +127,14 @@ export default function () {
 	return {
 		revenue: 0,
 		revenues: [],
+		margin: 0,
+		margins: [],
 		monthly_cost: 0,
 		monthly_costs: [],
 
 		async init() {
 			this.getRevenue();
+			this.getMargin();
 			this.getMonthlyCost();
 		},
 		async getRevenue() {
@@ -188,14 +192,104 @@ export default function () {
 								backgroundColor: "rgba(255, 99, 132, 0.2)",
 								tension: 0.4,
 							},
+							// {
+							// 	label: "Total",
+							// 	data: total,
+							// 	borderColor: "rgb(255, 206, 86)",
+							// 	backgroundColor: "rgba(255, 206, 86, 0.2)",
+							// 	borderDash: [5, 5], // supaya garisnya beda
+							// 	tension: 0.4,
+							// },
+						],
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								labels: {
+									color: "#fff",
+								},
+							},
+						},
+						scales: {
+							x: {
+								ticks: {
+									color: "#fff",
+									autoSkip: false, // tampilkan semua label meski mepet
+									maxRotation: 180, // putar label supaya lebih muat
+									minRotation: 0,
+								},
+							},
+							y: {
+								ticks: {
+									color: "#fff",
+									callback: (val) => {
+										return this.IDR.format(val);
+									},
+								},
+							},
+						},
+						plugins: {
+							legend: {
+								labels: {
+									color: "#fff",
+								},
+							},
+							tooltip: {
+								callbacks: {
+									label: function (context) {
+										const label = context.dataset.label || "";
+										const value = context.parsed.y || 0;
+										return `${label}: Rp ${value.toLocaleString("id-ID")}`;
+									},
+								},
+							},
+						},
+					},
+				});
+			});
+		},
+		async getMargin() {
+			encodeFetchedJson(await (await fetch(db_path + "get-margin")).text(), "get-margin", ({ margin, margins }) => {
+				margins.reverse();
+
+				this.margins = margins;
+				this.margin = margin;
+
+				const labels = margins.map(({ date }) => (date == dateNow ? "Hari Ini" : date));
+				const profit = margins.map(({ profit }) => profit);
+				const total = margins.map(({ total }) => total);
+
+				console.log("margins", margins);
+
+				chart4 = new Chart(elChart4, {
+					type: "line",
+					data: {
+						labels,
+						datasets: [
+							{
+								label: "Profit",
+								data: profit,
+								borderColor: "rgb(255, 206, 86)",
+								backgroundColor: "rgba(255, 206, 86, 0.2)",
+								tension: 0.4,
+							},
 							{
 								label: "Total",
 								data: total,
-								borderColor: "rgb(255, 206, 86)",
-								backgroundColor: "rgba(255, 206, 86, 0.2)",
-								borderDash: [5, 5], // supaya garisnya beda
+								borderColor: "rgb(255, 99, 132)",
+								backgroundColor: "rgba(255, 99, 132, 0.2)",
 								tension: 0.4,
 							},
+							// {
+							// 	label: "Total",
+							// 	data: total,
+							// 	borderColor: "rgb(255, 206, 86)",
+							// 	backgroundColor: "rgba(255, 206, 86, 0.2)",
+							// 	borderDash: [5, 5], // supaya garisnya beda
+							// 	tension: 0.4,
+							// },
 						],
 					},
 					options: {
