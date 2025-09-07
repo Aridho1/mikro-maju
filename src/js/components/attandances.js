@@ -10,14 +10,15 @@ import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/D
 import { config, getConfigJson } from "../libs/getConfigJson.js";
 
 export default function () {
-	const db_path = "./src/php/costs.php?m=";
+	const db_path = "./src/php/attandances.php?m=";
 
 	// console.warn(config);
 
 	const is_wait = {
 		get: false,
 		add: false,
-		edit: false,
+		// edit: false,
+		remove: false,
 	};
 
 	// Handle datepicker
@@ -34,19 +35,21 @@ export default function () {
 	});
 	const datepickers = dateRangePicker.datepickers;
 
+	const date = new Date().toISOString().split("T")[0];
+
 	return {
-		appName: "Pengeluaran",
-		costs: [],
+		appName: "Absensi",
+		attandances: [],
 		form: {
 			id: null,
-			date: null,
-			amount: null,
-			category: null,
-			description: null,
+			username: null,
+			status: null,
+			type: null,
+			time: null,
 		},
 		formSearch: {
-			filters: ["amount", "description"],
-			categories: [],
+			statuses: [],
+			types: [],
 			date_start: null,
 			date_end: null,
 			sort_desc: true,
@@ -54,25 +57,46 @@ export default function () {
 		},
 		page: new Pagination(),
 
-		categories: [],
+		statuses: ["Hadir", "Tidak Hadir"],
+		types: ["clock-in", "clock-out"],
+		typesText: ["Clock In", "Clock out"],
 
 		// regular props
 		isOpenModal: false,
 		isOpenDescModal: false,
 		description_of_cost: null,
+		time: null,
+		date,
+
+		getTime() {
+			const now = new Date();
+			const hours = now.getHours().toString().padStart(2, "0");
+			const minute = now.getMinutes().toString().padStart(2, "0");
+
+			const time = `${hours}:${minute}`;
+			this.time = time;
+			this.form.time = time;
+
+			console.log({ time });
+		},
 
 		// methods
 		async init() {
-			// get categories
-			await this.getCategories(true);
+			if (!this.auth) {
+				return console.log("Auth tidak ditemukan!");
+			}
 
-			const config = await getConfigJson();
-			console.warn("a", { config });
+			this.getTime();
+
+			setInterval(() => this.getTime(), 1000 * 60);
+
+			// get categories
+			// await this.getCategories(true);
 
 			// set filter by url param
 			fillFormsByUrlParam(
 				{
-					array: ["filters", "categories"],
+					array: ["statuses", "types"],
 					string: ["date_start", "date_end", "keyword"],
 					int: "page",
 					boolean: "sort_desc",
@@ -80,6 +104,10 @@ export default function () {
 				this.formSearch,
 				url_param
 			);
+
+			this.form.username = this.auth.username;
+
+			console.error("FORM", this.form);
 
 			// regenerate UI / value input date
 			if (this.formSearch.date_start && this.formSearch.date_end) {
@@ -90,16 +118,6 @@ export default function () {
 			}
 
 			await this.get(null, true);
-
-			// watch amount form
-			this.$watch("form.amount", (curr, prev) => {
-				if (isNaN(curr) || isNaN(prev)) return;
-
-				console.log({ curr, prev });
-
-				if (prev - 1 == curr) this.form.amount = prev - 1000;
-				else if (prev - 0 + 1 == curr) this.form.amount = prev - 0 + 1000;
-			});
 
 			const ctx = this;
 
@@ -135,17 +153,6 @@ export default function () {
 			});
 		},
 
-		async getCategories(is_init) {
-			encodeFetchedJson(await (await fetch(db_path + "get-categories")).text(), "get-categories", ({ data, categories }) => {
-				if (!Array.isArray(categories)) return;
-
-				this.categories = categories;
-				console.log({ categories });
-
-				if (is_init) this.formSearch.categories = categories;
-			});
-		},
-
 		async get(page, is_init = false) {
 			if (is_wait.get) return console.warn("Reject get method cause spam!");
 
@@ -154,13 +161,12 @@ export default function () {
 			const formData = new FormData();
 			bindAndFillFormData(formData, this.formSearch);
 			formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
-			console.log(this.formSearch);
 
 			// Filter | same url param = same result
 			if (!rewriteUrl(formData, url_param) && !is_init) return (is_wait.get = false), console.warn("Reject get method cause same url param!");
 
 			encodeFetchedJson(await (await fetch(db_path + "search", { method: "POST", body: formData })).text(), "search", ({ data, pagination } = {}) => {
-				this.costs = data;
+				this.attandances = data;
 
 				if (pagination && typeof pagination == "object") Object.assign(this.page, pagination);
 			});
@@ -204,12 +210,12 @@ export default function () {
 
 			await this.get(null, true);
 		},
-		async remove({ id } = {}) {
-			if (!id) return;
+		async remove({ id, staff_id } = {}) {
+			if (!id || !staff_id) return;
 
 			const { isConfirmed } = await Swal.fire({
 				...deafultConfirmProps,
-				title: "Yakin ingin hapus Data Pengeluaran?",
+				title: "Yakin ingin hapus Absen?",
 				text: "Data yang dihapus tidak bisa di kembalikan!",
 				confirmButtonText: "Ya, saya yakin!",
 				cancelButtonText: "Batal",
@@ -219,6 +225,7 @@ export default function () {
 
 			const formData = new FormData();
 			formData.append("id", id);
+			formData.append("staff_id", staff_id);
 
 			encodeFetchedJson(await (await fetch(db_path + "remove", { method: "POST", body: formData })).text(), "remove", async ({ msg } = {}) => {
 				Swal.fire({ title: "Selamat", icon: "success", text: msg });
@@ -227,19 +234,19 @@ export default function () {
 		},
 		openModal() {
 			this.form = {
+				...this.form,
 				id: null,
-				amount: null,
-				category: null,
-				description: null,
+				status: null,
+				type: null,
 			};
 
 			this.isOpenModal = true;
 		},
-		selectCostEdit(cost) {
-			if (!cost.id) return;
-			console.log("IDDDDDDDDDDDD", cost.id);
+		selectAttandanceEdit(attandance) {
+			if (!attandance.id) return;
+			console.log("IDDDDDDDDDDDD", attandance.id);
 
-			Object.assign(this.form, cost);
+			Object.assign(this.form, attandance);
 
 			this.isOpenModal = true;
 		},

@@ -235,6 +235,7 @@ export default function () {
 			is_wait.search = true;
 
 			const formData = new FormData();
+			formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
 			console.log("page:", page);
 

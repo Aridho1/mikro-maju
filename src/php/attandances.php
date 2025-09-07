@@ -13,29 +13,38 @@ if (!session_id()) session_start();
 
 toGlobal($_POST);
 
-$table = "costs";
+$table = "attandance";
 
 $auth = $_SESSION["auth"] ?? false;
 
 switch (M) {
     case "add": {
 
+        // validate auth
         if (!$auth) {
             echo json_encode(['status' => false, 'msg' => 'Authentifikasi tidak ditemukan.']);
             die;
         }
 
-        if (validateEmptyVar("type")) {
-            echo json_encode(['status' => false, 'msg' => 'Kekurangan data required!']);
+        // validate input
+        $validated = validateEmptyVar("status|type|time");
+        if ($validated !== true) {
+            echo json_encode(['status' => false, 'msg' => $validated]);
             die;
         }
 
         $staff_id = $auth['id'];
-        $type = $_POST['type'];
         $date = date('Y-m-d');
-        $timestamp = ((int) time()) * 1000;
+        $timestamp = ((int) microtime(true)) * 1000;
 
-        $db->query("INSERT INTO $table SET staff_id = $staff_id, date = '$date', type = '$type', timestamp = $timestamp");
+        // $hours = date("H");
+        // $minutes = date("i");
+
+        // $time = "$hours : $minutes";
+        // date_default_timezone_set("Asia/Jakarta");
+        // $time = date("H:i");
+
+        $db->query("INSERT INTO $table SET staff_id = $staff_id, date = '$date', time = '$time', status = '$status', type = '$type', timestamp = $timestamp");
 
         echo json_encode(['status' => true, 'msg' => 'Absen berhasil ditamahkan.']);
         break;
@@ -45,37 +54,50 @@ switch (M) {
         $page ??= false;
         $page = (Int) ($page ?? 1);
 
-        $sql = " FROM $table WHERE 1 ";
+        $sql = " FROM $table a JOIN staffs s ON s.id = a.staff_id WHERE 1 ";
         $conditions = [];
 
         if ($keyword ?? false) {
-            // if ($description ?? false)
-            //     $conditions[] = "description LIKE '%$keyword%'";
 
-            // if ($amount ?? false)
-            //     $conditions[] = "amount LIKE '%$amount%'";
+            $_filters = ["s.id", "s.username"];
 
-            // filters
-            if ($filters ?? false) {
-                $keys = explode(",", $filters);
+            foreach ($_filters as $key) 
+                $conditions[] = "$key LIKE '%$keyword%'";
 
-                foreach ($keys as $key)
-                    $conditions[] = "$key LIKE '%$keyword%'";
+            // // filters
+            // if ($filters ?? false) {
+            //     $keys = explode(",", $filters);
 
-            }
+            //     foreach ($keys as $key)
+            //         $conditions[] = "$key LIKE '%$keyword%'";
+
+            // }
 
 
             if (!empty($conditions))
                 $sql .= " AND (" . implode(' OR ', $conditions) . ")";
         }
 
-        if ($categories ?? false) {
+        if ($statuses ?? false) {
 
-            $arr = explode(",", $categories);
+            $arr = explode(",", $statuses);
             $conditions = [];
 
-            foreach ($arr as $cty)
-                $conditions[] = "category = '$cty'";
+            foreach ($arr as $key)
+                $conditions[] = "status = '$key'";
+
+            if (!empty($conditions))
+                $sql .= " AND (" . implode(' OR ', $conditions) . ")";
+
+        }
+
+        if ($types ?? false) {
+
+            $arr = explode(",", $types);
+            $conditions = [];
+
+            foreach ($arr as $key)
+                $conditions[] = "type = '$key'";
 
             if (!empty($conditions))
                 $sql .= " AND (" . implode(' OR ', $conditions) . ")";
@@ -101,6 +123,7 @@ switch (M) {
         } catch (Exception $e) {
             $max_data = 5;
         }
+
         $page = $page < 1 ? 1 : $page;
 
         // $total_page = ceil($total_data / $max_data);
@@ -123,8 +146,9 @@ switch (M) {
         //     'end_index' => $end_index,
         // ];
 
-        $sql = "SELECT SQL_CALC_FOUND_ROWS * $sql LIMIT $offset, $max_data";
+        $sql = "SELECT SQL_CALC_FOUND_ROWS a.*, s.username $sql LIMIT $offset, $max_data";
 
+        // die($sql);
 
         $raw = $db->query($sql);
 
@@ -154,7 +178,7 @@ switch (M) {
             'end_index' => $end_index,
         ];
 
-        echo json_encode(['status' => true, 'data' => $data, 'query' => $sql, 'pagination' => $pagination, 'post' => $_POST, 'cty' => $categories ?? false ? $categories : '']);
+        echo json_encode(['status' => true, 'data' => $data, 'query' => $sql, 'pagination' => $pagination, 'post' => $_POST]);
         break;
     }
     case 'get': {
@@ -171,55 +195,72 @@ switch (M) {
     }
     case 'edit': {
 
-        $id ??= false;
-        $amount ??= false;
-        $category ??= false;
-        $description ??= false;
+        // $id ??= false;
+        // $amount ??= false;
+        // $category ??= false;
+        // $description ??= false;
 
-        if (!$id || !$amount || !$category || !$description) {
-            echo json_encode(['status' => false, 'msg' => 'Kekurangan data required!', 'post' => $_POST]);
-            die;
-        }
+        // if (!$id || !$amount || !$category || !$description) {
+        //     echo json_encode(['status' => false, 'msg' => 'Kekurangan data required!', 'post' => $_POST]);
+        //     die;
+        // }
 
 
-        $db->query("UPDATE $table SET amount = '$amount', category = '$category', description = '$description' WHERE id = $id");
+        // $db->query("UPDATE $table SET amount = '$amount', category = '$category', description = '$description' WHERE id = $id");
 
-        echo json_encode(['status' => true, 'msg' => 'Data Pengeluaran berhasil diubah.', 'post' => $_POST]);
+        // echo json_encode(['status' => true, 'msg' => 'Data Pengeluaran berhasil diubah.', 'post' => $_POST]);
 
         break;
     }
     case 'remove': {
-        $id ??= false;
 
-        if (!$id) {
-            echo json_encode(['status' => false, 'msg' => "Missing requied value."]);
-            break;
+        $validated = validateEmptyVar("id|staff_id");
+
+        if ($validated !== true) {
+            echo json_encode(['status' => false, 'msg' => "Kekurangan data required! <br>missing: $validated", 'post' => $_POST]);
+            die;
+        }
+        
+        // validate auth
+        $_staff_id = $auth['id'];
+        
+        if ($_staff_id != $staff_id) {
+            echo json_encode(['status' => false, 'msg' => "ID STAFF BERBEDA\nKamu tidak bisa menghapus absen orang lain.", 'post' => $_POST]);
+            die;
+
         }
 
-        $db->query("DELETE FROM $table WHERE id='$id'");
+        // $id ??= false;
 
-        echo json_encode(['status' => true, 'msg' => 'Data Pengeluaran berhasil dihapus.']);
+        // if (!$id) {
+        //     echo json_encode(['status' => false, 'msg' => "Missing requied value."]);
+        //     break;
+        // }
+
+        $db->query("DELETE FROM $table WHERE id='$id' AND staff_id = '$staff_id'");
+
+        echo json_encode(['status' => true, 'msg' => 'Absen berhasil dihapus.']);
         break;
     }
-    case 'get-categories': {
-        $query = "SELECT category FROM $table WHERE category IS NOT NULL AND category <> '' GROUP BY category";
+    // case 'get-categories': {
+    //     $query = "SELECT category FROM $table WHERE category IS NOT NULL AND category <> '' GROUP BY category";
 
-        $raw = $db->query($query);
-        $res = [];
+    //     $raw = $db->query($query);
+    //     $res = [];
 
-        while ($row = $raw->fetch_assoc()) {
-            $res[] = $row;
-        }
+    //     while ($row = $raw->fetch_assoc()) {
+    //         $res[] = $row;
+    //     }
 
-        $categories = [];
-        foreach ($res as $c) {
-            $categories[] = $c['category'];
-        }
+    //     $categories = [];
+    //     foreach ($res as $c) {
+    //         $categories[] = $c['category'];
+    //     }
 
-        echo json_encode(['status' => true, 'data' => $res, 'categories' => $categories]);
+    //     echo json_encode(['status' => true, 'data' => $res, 'categories' => $categories]);
 
-        break;
-    }
+    //     break;
+    // }
     // case 'get-categories': {
 
     //     $query = "SELECT category, GROUP_CONCAT(DISTINCT subcategory SEPARATOR ',') AS subcategory FROM $table WHERE category IS NOT NULL AND category <> '' AND deprecated_code = '' GROUP BY category";
