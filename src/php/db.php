@@ -137,7 +137,7 @@ function validateEmptyVar(string $str, bool $is_with_message = false): bool|stri
     $unpass = [];
 
     foreach ($arr as $key) {
-        if (($GLOBALS[$key] ?? null) === null) {
+        if (($GLOBALS[$key] ?? null) === null ) {
             $unpass[] = $key;
         }
         // try {
