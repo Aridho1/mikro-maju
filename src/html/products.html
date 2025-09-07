@@ -316,6 +316,18 @@
 
 						<div class="col-span-6 sm:col-span-3">
 							<label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
+							<select
+								id="category"
+								x-model="form.category"
+								class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+								<option value="">Pilih Kategori</option>
+								<template x-for="(c, i, all) in ['Makanan', 'Minuman']" :key="c">
+									<option x-text="c" :value="c"></option>
+								</template>
+							</select>
+						</div>
+						<!-- <div class="col-span-6 sm:col-span-3">
+							<label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
 							<input
 								type="search"
 								id="category"
@@ -330,7 +342,7 @@
 									<option x-text="category"></option>
 								</template>
 							</datalist>
-						</div>
+						</div> -->
 
 						<div class="col-span-6 sm:col-span-3">
 							<label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Beli</label>

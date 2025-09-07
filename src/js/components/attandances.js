@@ -186,6 +186,8 @@ export default function () {
 				Swal.fire({ icon: "success", title: "Selamat", text });
 			});
 
+			console.error("THISFORM", this.form);
+
 			// if (!this.categories.includes(formData.get("amount"))) this.getCategories();
 
 			is_wait.add = false;
