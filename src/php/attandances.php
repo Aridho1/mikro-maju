@@ -29,7 +29,7 @@ switch (M) {
         // validate input
         $validated = validateEmptyVar("status|type|time");
         if ($validated !== true) {
-            echo json_encode(['status' => false, 'msg' => $validated]);
+            echo json_encode(['status' => false, 'msg' => "Kekurangan data required! <br>missing: $validated"]);
             die;
         }
 
