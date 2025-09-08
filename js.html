@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
-        <script src="./src/js/app.js" type="module"></script>
-    </head>
-    <body>
-        <h1>Hai</h1>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<script src="./src/js/app.js" type="module"></script>
+	</head>
+	<body>
+		<h1>Hai</h1>
 
-        <!-- <script>
+		<!-- <script>
             console.log({ 1: new Date().getTime() });
             const data = {
                 id: 123,
@@ -32,5 +32,22 @@
                 console.log("abc", abc);
             }, 1000);
         </script> -->
-    </body>
+		<script>
+			const speech = new SpeechSynthesisUtterance();
+			speech.lang = "id-ID";
+			speech.volume = 1;
+			speech.rate = 1;
+
+			const voices = window.speechSynthesis.getVoices();
+
+			console.log("voices", voices);
+			console.log("voices[0]", voices[0]);
+
+			speech.voice = voices[0];
+
+			console.log("speech.voice", speech.voice);
+
+			const read = (text) => ((speech.text = text), window.speechSynthesis.speak(speech));
+		</script>
+	</body>
 </html>
