@@ -5,6 +5,7 @@
 		<!-- <script type="text/javascript"
 		src="https://app.stg.midtrans.com/snap/snap.js"
     data-client-key="SB-Mid-client-uj7hKX_GDknpM6wl"></script> -->
+		<!-- SB-Mid-client-uj7hKX_GDknpM6wl -->
 		<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-uj7hKX_GDknpM6wl"></script>
 
 		<script src="./node_modules/sweetalert2/dist/sweetalert2.all.min.js" defer></script>
@@ -79,7 +80,10 @@
 
 							if (!status) throw new Error(msg);
 
-							readText("Pembayaran Sudah Diterima");
+							const rMessage = "Pembayaran Sudah Diterima";
+
+							readText(rMessage);
+							console.log(rMessage);
 
 							Swal.fire({ text: "Selamat", icon: "success", text: msg });
 						} catch (e) {
