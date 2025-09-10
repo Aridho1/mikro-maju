@@ -92,7 +92,10 @@
 	<div class="mx-auto flex flex-wrap py-4 justify-center gap-4">
 		<!-- x-show="filterCategories[product.category]?.enabled && filterCategories[product.category].items.includes(product.subcategory)" -->
 		<template x-for="(product, index) in products" :key="product.name + index">
-			<div @click="selectItem(product)" x-show="true" class="bg-white shadow rounded-lg overflow-hidden cursor-pointer flex-1 basis-36 max-w-[12rem]">
+			<div
+				@click="selectItem(product)"
+				x-show="filterCategories[product.category]?.enabled && product.name.toLowerCase().includes(searchKeyword.toLowerCase())"
+				class="bg-white shadow rounded-lg overflow-hidden cursor-pointer flex-1 basis-36 max-w-[12rem]">
 				<div class="h-28 md:h-32 bg-gray-100 overflow-hidden flex items-center justify-center relative">
 					<img
 						:src="`./src/img/db/${product.image}`"
@@ -112,14 +115,14 @@
 				<div class="py-4 px-2 flex flex-col gap-2">
 					<h3 class="text-xs md:text-sm font-semibold text-gray-900 truncate" x-text="product.name">Nama Produk Contoh</h3>
 					<p class="text-xs md:text-sm font-bold text-blue-600" x-text="IDR.format(product.price)">Rp 25.000</p>
-					<p>
+					<!-- <p>
 						filter category:
 						<span x-text="!!filterCategories[product.category]?.enabled"></span>
 					</p>
 					<p>
 						filter search:
 						<span x-text="!!product.name.toLowerCase().includes(searchKeyword.toLowerCase())"></span>
-					</p>
+					</p> -->
 				</div>
 			</div>
 		</template>
