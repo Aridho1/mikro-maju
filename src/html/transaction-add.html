@@ -173,6 +173,7 @@
 				<div>
 					<label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Metode Pembayaran</label>
 					<select
+						x-model="payment_method"
 						id="category"
 						name="payment_method"
 						class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
@@ -180,6 +181,39 @@
 						<option value="QRIS">QRIS</option>
 						<option value="Transfer">Transfer</option>
 					</select>
+				</div>
+
+				<div class="w-full" x-show="payment_method === 'Tunai'">
+					<label for="inputBuy" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Uang Tunai</label>
+					<div class="flex gap-2">
+						<input
+							type="number"
+							inputmode="numeric"
+							id="inputBuy"
+							x-model.number="inputBuy"
+							min="0"
+							class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-1/2 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+							required="" />
+						<input
+							type="text"
+							:value="inputBuy && !isNaN(inputBuy) ? IDR.format(inputBuy) : ''"
+							placeholder="IDR"
+							class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-1/2 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+							placeholder="RP 25.000"
+							required=""
+							disabled />
+					</div>
+				</div>
+				<div class="w-full" x-show="payment_method === 'Tunai'">
+					<label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kembalian</label>
+					<input
+						type="text"
+						name="IDR-total"
+						id="disabled-input-2"
+						x-model="isNaN(inputBuy - total) ? '' : IDR.format(inputBuy - total)"
+						aria-label="disabled input 2"
+						class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+						readonly />
 				</div>
 			</div>
 			<button

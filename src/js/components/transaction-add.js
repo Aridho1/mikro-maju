@@ -48,6 +48,8 @@ export default function () {
 		cart: [],
 		quantity: 0,
 		total: 0,
+		payment_method: "Tunai",
+		inputBuy: 0,
 
 		async init() {
 			// Handle get products
@@ -76,6 +78,19 @@ export default function () {
 
 			this.$watch("filterCategories", () => {
 				this.setStorageFilterCategories();
+			});
+
+			this.$watch("inputBuy", (curr, prev) => {
+				if (isNaN(curr) || isNaN(prev)) return;
+
+				console.log({ curr, prev });
+
+				if (prev - 1 == curr) this.inputBuy = prev - 1000;
+				else if (prev - 0 + 1 == curr) this.inputBuy = prev - 0 + 1000;
+			});
+
+			this.$watch("payment_method", (curr, prev) => {
+				console.log({ curr, prev });
 			});
 
 			// Handle quantity & storage
@@ -122,6 +137,14 @@ export default function () {
 					text: "Pilih setidaknya 1 produk!",
 				});
 
+			if (this.payment_method == "Tunai" && (!this.inputBuy || this.inputBuy < this.total)) {
+				return Swal.fire({
+					icon: "error",
+					title: "Error",
+					text: "Uang tidak cukup!",
+				});
+			}
+
 			is_wait.submit = true;
 
 			const { cart } = this;
@@ -154,6 +177,7 @@ export default function () {
 			this.quantity = 0;
 			this.total = 0;
 			this.setCart();
+			this.inputBuy = 0;
 		},
 		selectItem(item) {
 			console.log({ cart: this.cart, item });
