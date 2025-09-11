@@ -3470,7 +3470,7 @@ body {
 
 body {
   min-height: 100dvh;
-  font-family: "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-family: "Poppins", century-gothic !important;
 }
 
 [data-x-tooltip] {
