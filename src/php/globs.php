@@ -11,5 +11,7 @@ switch (M) {
         $fileText = file_get_contents(__DIR__ . '/____write.py');
         echo $fileText;
         break;
+        
+        
     }
 }
