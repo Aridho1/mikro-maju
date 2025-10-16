@@ -1,7 +1,9 @@
 -- Setup tables untuk device fingerprinting dan rate limiting
 -- Jalankan script ini untuk membuat tabel yang diperlukan
 
--- Tabel untuk menyimpan device fingerprints
+-- =====================================
+-- Tabel: device_fingerprints
+-- =====================================
 CREATE TABLE IF NOT EXISTS `device_fingerprints` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fingerprint` varchar(255) NOT NULL UNIQUE,
@@ -18,7 +20,9 @@ CREATE TABLE IF NOT EXISTS `device_fingerprints` (
   KEY `idx_last_seen` (`last_seen`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabel untuk log rate limiting
+-- =====================================
+-- Tabel: rate_limit_logs
+-- =====================================
 CREATE TABLE IF NOT EXISTS `rate_limit_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `device_id` varchar(255) NOT NULL,
@@ -32,7 +36,9 @@ CREATE TABLE IF NOT EXISTS `rate_limit_logs` (
   KEY `idx_ip_address` (`ip_address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabel untuk konfigurasi rate limiting per endpoint
+-- =====================================
+-- Tabel: rate_limit_config
+-- =====================================
 CREATE TABLE IF NOT EXISTS `rate_limit_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `endpoint` varchar(255) NOT NULL,
@@ -45,17 +51,21 @@ CREATE TABLE IF NOT EXISTS `rate_limit_config` (
   UNIQUE KEY `idx_endpoint` (`endpoint`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Insert default rate limit configurations
+-- =====================================
+-- Insert default config
+-- =====================================
 INSERT INTO `rate_limit_config` (`endpoint`, `max_requests`, `time_window`) VALUES
-('login', 5, 900),      -- 5 attempts per 15 minutes
-('api/*', 100, 3600),   -- 100 requests per hour
-('dashboard', 200, 3600), -- 200 requests per hour
-('*', 1000, 3600)       -- default: 1000 requests per hour
+('login', 5, 900),
+('api/*', 100, 3600),
+('dashboard', 200, 3600),
+('*', 1000, 3600)
 ON DUPLICATE KEY UPDATE 
 `max_requests` = VALUES(`max_requests`),
 `time_window` = VALUES(`time_window`);
 
--- Tabel untuk menyimpan device metadata (opsional)
+-- =====================================
+-- Tabel: device_metadata
+-- =====================================
 CREATE TABLE IF NOT EXISTS `device_metadata` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `device_fingerprint_id` int(11) NOT NULL,
@@ -69,10 +79,13 @@ CREATE TABLE IF NOT EXISTS `device_metadata` (
   `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_device_fingerprint_id` (`device_fingerprint_id`),
-  FOREIGN KEY (`device_fingerprint_id`) REFERENCES `device_fingerprints`(`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_device_metadata_fingerprint`
+    FOREIGN KEY (`device_fingerprint_id`) REFERENCES `device_fingerprints`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- View untuk monitoring rate limiting
+-- =====================================
+-- View: rate_limit_monitoring
+-- =====================================
 CREATE OR REPLACE VIEW `rate_limit_monitoring` AS
 SELECT 
     rl.device_id,
@@ -84,36 +97,46 @@ SELECT
     df.last_seen
 FROM rate_limit_logs rl
 LEFT JOIN device_fingerprints df ON rl.device_id LIKE CONCAT('%', df.fingerprint, '%')
-WHERE rl.request_time >= (UNIX_TIMESTAMP() - 3600) -- last hour
+WHERE rl.request_time >= (UNIX_TIMESTAMP() - 3600)
 GROUP BY rl.device_id, df.ip_address, df.user_agent, df.last_seen
 ORDER BY request_count DESC;
 
--- Index untuk performa
-CREATE INDEX IF NOT EXISTS `idx_rate_limit_composite` ON `rate_limit_logs` (`device_id`, `request_time`);
-CREATE INDEX IF NOT EXISTS `idx_device_fingerprints_composite` ON `device_fingerprints` (`fingerprint`, `last_seen`);
+-- =====================================
+-- Index tambahan (tanpa IF NOT EXISTS)
+-- =====================================
 
--- Stored procedure untuk cleanup data lama (opsional)
+-- Tambahkan manual, karena versi MySQL lama tidak dukung "IF NOT EXISTS"
+-- Akan error kecil jika index sudah ada, bisa diabaikan
+CREATE INDEX `idx_rate_limit_composite` ON `rate_limit_logs` (`device_id`, `request_time`);
+CREATE INDEX `idx_device_fingerprints_composite` ON `device_fingerprints` (`fingerprint`, `last_seen`);
+
+-- =====================================
+-- Stored procedure cleanup
+-- =====================================
 DELIMITER //
-CREATE PROCEDURE IF NOT EXISTS CleanupOldRateLimitData()
+DROP PROCEDURE IF EXISTS CleanupOldRateLimitData //
+CREATE PROCEDURE CleanupOldRateLimitData()
 BEGIN
-    -- Hapus log rate limiting yang lebih dari 7 hari
+    -- Hapus log rate limiting > 7 hari
     DELETE FROM rate_limit_logs WHERE request_time < (UNIX_TIMESTAMP() - (7 * 24 * 3600));
-    
-    -- Hapus device fingerprints yang tidak aktif lebih dari 30 hari
+
+    -- Hapus device fingerprints nonaktif > 30 hari
     DELETE FROM device_fingerprints 
     WHERE is_active = 0 
-    AND last_seen < (NOW() - INTERVAL 30 DAY);
-    
-    -- Optimize tables
+      AND last_seen < (NOW() - INTERVAL 30 DAY);
+
+    -- Optimasi tabel
     OPTIMIZE TABLE rate_limit_logs;
     OPTIMIZE TABLE device_fingerprints;
 END //
 DELIMITER ;
 
--- Event scheduler untuk cleanup otomatis (jika event scheduler enabled)
+-- =====================================
+-- Event scheduler (opsional)
+-- =====================================
 -- SET GLOBAL event_scheduler = ON;
--- 
--- CREATE EVENT IF NOT EXISTS cleanup_rate_limit_data
+-- DROP EVENT IF EXISTS cleanup_rate_limit_data;
+-- CREATE EVENT cleanup_rate_limit_data
 -- ON SCHEDULE EVERY 1 DAY
 -- STARTS CURRENT_TIMESTAMP
 -- DO
