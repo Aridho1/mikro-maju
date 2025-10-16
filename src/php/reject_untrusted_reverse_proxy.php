@@ -127,3 +127,27 @@ function getTrustedClientIp(array $trustedProxies): string {
 $clientIp = getTrustedClientIp($trustedProxies);
 // lanjutkan aplikasi / rate limiter dengan $clientIp
 echo "ip: $clientIp";
+
+
+/**
+ * Buat fingerprint unik untuk rate limiting.
+ * Gabungkan IP + user agent + optional user identifier (user_id atau session id).
+ *
+ * @param string $ip
+ * @param string|null $userAgent
+ * @param string|null $extra optional (user id / api key / session id)
+ * @return string hash (sha256)
+ */
+function makeFingerprint(string $ip, ?string $userAgent = null, ?string $extra = null): string {
+    $userAgent = $userAgent ?? ($_SERVER['HTTP_USER_AGENT'] ?? '');
+    $data = $ip . '|' . $userAgent . '|' . ($extra ?? '');
+    return hash('sha256', $data);
+}
+
+
+$userAgent = $userAgent ?? ($_SERVER['HTTP_USER_AGENT'] ?? '');
+
+$fingerprint = makeFingerprint($clientIp, $userAgent);
+
+echo "<br><br>userAgent: $userAgent";
+echo "<br><br>fingerprint: $fingerprint";
