@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Device Fingerprinting & Rate Limiting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+                Test Device Fingerprinting & Rate Limiting
+            </h1>
+            
+            <!-- Device Info Card -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Device Information</h2>
+                <div id="deviceInfo" class="space-y-2">
+                    <p class="text-sm text-gray-600">Loading device information...</p>
+                </div>
+            </div>
+            
+            <!-- Rate Limiting Tests -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- API Test -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">API Rate Limiting Test</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Test rate limiting untuk API endpoint (100 requests/hour)
+                    </p>
+                    <button id="testApi" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition duration-200">
+                        Test API Request
+                    </button>
+                    <div id="apiResult" class="mt-4 text-sm"></div>
+                </div>
+                
+                <!-- Dashboard Test -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">Dashboard Rate Limiting Test</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Test rate limiting untuk dashboard (200 requests/hour)
+                    </p>
+                    <button id="testDashboard" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded transition duration-200">
+                        Test Dashboard Request
+                    </button>
+                    <div id="dashboardResult" class="mt-4 text-sm"></div>
+                </div>
+                
+                <!-- Custom Test -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">Custom Rate Limiting Test</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Test rate limiting custom (50 requests/30 minutes)
+                    </p>
+                    <button id="testCustom" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded transition duration-200">
+                        Test Custom Request
+                    </button>
+                    <div id="customResult" class="mt-4 text-sm"></div>
+                </div>
+                
+                <!-- Login Test -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">Login Rate Limiting Test</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Test rate limiting untuk login (5 attempts/15 minutes)
+                    </p>
+                    <button id="testLogin" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded transition duration-200">
+                        Test Login Request
+                    </button>
+                    <div id="loginResult" class="mt-4 text-sm"></div>
+                </div>
+            </div>
+            
+            <!-- Results Summary -->
+            <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                <h3 class="text-lg font-semibold mb-4 text-gray-700">Test Results</h3>
+                <div id="resultsSummary" class="space-y-2">
+                    <p class="text-sm text-gray-600">No tests run yet.</p>
+                </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
+                <h3 class="text-lg font-semibold mb-3 text-blue-800">Cara Kerja</h3>
+                <div class="text-sm text-blue-700 space-y-2">
+                    <p><strong>Device Fingerprinting:</strong> Sistem akan mengumpulkan informasi browser dan device untuk membuat ID yang konsisten, bahkan ketika IP address berubah (misalnya pindah dari WiFi ke mobile data).</p>
+                    <p><strong>Rate Limiting:</strong> Setiap endpoint memiliki batasan request per waktu tertentu. Jika melebihi batas, request akan ditolak dengan kode 429.</p>
+                    <p><strong>Konsistensi:</strong> Device ID akan tetap sama meskipun user berpindah jaringan, karena menggunakan kombinasi user agent, screen resolution, timezone, canvas fingerprint, dll.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load device fingerprint script -->
+    <script src="./src/js/deviceFingerprint.js"></script>
+    
+    <script>
+        let deviceId = null;
+        let testResults = [];
+        
+        // Initialize device fingerprinting
+        async function initDeviceFingerprint() {
+            try {
+                deviceId = await window.deviceFingerprint.init();
+                updateDeviceInfo();
+            } catch (error) {
+                console.error('Failed to initialize device fingerprint:', error);
+                document.getElementById('deviceInfo').innerHTML = '<p class="text-red-600">Failed to initialize device fingerprint</p>';
+            }
+        }
+        
+        // Update device info display
+        function updateDeviceInfo() {
+            const deviceInfo = window.deviceFingerprint.getDeviceInfo();
+            const deviceInfoHtml = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p><strong>Device ID:</strong></p>
+                        <p class="text-xs text-gray-500 break-all">${deviceId || 'Not available'}</p>
+                    </div>
+                    <div>
+                        <p><strong>Screen Resolution:</strong></p>
+                        <p class="text-xs">${deviceInfo.screen.width}x${deviceInfo.screen.height}</p>
+                    </div>
+                    <div>
+                        <p><strong>Timezone:</strong></p>
+                        <p class="text-xs">${deviceInfo.timezone}</p>
+                    </div>
+                    <div>
+                        <p><strong>Browser:</strong></p>
+                        <p class="text-xs">${deviceInfo.browser.userAgent.split(' ')[0]}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('deviceInfo').innerHTML = deviceInfoHtml;
+        }
+        
+        // Test function
+        async function testEndpoint(endpoint, buttonId, resultId, testName) {
+            const button = document.getElementById(buttonId);
+            const resultDiv = document.getElementById(resultId);
+            
+            button.disabled = true;
+            button.textContent = 'Testing...';
+            
+            try {
+                const rateLimit = await window.deviceFingerprint.checkRateLimit(endpoint, 100, 3600);
+                
+                const result = {
+                    test: testName,
+                    endpoint: endpoint,
+                    allowed: rateLimit.allowed,
+                    requestCount: rateLimit.request_count,
+                    maxRequests: rateLimit.max_requests,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                
+                testResults.push(result);
+                updateResultsSummary();
+                
+                if (rateLimit.allowed) {
+                    resultDiv.innerHTML = `
+                        <div class="text-green-600">
+                            <p>✅ Request allowed</p>
+                            <p class="text-xs">Count: ${rateLimit.request_count}/${rateLimit.max_requests}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="text-red-600">
+                            <p>❌ Rate limit exceeded</p>
+                            <p class="text-xs">Count: ${rateLimit.request_count}/${rateLimit.max_requests}</p>
+                            <p class="text-xs">Reset in: ${rateLimit.reset_time - Math.floor(Date.now()/1000)} seconds</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-600">Error: ${error.message}</div>`;
+            }
+            
+            button.disabled = false;
+            button.textContent = `Test ${testName} Request`;
+        }
+        
+        // Update results summary
+        function updateResultsSummary() {
+            const summaryDiv = document.getElementById('resultsSummary');
+            const summaryHtml = testResults.map(result => `
+                <div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+                    <div>
+                        <span class="font-medium">${result.test}</span>
+                        <span class="text-xs text-gray-500">(${result.endpoint})</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs ${result.allowed ? 'text-green-600' : 'text-red-600'}">
+                            ${result.allowed ? '✅ Allowed' : '❌ Blocked'}
+                        </span>
+                        <p class="text-xs text-gray-500">${result.requestCount}/${result.maxRequests}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            summaryDiv.innerHTML = summaryHtml || '<p class="text-sm text-gray-600">No tests run yet.</p>';
+        }
+        
+        // Event listeners
+        document.getElementById('testApi').addEventListener('click', () => {
+            testEndpoint('api', 'testApi', 'apiResult', 'API');
+        });
+        
+        document.getElementById('testDashboard').addEventListener('click', () => {
+            testEndpoint('dashboard', 'testDashboard', 'dashboardResult', 'Dashboard');
+        });
+        
+        document.getElementById('testCustom').addEventListener('click', () => {
+            testEndpoint('custom', 'testCustom', 'customResult', 'Custom');
+        });
+        
+        document.getElementById('testLogin').addEventListener('click', () => {
+            testEndpoint('login', 'testLogin', 'loginResult', 'Login');
+        });
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initDeviceFingerprint();
+        });
+    </script>
+</body>
+</html>

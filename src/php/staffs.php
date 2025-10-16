@@ -10,6 +10,7 @@ if (!M ?? false) {
 }
 
 require_once 'db.php';
+require_once 'rate_limiter.php';
 
 
 toGlobal($_POST);
@@ -18,6 +19,8 @@ $table = "staffs";
 
 switch (M) {
     case "login": {
+        // Cek rate limit untuk login (lebih ketat: 5 attempts per 15 minutes)
+        checkLoginRateLimit();
 
         // validate param
         if (($validate = validateEmptyVar("username|password", true)) !== true) {
