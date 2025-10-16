@@ -9,5 +9,5 @@
 		"client_key": ""
 	},
 	"is_production": true,
-	"is_force_debug": true
+	"is_force_debug": false
 }
