@@ -2,39 +2,37 @@ import bindAndFillFormData from "../libs/bindAndFillFormData.js";
 import encodeFetchedJson from "../libs/encodeFetchedJson.js";
 import { defaultErrorProps } from "../libs/swal2props.js";
 
-export default function() {
+export default function () {
+	const db_path = "./src/php/staffs.php?m=";
 
-    const db_path = "./src/php/staffs.php?m=";
+	const is_wait = {
+		login: false,
+	};
 
-    const is_wait = {
-        login: false,
-    };
+	return {
+		appName: "login",
+		form: {
+			username: null,
+			password: null,
+		},
 
-    return {
-        appName: "login",
-        form: {
-            username: null,
-            password: null,
-        },
+		init() {},
 
-        init() { },
-        
-        async login() {
-            if (is_wait.login) return await Swal.fire({ ...defaultErrorProps, text: "Mohon Tunggu. Sedang memproses aksi sebelumnya!" });
+		async login() {
+			if (is_wait.login) return await Swal.fire({ ...defaultErrorProps, text: "Mohon Tunggu. Sedang memproses aksi sebelumnya!" });
 
-            is_wait.login = true;
+			is_wait.login = true;
 
-           const formData = new FormData();
-            bindAndFillFormData(formData, this.form);
+			const formData = new FormData();
+			bindAndFillFormData(formData, this.form);
 
-            encodeFetchedJson(await (await fetch(db_path + "login", { method: "POST", body: formData })).text(), "Login", () => {
-                setTimeout(() => {
-                    location.href = "?c=menu";
-                }, 3000);
-            });
+			encodeFetchedJson(await (await fetch(db_path + "login", { method: "POST", body: formData })).text(), "Login", () => {
+				setTimeout(() => {
+					location.href = "?c=menu";
+				}, 3000);
+			});
 
-            is_wait.login = false; 
-            
-        },
-    }
+			is_wait.login = false;
+		},
+	};
 }

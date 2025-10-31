@@ -70,6 +70,7 @@ export default function () {
 			date_start: null,
 			date_end: null,
 			sort_desc: true,
+			is_req_by_user: false,
 		},
 		inputPage: null,
 		PAYMENT_METHODS,
@@ -114,7 +115,7 @@ export default function () {
 				{
 					array: ["payment_methods", "payment_statuses"],
 					string: ["date_start", "date_end"],
-					boolean: "sort_desc",
+					boolean: ["sort_desc", "is_req_by_user"],
 					int: "page",
 				},
 				this.formSearch,
@@ -406,7 +407,7 @@ export default function () {
 			// console.log({ data, transaction });
 		},
 		openModalDetail(detail) {
-			// console.log(detail.td);
+			console.log(detail);
 			// console.log(JSON.stringify(detail));
 
 			try {
