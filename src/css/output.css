@@ -2147,6 +2147,10 @@ input:checked + .toggle-bg {
   flex-basis: 9rem;
 }
 
+.basis-28 {
+  flex-basis: 7rem;
+}
+
 .table-auto {
   table-layout: auto;
 }
@@ -2824,10 +2828,6 @@ input:checked + .toggle-bg {
 
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
-}
-
-.\!bg-none {
-  background-image: none !important;
 }
 
 .from-pink-400 {
@@ -4156,6 +4156,10 @@ tr {
 
   .md\:h-32 {
     height: 8rem;
+  }
+
+  .md\:basis-36 {
+    flex-basis: 9rem;
   }
 
   .md\:-translate-x-full {

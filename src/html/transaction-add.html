@@ -95,7 +95,7 @@
 			<div
 				@click="selectItem(product)"
 				x-show="filterCategories[product.category]?.enabled && product.name.toLowerCase().includes(searchKeyword.toLowerCase())"
-				class="bg-white shadow rounded-lg overflow-hidden cursor-pointer flex-1 basis-36 max-w-[12rem]">
+				class="bg-white shadow rounded-lg overflow-hidden cursor-pointer flex-1 basis-28 md:basis-36 max-w-[12rem]">
 				<div class="h-28 md:h-32 bg-gray-100 overflow-hidden flex items-center justify-center relative">
 					<img
 						:src="`./src/img/db/${product.image}`"

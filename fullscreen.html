@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>Demo Fullscreen</title>
+		<style>
+			body,
+			html {
+				height: 100%;
+				margin: 0;
+				font-family: sans-serif;
+				display: grid;
+				place-items: center;
+			}
+			#app {
+				width: 90%;
+				max-width: 900px;
+				text-align: center;
+				padding: 24px;
+				border: 1px solid #ccc;
+				border-radius: 12px;
+			}
+			/* styling saat elemen fullscreen (modern browsers) */
+			:fullscreen #app,
+			:-webkit-full-screen #app {
+				/* webkit older */
+				width: 100vw;
+				height: 100vh;
+				border: none;
+				border-radius: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			button {
+				padding: 10px 18px;
+				font-size: 16px;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<h1>Demo Fullscreen</h1>
+			<p id="status">Belum fullscreen</p>
+			<button id="toggle">Masuk Fullscreen</button>
+		</div>
+
+		<script>
+			const app = document.getElementById("app");
+			const btn = document.getElementById("toggle");
+			const status = document.getElementById("status");
+
+			// Cross-browser helper untuk request fullscreen
+			async function enterFullscreen(el) {
+				if (el.requestFullscreen) return el.requestFullscreen();
+				if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); // Safari, older Chrome
+				if (el.mozRequestFullScreen) return el.mozRequestFullScreen(); // older Firefox
+				if (el.msRequestFullscreen) return el.msRequestFullscreen(); // IE/Edge legacy
+				throw new Error("Fullscreen API tidak tersedia pada browser ini.");
+			}
+
+			async function exitFullscreen() {
+				console.log("Exiting fullscreen...");
+				if (document.exitFullscreen) return document.exitFullscreen();
+				if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+				if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
+				if (document.msExitFullscreen) return document.msExitFullscreen();
+				throw new Error("Fullscreen exit API tidak tersedia.");
+			}
+
+			// Toggle dengan handling error
+			async function toggleFullscreen() {
+				try {
+					if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+						await exitFullscreen();
+					} else {
+						await enterFullscreen(document.documentElement); // atau enterFullscreen(app) kalau cuma elemen tertentu
+					}
+				} catch (err) {
+					console.error("Fullscreen error:", err);
+					alert("Gagal mengubah fullscreen: " + (err.message || err));
+				}
+			}
+
+			// Update UI saat berubah state
+			function onChange() {
+				const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+				btn.textContent = isFs ? "Keluar Fullscreen" : "Masuk Fullscreen";
+				status.textContent = isFs ? "Sedang fullscreen" : "Belum fullscreen";
+			}
+
+			// Event listener
+			btn.addEventListener("click", toggleFullscreen);
+			document.addEventListener("fullscreenchange", onChange);
+			document.addEventListener("webkitfullscreenchange", onChange); // Safari/old
+			document.addEventListener("mozfullscreenchange", onChange);
+			document.addEventListener("MSFullscreenChange", onChange);
+
+			// optional: tangani error event
+			document.addEventListener("fullscreenerror", (e) => {
+				console.error("Fullscreen error event", e);
+			});
+
+			document.addEventListener("fullscreenchange", () => {
+				if (document.fullscreenElement) {
+					console.log("✅ Masuk fullscreen:", document.fullscreenElement);
+				} else {
+					console.log("🚪 Keluar dari fullscreen");
+				}
+			});
+		</script>
+	</body>
+</html>
