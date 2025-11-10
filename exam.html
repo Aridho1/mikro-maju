@@ -238,10 +238,10 @@
 			});
 
 			/* ---------------------------
-   Admin-ish client-side scoring (only for mock/testing)
-   - This demonstrates how server might aggregate events to produce a violation score.
-   - In production, this aggregation must happen server-side (trusted).
-   --------------------------- */
+                Admin-ish client-side scoring (only for mock/testing)
+                - This demonstrates how server might aggregate events to produce a violation score.
+                - In production, this aggregation must happen server-side (trusted).
+            --------------------------- */
 			async function computeMockViolationScore() {
 				if (!isMock()) return;
 				const arr = JSON.parse(localStorage.getItem(MOCK_STORAGE_KEY) || "[]");
