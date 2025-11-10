@@ -107,9 +107,41 @@
 				if (document.fullscreenElement) {
 					console.log("✅ Masuk fullscreen:", document.fullscreenElement);
 				} else {
-					console.log("🚪 Keluar dari fullscreen");
+					console.warn("🚪 Keluar dari fullscreen");
 				}
 			});
+
+			document.addEventListener("visibilitychange", () => {
+				if (document.hidden) {
+					console.warn("🚪 User meninggalkan halaman (minimize/tab lain/app lain)");
+				} else {
+					console.log("👋 User kembali ke halaman");
+				}
+			});
+
+			window.addEventListener("blur", () => console.warn("💤 Tab kehilangan fokus"));
+			window.addEventListener("focus", () => console.log("🎯 Tab aktif lagi"));
+
+			window.addEventListener("keydown", () => {
+				const { wich, keyCode } = event;
+
+				console.log({ wich, keyCode });
+			});
+
+			// setInterval(() => {
+			// 	const open = window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160;
+			// 	if (open) sendEvent("devtools_open", {});
+			// }, 1000);
+
+			function sendEvent(type, payload = {}) {
+				navigator.sendBeacon // preferable untuk reliability after unload
+					? navigator.sendBeacon(endpoint, JSON.stringify({ examId, attemptId, type, payload, ts: Date.now() }))
+					: fetch(endpoint, {
+							method: "POST",
+							headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content },
+							body: JSON.stringify({ examId, attemptId, type, payload, ts: Date.now() }),
+					  }).catch(() => {});
+			}
 		</script>
 	</body>
 </html>

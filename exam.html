@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Exam Test — Frontend Only</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<style>
+			body {
+				font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+				padding: 20px;
+			}
+			.log {
+				white-space: pre-wrap;
+				background: #f7f7f7;
+				padding: 10px;
+				border: 1px solid #eee;
+				max-height: 300px;
+				overflow: auto;
+			}
+			.controls {
+				margin-bottom: 12px;
+			}
+			button {
+				margin-right: 8px;
+			}
+			.flag {
+				color: #a00;
+				font-weight: 700;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Exam — Frontend-only Test</h1>
+
+		<div class="controls">
+			<label>
+				<input id="mockMode" type="checkbox" checked />
+				MOCK MODE (no server) — uncheck to use REAL endpoint
+			</label>
+			<button id="emitTest">Emit Test Event</button>
+			<button id="clearLog">Clear Mock Log</button>
+			<span id="status"></span>
+		</div>
+
+		<div>
+			<strong>Exam Info (client-side)</strong>
+			<div>
+				examId:
+				<span id="examId">123</span>
+				— attemptId:
+				<span id="attemptId">att-abc-001</span>
+			</div>
+		</div>
+
+		<h3>Event Log (mock)</h3>
+		<div id="log" class="log"></div>
+
+		<script>
+			/*
+  exam_test.html
+  - Full frontend-only implementation for testing detection & event sending.
+  - Toggle MOCK MODE to store events in localStorage instead of sending to server.
+  - Comments indicate which parts should be implemented / verified server-side.
+*/
+
+			/* ---------------------------
+   Config / Server settings
+   --------------------------- */
+
+			// Client-visible exam variables (in real deployment these come from the server)
+			const EXAM_ID = "123";
+			const ATTEMPT_ID = "att-abc-001";
+
+			// Endpoint path (when NOT in mock mode) - replace with your server endpoint
+			const EVENT_ENDPOINT = "/exam_event"; // e.g. POST /exam_event (server must accept JSON)
+
+			// Mock mode flag (UI)
+			const mockCheckbox = document.getElementById("mockMode");
+			const statusEl = document.getElementById("status");
+			function isMock() {
+				return mockCheckbox.checked;
+			}
+
+			/* ---------------------------
+   Mock server (for testing)
+   - Keeps events in localStorage and shows in UI.
+   --------------------------- */
+			const MOCK_STORAGE_KEY = "exam_mock_events";
+			function mockLog(entry) {
+				const arr = JSON.parse(localStorage.getItem(MOCK_STORAGE_KEY) || "[]");
+				arr.push(entry);
+				localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(arr));
+				renderMockLog();
+			}
+			function clearMockLog() {
+				localStorage.removeItem(MOCK_STORAGE_KEY);
+				renderMockLog();
+			}
+			function renderMockLog() {
+				const logEl = document.getElementById("log");
+				const arr = JSON.parse(localStorage.getItem(MOCK_STORAGE_KEY) || "[]");
+				logEl.textContent = arr.map((e, i) => `${i + 1}. ${e.ts} [${e.type}] ${JSON.stringify(e.payload)}`).join("\n\n");
+			}
+			renderMockLog();
+
+			/* ---------------------------
+   sendEvent implementation
+   - Uses Beacon where available, fallback to fetch.
+   - In MOCK mode it calls mockLog instead.
+   - NOTE: server must verify authenticity (session token / JWT) and validate attemptId.
+   --------------------------- */
+			async function sendEvent(type, payload = {}) {
+				const event = {
+					ts: new Date().toISOString(),
+					clientTs: Date.now(),
+					examId: EXAM_ID,
+					attemptId: ATTEMPT_ID,
+					type,
+					payload,
+				};
+
+				if (isMock()) {
+					mockLog(event);
+					return true;
+				}
+
+				// REAL server mode: server should require authentication (session cookie or Authorization header)
+				// and SHOULD verify the attemptId belongs to the logged-in user.
+				const body = JSON.stringify({ event });
+
+				// Prefer sendBeacon for reliability during unload
+				if (navigator.sendBeacon) {
+					try {
+						const blob = new Blob([body], { type: "application/json" });
+						const ok = navigator.sendBeacon(EVENT_ENDPOINT, blob);
+						return ok;
+					} catch (e) {
+						// fallthrough to fetch
+					}
+				}
+
+				// Fallback fetch (fire-and-forget)
+				try {
+					// keepalive:true helps on unload in some browsers
+					await fetch(EVENT_ENDPOINT, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body,
+						keepalive: true,
+					});
+					return true;
+				} catch (e) {
+					console.warn("sendEvent: network error", e);
+					return false;
+				}
+			}
+
+			/* ---------------------------
+   Detection handlers
+   - These are pure client-side signals. Use server rules to escalate.
+   --------------------------- */
+
+			// 1) Visibility / focus
+			document.addEventListener("visibilitychange", () => {
+				sendEvent("visibilitychange", { state: document.visibilityState });
+			});
+			window.addEventListener("blur", () => sendEvent("blur", {}));
+			window.addEventListener("focus", () => sendEvent("focus", {}));
+
+			// 2) Copy / paste / right-click
+			document.addEventListener("copy", () => sendEvent("copy", {}));
+			document.addEventListener("paste", () => sendEvent("paste", {}));
+			document.addEventListener("contextmenu", () => sendEvent("contextmenu", {}));
+
+			// 3) Print/reload attempts (Ctrl/Cmd+P, Ctrl/Cmd+R, F5)
+			window.addEventListener("keydown", (e) => {
+				if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P")) sendEvent("print_attempt", {});
+				if ((e.ctrlKey || e.metaKey) && (e.key === "r" || e.key === "R")) sendEvent("reload_attempt", {});
+				if (e.key === "F5") sendEvent("reload_attempt", {});
+			});
+
+			// 4) Framed (iframe) detection
+			try {
+				if (window.top !== window.self) {
+					// If inside a frame: send event and attempt to bust out
+					sendEvent("framed_detected", {});
+					try {
+						window.top.location = window.location.href;
+					} catch (e) {
+						/* cross-origin - cannot bust */
+					}
+				}
+			} catch (e) {
+				sendEvent("framed_detected", { error: String(e) });
+			}
+
+			// 5) Heuristic devtools detection (outer-inner size)
+			let lastDev = null;
+			setInterval(() => {
+				const widthDiff = window.outerWidth - window.innerWidth;
+				const heightDiff = window.outerHeight - window.innerHeight;
+				const open = widthDiff > 160 || heightDiff > 160;
+				if (open !== lastDev) {
+					lastDev = open;
+					sendEvent("devtools_toggled", { open, widthDiff, heightDiff });
+				}
+			}, 1000);
+
+			// 6) Human interaction sampling (mouse + keyboard)
+			//    Useful to detect headless/bots. Server should treat missing human pings as suspicious.
+			let humanCount = 0;
+			function markHuman() {
+				humanCount++;
+			}
+			window.addEventListener("mousemove", markHuman);
+			window.addEventListener("keydown", markHuman);
+			window.addEventListener("touchstart", markHuman);
+			setInterval(() => {
+				sendEvent("human_activity_ping", { count: humanCount });
+				humanCount = 0;
+			}, 30000);
+
+			// 7) beforeunload final beacon (best-effort)
+			window.addEventListener("beforeunload", () => {
+				sendEvent("page_unload", { reason: "beforeunload" });
+			});
+
+			// 8) Optional: detect clipboard paste of large text (example)
+			document.addEventListener("paste", (e) => {
+				try {
+					const text = (e.clipboardData || window.clipboardData).getData("text");
+					if (text && text.length > 200) {
+						sendEvent("large_paste", { length: text.length });
+					}
+				} catch (err) {
+					/* ignore */
+				}
+			});
+
+			/* ---------------------------
+   Admin-ish client-side scoring (only for mock/testing)
+   - This demonstrates how server might aggregate events to produce a violation score.
+   - In production, this aggregation must happen server-side (trusted).
+   --------------------------- */
+			async function computeMockViolationScore() {
+				if (!isMock()) return;
+				const arr = JSON.parse(localStorage.getItem(MOCK_STORAGE_KEY) || "[]");
+				// naive scoring rules (for demo only)
+				const perTypeScore = {
+					framed_detected: 50,
+					devtools_toggled: 10,
+					copy: 20,
+					paste: 20,
+					large_paste: 50,
+					visibilitychange: 5,
+					reload_attempt: 10,
+					print_attempt: 20,
+				};
+				const scores = {};
+				for (const e of arr) {
+					const t = e.type;
+					scores[t] = (scores[t] || 0) + 1;
+				}
+				let total = 0;
+				for (const [type, count] of Object.entries(scores)) {
+					const s = perTypeScore[type] || 1;
+					total += s * count;
+				}
+				return { total, scores, events: arr.length };
+			}
+
+			/* ---------------------------
+   UI interactions (test helpers)
+   --------------------------- */
+			document.getElementById("emitTest").addEventListener("click", async () => {
+				await sendEvent("manual_test", { note: "user pressed test" });
+				renderMockLog();
+			});
+			document.getElementById("clearLog").addEventListener("click", () => {
+				clearMockLog();
+			});
+
+			// update status display when mock toggle changes
+			mockCheckbox.addEventListener("change", () => {
+				statusEl.textContent = isMock() ? " MOCK" : " REAL";
+				statusEl.style.color = isMock() ? "#080" : "#008";
+			});
+
+			// show an auto-updating mini violation score (mock only)
+			setInterval(async () => {
+				if (isMock()) {
+					const s = await computeMockViolationScore();
+					if (s) statusEl.textContent = ` MOCK — events:${s.events} score:${s.total}`;
+				} else {
+					statusEl.textContent = " REAL — events sent to " + EVENT_ENDPOINT;
+				}
+			}, 2000);
+
+			/* ---------------------------
+   Initial UI values
+   --------------------------- */
+			document.getElementById("examId").textContent = EXAM_ID;
+			document.getElementById("attemptId").textContent = ATTEMPT_ID;
+			statusEl.textContent = isMock() ? " MOCK" : " REAL";
+			renderMockLog();
+		</script>
+	</body>
+</html>
