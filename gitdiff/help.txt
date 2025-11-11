@@ -1,0 +1,12 @@
+
+# Command for get chnages
+git diff > gitdiff/changes.txt
+
+# Command for get all log
+git log --oneline --graph --all --decorate > gitdiff/gitlog.txt
+
+
+# Dont forget to add this to .gitignore
+gitdiff/*
+!gitdiff/
+!gitdiff/help.txt
