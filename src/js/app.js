@@ -1,7 +1,7 @@
 import encodeFetchedJson from "./libs/encodeFetchedJson.js";
 import { deafultConfirmProps } from "./libs/swal2props.js";
 import { url_param } from "./libs/urlParam.js";
-import { getConfigJson } from "./libs/getConfigJson.js";
+// import { getConfigJson } from "./libs/getConfigJson.js";
 
 console.log("App");
 
@@ -74,7 +74,7 @@ async function loadComponent() {
 				location.href = "?c=login3";
 			}, 3000);
 
-		console.log("WUUUUHUUUUUU", is_continue);
+		// console.log("WUUUUHUUUUUU", is_continue);
 
 		// set layout
 		const htmlLayout = await (await fetch("./src/html/layout.html")).text();
