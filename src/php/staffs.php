@@ -45,6 +45,7 @@ switch (M) {
         $_SESSION['auth'] = [
             'id' => $staff['id'],
             'username' => $username,
+            'level' => $staff['level'],
         ];
 
         echo json_encode(['status' => true, 'msg' => 'Berhasil login.', 'post' => $_POST]);
