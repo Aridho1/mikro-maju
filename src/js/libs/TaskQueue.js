@@ -74,14 +74,11 @@ export class TaskQueue {
 
 		let is_cancelled = false;
 
-		// Ambil previous promise di queue
 		const prev = this.queues.get(key);
 
-		// Jika sudah ada dan opsi minta cancel
 		if (cancelIfAlreadyInQueue && prev) {
 			is_cancelled = true;
 
-			// Eksekusi callback cancelled bila tersedia
 			if (typeof callbackForCancelled === "function") {
 				return callbackForCancelled();
 			}
@@ -89,16 +86,12 @@ export class TaskQueue {
 			return;
 		}
 
-		// Jika tidak ada previous → pakai Promise.resolve()
 		const base = prev || Promise.resolve();
 
-		// next = jalankan fn setelah prev selesai (meski prev error)
 		const next = base.catch(() => {}).then(fn);
 
-		// simpan next sebagai promise aktif untuk key ini
 		this.queues.set(key, next);
 
-		// ketika next selesai → hapus queue bila next masih yg aktif
 		next.finally(() => {
 			if (this.queues.get(key) === next) {
 				this.queues.delete(key);

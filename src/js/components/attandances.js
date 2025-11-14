@@ -190,24 +190,24 @@ export default function () {
 		},
 
 		async get(page, is_init = false) {
-			if (is_wait.get) return console.warn("Reject get method cause spam!");
+			q.add(
+				"get",
+				async () => {
+					const formData = new FormData();
+					bindAndFillFormData(formData, this.formSearch);
+					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
-			is_wait.get = true;
+					// Filter | same url param = same result
+					if (!rewriteUrl(formData, url_param) && !is_init) return (is_wait.get = false), console.warn("Reject get method cause same url param!");
 
-			const formData = new FormData();
-			bindAndFillFormData(formData, this.formSearch);
-			formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
+					encodeFetchedJson(await (await fetch(db_path + "search", { method: "POST", body: formData })).text(), "search", ({ data, pagination } = {}) => {
+						this.attandances = data;
 
-			// Filter | same url param = same result
-			if (!rewriteUrl(formData, url_param) && !is_init) return (is_wait.get = false), console.warn("Reject get method cause same url param!");
-
-			encodeFetchedJson(await (await fetch(db_path + "search", { method: "POST", body: formData })).text(), "search", ({ data, pagination } = {}) => {
-				this.attandances = data;
-
-				if (pagination && typeof pagination == "object") Object.assign(this.page, pagination);
-			});
-
-			is_wait.get = false;
+						if (pagination && typeof pagination == "object") Object.assign(this.page, pagination);
+					});
+				},
+				{ cancelIfAlreadyInQueue: true, callbackForCancelled: () => console.warn("JANGAN SPAM GET!!!") }
+			);
 		},
 		async add() {
 			q.add(
@@ -229,59 +229,28 @@ export default function () {
 
 					// return;
 
-					encodeFetchedJson(await (await fetch(db_path + "add", { method: "POST", body: formData })).text(), "add", ({ msg: text } = {}) => {
-						Swal.fire({ icon: "success", title: "Selamat", text });
+					encodeFetchedJson(await (await fetch(db_path + "add", { method: "POST", body: formData })).text(), "add", ({ msg } = {}) => {
+						// Swal.fire({ icon: "success", title: "Selamat", text });
+						this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
 					});
 
 					console.error("THISFORM", this.form);
 
 					// if (!this.categories.includes(formData.get("amount"))) this.getCategories();
 
-					is_wait.add = false;
+					// is_wait.add = false;
 
 					await this.get(null, true);
 				},
 				{
 					cancelIfAlreadyInQueue: true,
 					callbackForCancelled: () => {
-						console.warn("JANGAN SPAM ADDDDD!!!");
+						// console.warn("JANGAN SPAM ADDDDD!!!");
+						this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
 					},
 				}
 			);
-			// if (is_wait.add) return console.warn("Reject add method cause spam!");
-			// is_wait.add = true;
-			// const formData = new FormData();
-			// bindAndFillFormData(formData, this.form);
-			// // formData.forEach((value, key) => {
-			// // 	console.log({ key, value });
-			// // });
-			// // return;
-			// encodeFetchedJson(await (await fetch(db_path + "add", { method: "POST", body: formData })).text(), "add", ({ msg: text } = {}) => {
-			// 	Swal.fire({ icon: "success", title: "Selamat", text });
-			// });
-			// console.error("THISFORM", this.form);
-			// // if (!this.categories.includes(formData.get("amount"))) this.getCategories();
-			// is_wait.add = false;
-			// await this.get(null, true);
 		},
-		// async edit() {
-		// 	if (is_wait.edit) return console.warn("Reject edit method case spam!");
-
-		// 	is_wait.edit = true;
-
-		// 	const formData = new FormData();
-		// 	bindAndFillFormData(formData, this.form);
-
-		// 	encodeFetchedJson(await (await fetch(db_path + "edit", { method: "POST", body: formData })).text(), "edit", ({ msg: text } = {}) => {
-		// 		Swal.fire({ icon: "success", title: "Selamat", text });
-		// 	});
-
-		// 	// if (!this.categories.includes(formData.get("amount"))) this.getCategories();
-
-		// 	is_wait.edit = false;
-
-		// 	await this.get(null, true);
-		// },
 		async remove({ id, staff_id } = {}) {
 			if (!id || !staff_id) return;
 
@@ -300,7 +269,8 @@ export default function () {
 			formData.append("staff_id", staff_id);
 
 			encodeFetchedJson(await (await fetch(db_path + "remove", { method: "POST", body: formData })).text(), "remove", async ({ msg } = {}) => {
-				Swal.fire({ title: "Selamat", icon: "success", text: msg });
+				// Swal.fire({ title: "Selamat", icon: "success", text: msg });
+				this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
 				await this.get(null, true);
 			});
 		},
