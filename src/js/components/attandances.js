@@ -7,7 +7,16 @@ import { url_param } from "../libs/urlParam.js";
 import { deafultConfirmProps } from "../libs/swal2props.js";
 // import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
 import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/DateRangePicker.js";
-import { config, getConfigJson } from "../libs/getConfigJson.js";
+import { TaskQueue } from "../libs/TaskQueue.js";
+// import { config, getConfigJson } from "../libs/getConfigJson.js";
+
+const q = new TaskQueue();
+
+const IDR = new Intl.NumberFormat("id-ID", {
+	style: "currency",
+	currency: "IDR",
+	minimumFractionDigits: 0,
+});
 
 export default function () {
 	const db_path = "./src/php/attandances.php?m=";
@@ -40,12 +49,15 @@ export default function () {
 	return {
 		appName: "Absensi",
 		attandances: [],
+		staffs: [],
 		form: {
 			id: null,
+			staff_id: null,
 			username: null,
 			status: null,
 			type: null,
 			time: null,
+			salary: 0,
 		},
 		formSearch: {
 			statuses: [],
@@ -67,6 +79,7 @@ export default function () {
 		description_of_cost: null,
 		time: null,
 		date,
+		formattedSalary: "",
 
 		getTime() {
 			const now = new Date();
@@ -151,6 +164,29 @@ export default function () {
 					return this._value;
 				},
 			});
+
+			this.$watch("formattedSalary", (value) => {
+				const _value = value.replace(/\D/g, "");
+				this.formattedSalary = IDR.format(_value);
+				this.form.salary = _value;
+			});
+
+			encodeFetchedJson(await (await fetch("./src/php/staffs.php?m=" + "get-all-staff")).text(), "get-all-staff", ({ data }) => {
+				if (!Array.isArray(data)) return;
+
+				this.staffs = data;
+				console.log({ staffs: data });
+
+				// if (is_init) this.formSearch.categories = categories;
+			});
+		},
+
+		staff: null,
+		selectStaff(username) {
+			this.staff = this.staffs.find((staff) => staff.username == username);
+
+			// console.log({ staff: this.staff });
+			this.form.staff_id = this.staff.id;
 		},
 
 		async get(page, is_init = false) {
@@ -174,44 +210,78 @@ export default function () {
 			is_wait.get = false;
 		},
 		async add() {
-			if (is_wait.add) return console.warn("Reject add method cause spam!");
+			q.add(
+				"add",
+				async () => {
+					// if (is_wait.add) return console.warn("Reject add method cause spam!");
 
-			is_wait.add = true;
+					// is_wait.add = true;
 
-			const formData = new FormData();
+					await new Promise((resolve) => setTimeout(resolve, 6000));
 
-			bindAndFillFormData(formData, this.form);
+					const formData = new FormData();
 
-			encodeFetchedJson(await (await fetch(db_path + "add", { method: "POST", body: formData })).text(), "add", ({ msg: text } = {}) => {
-				Swal.fire({ icon: "success", title: "Selamat", text });
-			});
+					bindAndFillFormData(formData, this.form);
 
-			console.error("THISFORM", this.form);
+					// formData.forEach((value, key) => {
+					// 	console.log({ key, value });
+					// });
 
-			// if (!this.categories.includes(formData.get("amount"))) this.getCategories();
+					// return;
 
-			is_wait.add = false;
+					encodeFetchedJson(await (await fetch(db_path + "add", { method: "POST", body: formData })).text(), "add", ({ msg: text } = {}) => {
+						Swal.fire({ icon: "success", title: "Selamat", text });
+					});
 
-			await this.get(null, true);
+					console.error("THISFORM", this.form);
+
+					// if (!this.categories.includes(formData.get("amount"))) this.getCategories();
+
+					is_wait.add = false;
+
+					await this.get(null, true);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => {
+						console.warn("JANGAN SPAM ADDDDD!!!");
+					},
+				}
+			);
+			// if (is_wait.add) return console.warn("Reject add method cause spam!");
+			// is_wait.add = true;
+			// const formData = new FormData();
+			// bindAndFillFormData(formData, this.form);
+			// // formData.forEach((value, key) => {
+			// // 	console.log({ key, value });
+			// // });
+			// // return;
+			// encodeFetchedJson(await (await fetch(db_path + "add", { method: "POST", body: formData })).text(), "add", ({ msg: text } = {}) => {
+			// 	Swal.fire({ icon: "success", title: "Selamat", text });
+			// });
+			// console.error("THISFORM", this.form);
+			// // if (!this.categories.includes(formData.get("amount"))) this.getCategories();
+			// is_wait.add = false;
+			// await this.get(null, true);
 		},
-		async edit() {
-			if (is_wait.edit) return console.warn("Reject edit method case spam!");
+		// async edit() {
+		// 	if (is_wait.edit) return console.warn("Reject edit method case spam!");
 
-			is_wait.edit = true;
+		// 	is_wait.edit = true;
 
-			const formData = new FormData();
-			bindAndFillFormData(formData, this.form);
+		// 	const formData = new FormData();
+		// 	bindAndFillFormData(formData, this.form);
 
-			encodeFetchedJson(await (await fetch(db_path + "edit", { method: "POST", body: formData })).text(), "edit", ({ msg: text } = {}) => {
-				Swal.fire({ icon: "success", title: "Selamat", text });
-			});
+		// 	encodeFetchedJson(await (await fetch(db_path + "edit", { method: "POST", body: formData })).text(), "edit", ({ msg: text } = {}) => {
+		// 		Swal.fire({ icon: "success", title: "Selamat", text });
+		// 	});
 
-			// if (!this.categories.includes(formData.get("amount"))) this.getCategories();
+		// 	// if (!this.categories.includes(formData.get("amount"))) this.getCategories();
 
-			is_wait.edit = false;
+		// 	is_wait.edit = false;
 
-			await this.get(null, true);
-		},
+		// 	await this.get(null, true);
+		// },
 		async remove({ id, staff_id } = {}) {
 			if (!id || !staff_id) return;
 

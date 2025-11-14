@@ -187,6 +187,7 @@
 						<td class="px-6 py-4" x-text="attandance.username"></td>
 						<td class="px-6 py-4" x-text="attandance.type"></td>
 						<td class="px-6 py-4" x-text="attandance.status"></td>
+						<td class="px-6 py-4" x-text="IDR.format(attandance.salary)"></td>
 						<td class="px-6 py-4">
 							<!-- Modal toggle -->
 							<!-- <button type="button" @click="selectAttandanceEdit(attandance)" class="btn-edit font-medium text-blue-600 dark:text-blue-500 hover:underline">Ubah</button> -->
@@ -330,14 +331,28 @@
 
 						<div class="col-span-6 sm:col-span-3">
 							<label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-							<input
-								type="text"
-								id="username"
-								class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-								required=""
-								:value="form.username"
-								autocomplete="off"
-								disabled />
+							<template x-if="auth.level">
+								<select
+									id="username"
+									x-model="form.username"
+									@change="() => selectStaff(form.username)"
+									class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+									<option value="">Pilih Staff</option>
+									<template x-for="(staff, i) in staffs" :key="staff.username + '' + i">
+										<option x-bind:selected="i == 0" x-text="staff.username" :value="staff.username"></option>
+									</template>
+								</select>
+							</template>
+							<template x-if="!auth.level">
+								<input
+									type="text"
+									id="username"
+									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									required=""
+									:value="form.username"
+									autocomplete="off"
+									disabled />
+							</template>
 						</div>
 
 						<!-- <div class="col-span-6 sm:col-span-3">
@@ -385,6 +400,18 @@
 								</template>
 							</select>
 						</div>
+
+						<template x-if="auth.level && form.type == 'Clock out' && form.status == 'Hadir'">
+							<div class="col-span-6 sm:col-span-3">
+								<label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Gaji</label>
+								<input
+									type="text"
+									id="description"
+									x-model="formattedSalary"
+									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+							</div>
+						</template>
+
 						<!-- <div class="col-span-6 sm:col-span-3">
 							<label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
 							<input

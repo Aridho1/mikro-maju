@@ -68,4 +68,21 @@ switch (M) {
 
         break;
     }
+
+    case 'get-all-staff': {
+
+        $query = "SELECT * FROM $table WHERE level IS NULL";
+
+        $res = $db->query($query);
+
+        $data = [];
+
+        while ($row = mysqli_fetch_assoc($res)) {
+            $data[] = $row;
+        }
+
+        echo json_encode(['status' => true, 'data' => $data]);
+        
+        break;
+    }
 }

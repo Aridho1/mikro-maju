@@ -67,6 +67,8 @@ async function loadComponent() {
 			if (auth.username) {
 				auth.username = auth.username.replace(/^[a-z]/, (char) => char.toUpperCase());
 			}
+
+			console.log({ auth });
 		});
 
 		if (!is_continue)
