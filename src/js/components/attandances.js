@@ -42,7 +42,7 @@ export default function () {
 		todayBtnMode: 1,
 		language: "id",
 	});
-	const datepickers = dateRangePicker.datepickers;
+	// const datepickers = dateRangePicker.datepickers;
 
 	const date = new Date().toISOString().split("T")[0];
 
@@ -93,6 +93,15 @@ export default function () {
 			console.log({ time });
 		},
 
+		setDateToNow() {
+			const _date = new Date().toISOString().split("T")[0];
+
+			this.formSearch.date_start = _date;
+			this.formSearch.date_end = _date;
+
+			console.log("SET DATE", { _date });
+		},
+
 		// methods
 		async init() {
 			if (!this.auth) {
@@ -117,6 +126,11 @@ export default function () {
 				this.formSearch,
 				url_param
 			);
+
+			// set date to now if no search/url
+			if (!this.formSearch.date_start && !this.formSearch.date_end) {
+				// this.setDateToNow();
+			}
 
 			this.form.username = this.auth.username;
 
@@ -252,27 +266,38 @@ export default function () {
 			);
 		},
 		async remove({ id, staff_id } = {}) {
-			if (!id || !staff_id) return;
+			q.add(
+				"remove",
+				async () => {
+					if (!id || !staff_id) return;
 
-			const { isConfirmed } = await Swal.fire({
-				...deafultConfirmProps,
-				title: "Yakin ingin hapus Absen?",
-				text: "Data yang dihapus tidak bisa di kembalikan!",
-				confirmButtonText: "Ya, saya yakin!",
-				cancelButtonText: "Batal",
-			});
+					const { isConfirmed } = await Swal.fire({
+						...deafultConfirmProps,
+						title: "Yakin ingin hapus Absen?",
+						text: "Data yang dihapus tidak bisa di kembalikan!",
+						confirmButtonText: "Ya, saya yakin!",
+						cancelButtonText: "Batal",
+					});
 
-			if (!isConfirmed) return;
+					if (!isConfirmed) return;
 
-			const formData = new FormData();
-			formData.append("id", id);
-			formData.append("staff_id", staff_id);
+					const formData = new FormData();
+					formData.append("id", id);
+					formData.append("staff_id", staff_id);
 
-			encodeFetchedJson(await (await fetch(db_path + "remove", { method: "POST", body: formData })).text(), "remove", async ({ msg } = {}) => {
-				// Swal.fire({ title: "Selamat", icon: "success", text: msg });
-				this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
-				await this.get(null, true);
-			});
+					encodeFetchedJson(await (await fetch(db_path + "remove", { method: "POST", body: formData })).text(), "remove", async ({ msg } = {}) => {
+						// Swal.fire({ title: "Selamat", icon: "success", text: msg });
+						this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
+						await this.get(null, true);
+					});
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => {
+						this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
+					},
+				}
+			);
 		},
 		openModal() {
 			this.form = {
