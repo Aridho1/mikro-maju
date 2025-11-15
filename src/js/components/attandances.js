@@ -132,6 +132,9 @@ export default function () {
 			// set date to now if no search/url
 			if (!this.formSearch.date_start && !this.formSearch.date_end) {
 				this.setDateToNow();
+			} else {
+				if (this.formSearch.date_start == "NULL") this.formSearch.date_start = null;
+				if (this.formSearch.date_end == "NULL") this.formSearch.date_end = null;
 			}
 
 			// init watch date range
@@ -225,7 +228,8 @@ export default function () {
 				async () => {
 					const formData = new FormData();
 					bindAndFillFormData(formData, this.formSearch);
-					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
+
+					if (!is_init) formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
 					// Filter | same url param = same result
 					if (!rewriteUrl(formData, url_param) && !is_init) return (is_wait.get = false), console.warn("Reject get method cause same url param!");
