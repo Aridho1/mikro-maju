@@ -221,48 +221,45 @@
 <!-- Notifications -->
 <div
 	x-data="{
-        notifications: [],
-        displayDuration: 8000,
-        soundEffect: true,
-		sound: null,
+		notifications: [],
+		displayDuration: 8000,
+		soundEffect: true,
+		baseAudio: null,
 
-        addNotification({ variant = 'info', sender = null, title = null, message = null}) {
-            const id = Date.now()
-            const notification = { id, variant, sender, title, message }
+		addNotification({ variant = 'info', sender = null, title = null, message = null }) {
+			const id = Date.now()
+			const notification = { id, variant, sender, title, message }
 
-            // Keep only the most recent 20 notifications
-            if (this.notifications.length >= 20) {
-                this.notifications.splice(0, this.notifications.length - 19)
-            }
+			if (this.notifications.length >= 20) {
+				this.notifications.splice(0, this.notifications.length - 19)
+			}
 
-            // Add the new notification to the notifications stack
-            this.notifications.push(notification)
+			this.notifications.push(notification)
 
-            if (this.soundEffect) {
-                // Play the notification sound
-                // const notificationSound = new Audio('https://res.cloudinary.com/ds8pgw1pf/video/upload/v1728571480/penguinui/component-assets/sounds/ding.mp3')
-                const notificationSound = this.sound
-                // const notificationSound = new Audio('./src/sounds/notification.mp3')
-                notificationSound.play().catch((error) => {
-                    console.error('Error playing the sound:', error)
-                })
-            }
-        },
-        removeNotification(id) {
-            setTimeout(() => {
-                this.notifications = this.notifications.filter(
-                    (notification) => notification.id !== id,
-                )
-            }, 400);
-        },
+			if (this.soundEffect) {
+				this.playSound()
+			}
+		},
+
+		removeNotification(id) {
+			setTimeout(() => {
+				this.notifications = this.notifications.filter(
+					(notification) => notification.id !== id,
+				)
+			}, 400)
+		},
+
+		playSound() {
+			// clone instance, ini yang memungkinkan spam overlap
+			const audio = this.baseAudio.cloneNode(true)
+			audio.play().catch(err => console.error('Sound error:', err))
+		},
 
 		init() {
-			const audio = new Audio('./src/sounds/ding (3).mp3');
-			this.sound = audio
-
-			console.warn({ audio })
+			this.baseAudio = new Audio('./src/sounds/ding (3).mp3')
+			console.warn('Base audio loaded:', this.baseAudio)
 		}
-    }"
+	}"
 	x-on:notify.window="addNotification({
             variant: $event.detail.variant,
             sender: $event.detail.sender,
