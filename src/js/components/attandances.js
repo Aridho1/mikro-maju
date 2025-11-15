@@ -23,25 +23,25 @@ export default function () {
 
 	// console.warn(config);
 
-	const is_wait = {
-		get: false,
-		add: false,
-		// edit: false,
-		remove: false,
-	};
+	// const is_wait = {
+	// 	get: false,
+	// 	add: false,
+	// 	// edit: false,
+	// 	remove: false,
+	// };
 
 	// Handle datepicker
-	const el_date_start = document.querySelector("#datepicker-range-start");
-	const el_date_end = document.querySelector("#datepicker-range-end");
+	// const el_date_start = document.querySelector("#datepicker-range-start");
+	// const el_date_end = document.querySelector("#datepicker-range-end");
 
-	const el_date_range_picker = document.querySelector("#date-range-picker");
-	const dateRangePicker = new DateRangePicker(el_date_range_picker, {
-		format: "yyyy-mm-dd",
-		clearBtn: true,
-		todayBtn: true,
-		todayBtnMode: 1,
-		language: "id",
-	});
+	// const el_date_range_picker = document.querySelector("#date-range-picker");
+	// const dateRangePicker = new DateRangePicker(el_date_range_picker, {
+	// 	format: "yyyy-mm-dd",
+	// 	clearBtn: true,
+	// 	todayBtn: true,
+	// 	todayBtnMode: 1,
+	// 	language: "id",
+	// });
 	// const datepickers = dateRangePicker.datepickers;
 
 	const date = new Date().toISOString().split("T")[0];
@@ -66,6 +66,8 @@ export default function () {
 			date_end: null,
 			sort_desc: true,
 			keyword: null,
+			__date_start: null,
+			__date_end: null,
 		},
 		page: new Pagination(),
 
@@ -129,55 +131,69 @@ export default function () {
 
 			// set date to now if no search/url
 			if (!this.formSearch.date_start && !this.formSearch.date_end) {
-				// this.setDateToNow();
+				this.setDateToNow();
 			}
+
+			// init watch date range
+			window.addEventListener("date-range-change", ({ detail }) => {
+				// console.log({ detail });
+				const { startDate, endDate } = detail;
+
+				// console.log(dateRangePicker)
+				const _start = startDate ? startDate.toISOString() : startDate;
+				const _end = endDate ? endDate.toISOString() : endDate;
+
+				this.formSearch.date_start = _start;
+				this.formSearch.date_end = _end;
+				// console.log({ _start });
+			});
 
 			this.form.username = this.auth.username;
 
 			console.error("FORM", this.form);
 
 			// regenerate UI / value input date
-			if (this.formSearch.date_start && this.formSearch.date_end) {
-				dateRangePicker.setDates(this.formSearch.date_start, this.formSearch.date_end);
+			// if (this.formSearch.date_start && this.formSearch.date_end) {
+			// 	dateRangePicker.setDates(this.formSearch.date_start, this.formSearch.date_end);
 
-				// datepickers[1].setDate(this.formSearch.date_end);
-				// datepickers[0].setDate(this.formSearch.date_start);
-			}
+			// 	// datepickers[1].setDate(this.formSearch.date_end);
+			// 	// datepickers[0].setDate(this.formSearch.date_start);
+			// }
 
 			await this.get(null, true);
 
-			const ctx = this;
+			// const ctx = this;
 
-			Object.defineProperty(el_date_start, "value", {
-				_value: "",
-				set(newValue) {
-					this._value ??= "";
-					if (newValue == this._value) return newValue;
+			// Object.defineProperty(el_date_start, "value", {
+			// 	_value: "",
+			// 	set(newValue) {
+			// 		this._value ??= "";
+			// 		if (newValue == this._value) return newValue;
 
-					this._value = newValue;
-					ctx.formSearch.date_start = newValue;
+			// 		this._value = newValue;
+			// 		ctx.formSearch.date_start = newValue;
 
-					return newValue;
-				},
-				get() {
-					return this._value;
-				},
-			});
+			// 		return newValue;
+			// 	},
+			// 	get() {
+			// 		return this._value;
+			// 	},
+			// });
 
-			Object.defineProperty(el_date_end, "value", {
-				_value: "",
-				set(newValue) {
-					this._value ??= "";
-					if (newValue == this._value) return newValue;
+			// Object.defineProperty(el_date_end, "value", {
+			// 	_value: "",
+			// 	set(newValue) {
+			// 		this._value ??= "";
+			// 		if (newValue == this._value) return newValue;
 
-					this._value = newValue;
-					ctx.formSearch.date_end = newValue;
-					return newValue;
-				},
-				get() {
-					return this._value;
-				},
-			});
+			// 		this._value = newValue;
+			// 		ctx.formSearch.date_end = newValue;
+			// 		return newValue;
+			// 	},
+			// 	get() {
+			// 		return this._value;
+			// 	},
+			// });
 
 			this.$watch("formattedSalary", (value) => {
 				const _value = value.replace(/\D/g, "");

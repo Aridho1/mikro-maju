@@ -338,6 +338,138 @@ const alpineInitCallback = async () => {
 		};
 	});
 
+	Alpine.data("dateRangePicker", function (options) {
+		console.log("options in dateRangePicker", options);
+
+		let startDate = options?.startDate || null;
+		let endDate = options?.endDate || null;
+
+		if (startDate) {
+			try {
+				startDate = new Date(startDate);
+			} catch (e) {}
+		}
+
+		if (endDate) {
+			try {
+				endDate = new Date(endDate);
+			} catch (e) {}
+		}
+
+		return {
+			startDate,
+			endDate,
+			open: null, // 'start' | 'end' | null
+			currentMonth: new Date().getMonth(),
+			currentYear: new Date().getFullYear(),
+			days: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+			pickers: [
+				{
+					key: "start",
+					label: options?.labels?.[0] || "Start Date",
+				},
+				{ key: "end", label: options?.labels?.[1] || "End Date" },
+			],
+			withToday: !!options?.withToday,
+			withLabel: !!options?.withLabel,
+			model: options?.model || {}, // { start, end }
+			onChange: options?.onChange || null,
+
+			// === Helpers ===
+			monthName() {
+				return new Date(this.currentYear, this.currentMonth).toLocaleString("default", { month: "long" });
+			},
+			format(date) {
+				if (!date) return "";
+				const y = date.getFullYear();
+				const m = String(date.getMonth() + 1).padStart(2, "0");
+				const d = String(date.getDate()).padStart(2, "0");
+				return `${y}-${m}-${d}`;
+			},
+			normalizeToLocalMidnight(date) {
+				if (!date) return null;
+				return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+			},
+			dateKey(date) {
+				if (!date) return null;
+				return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+			},
+			isSameDate(a, b) {
+				if (!a || !b) return false;
+				return this.dateKey(a) === this.dateKey(b);
+			},
+			isInRange(day) {
+				if (!this.startDate || !this.endDate || !day) return false;
+				const k = this.dateKey(day);
+				return k >= this.dateKey(this.startDate) && k <= this.dateKey(this.endDate);
+			},
+			daysInMonth() {
+				const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+				const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+				const days = Array(firstDay.getDay()).fill(null);
+				for (let i = 1; i <= lastDay.getDate(); i++) {
+					days.push(new Date(this.currentYear, this.currentMonth, i));
+				}
+				return days;
+			},
+
+			// === Logic ===
+			selectDay(day, type) {
+				if (!day) return;
+				const normalized = this.normalizeToLocalMidnight(day);
+
+				if (type === "start") {
+					this.startDate = normalized;
+					if (this.endDate && this.dateKey(this.endDate) < this.dateKey(this.startDate)) [this.startDate, this.endDate] = [this.endDate, this.startDate];
+					else if (!this.endDate) this.endDate = this.startDate;
+				} else {
+					this.endDate = normalized;
+					if (this.startDate && this.dateKey(this.startDate) > this.dateKey(this.endDate)) [this.startDate, this.endDate] = [this.endDate, this.startDate];
+					else if (!this.startDate) this.startDate = this.endDate;
+				}
+
+				// setelah update date, kirim event ke parent:
+				this.dispatchChange();
+			},
+			isSelected(day, type) {
+				return this.isSameDate(day, type === "start" ? this.startDate : this.endDate);
+			},
+			prevMonth() {
+				if (this.currentMonth === 0) {
+					this.currentMonth = 11;
+					this.currentYear--;
+				} else this.currentMonth--;
+			},
+			nextMonth() {
+				if (this.currentMonth === 11) {
+					this.currentMonth = 0;
+					this.currentYear++;
+				} else this.currentMonth++;
+			},
+			toggleCalendar(type) {
+				this.open = this.open === type ? null : type;
+			},
+			clear() {
+				this.startDate = null;
+				this.endDate = null;
+				this.dispatchChange();
+			},
+			dispatchChange() {
+				this.$dispatch("date-range-change", {
+					startDate: this.startDate,
+					endDate: this.endDate,
+				});
+			},
+
+			init() {
+				// dengarkan event clear dari parent
+				this.$el.addEventListener("clear-range", () => this.clear());
+
+				console.log("INIT DATE RANGE PICKER");
+			},
+		};
+	});
+
 	// Alpine.data('app', () => ({
 	//     // isOpenBlackBarrier: true,
 	//     // IDR,
