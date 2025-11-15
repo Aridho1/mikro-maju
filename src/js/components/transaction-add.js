@@ -138,18 +138,8 @@ export default function () {
 					if (is_wait.submit) return console.warn("Cancel method cause spam!");
 
 					if (!this.total) return this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Tidak ada produk yang dipilih\nPilih setidaknya 1 produk!" });
-					// return Swal.fire({
-					// 	icon: "error",
-					// 	title: "Error",
-					// 	text: "Pilih setidaknya 1 produk!",
-					// });
 
 					if (this.payment_method == "Tunai" && (!this.inputBuy || this.inputBuy < this.total)) {
-						// return Swal.fire({
-						// 	icon: "error",
-						// 	title: "Error",
-						// 	text: "Uang tidak cukup!",
-						// });
 						return this.$dispatch("notify", { variant: "danger", title: "Gagal", message: "Uang tidak cukup!" });
 					}
 
@@ -170,7 +160,6 @@ export default function () {
 						text,
 						"Tambah Transaksi",
 						({ transaction_respon: { res: { token } = {} } = {} }) => {
-							// Swal.fire({ title: "Selamat", icon: "success", text: msg, didOpen })
 							this.clear();
 
 							this.$dispatch("notify", { variant: "success", title: "Selamat", message: "Transaksi berhasil ditambahkan!" });

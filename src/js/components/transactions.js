@@ -144,7 +144,6 @@ export default function () {
 					bindAndFillFormData(formData, this.formSearch);
 
 					if (!is_init) formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
-					// console.log("page:", formData.get("page"));
 
 					// Handle rewrtie
 					const isRewriteUrl = rewriteUrl(formData, url_param);
@@ -352,10 +351,6 @@ export default function () {
 			q.add(
 				"sync-status",
 				async () => {
-					// if (is_wait.syncTransactionStatus) return Swal.fire({ ...defaultErrorProps, text: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
-
-					// is_wait.syncTransactionStatus = true;
-
 					// check cache for to much re-request
 					const now = Date.now();
 					const cache_name = "cache-syncTransaction";
@@ -372,7 +367,7 @@ export default function () {
 						const { isConfirmed } = await Swal.fire({ ...deafultConfirmProps, title: "Yakin ingin sync status nya lagi?", text: `Aksi yang sama baru saja di lakukan ${times.minutes > 0 ? times.minutes + " menit" : times.seconds + " detik"} yang lalu.` });
 
 						console.log("confirm:", isConfirmed);
-						if (!isConfirmed) return; // (is_wait.syncTransactionStatus = false);
+						if (!isConfirmed) return;
 					}
 
 					const formData = new FormData();
@@ -384,10 +379,6 @@ export default function () {
 					encodeFetchedJson(await (await fetch(db_path + "check-status", { method: "POST", body: formData })).text(), "sync-status", () => {
 						this.get(null, true);
 					});
-
-					// console.log({ _cache, cache_name });
-
-					// is_wait.syncTransactionStatus = false;
 				},
 				{
 					cancelIfAlreadyInQueue: true,
@@ -404,16 +395,11 @@ export default function () {
 			q.add(
 				"remake-transaction",
 				async () => {
-					// if (is_wait.remakeTransaction) return Swal.fire({ ...defaultErrorProps, text: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
-
-					// is_wait.remakeTransaction = true;
-
 					const formData = new FormData();
 
 					const _data = { ...transaction };
 					delete _data.transaction_details;
-					// const _context = { ..._data, cart: transaction.transaction_details };
-					// console.log({ transaction });
+
 					bindAndFillFormData(formData, _data);
 					formData.append("cart", JSON.stringify(transaction.transaction_details));
 
@@ -430,7 +416,6 @@ export default function () {
 							swalSuccess: false,
 						}
 					);
-					// is_wait.remakeTransaction = false;
 				},
 				{
 					cancelIfAlreadyInQueue: true,

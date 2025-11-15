@@ -5,10 +5,7 @@ import Pagination from "../libs/pagination.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
 import { url_param } from "../libs/urlParam.js";
 import { deafultConfirmProps } from "../libs/swal2props.js";
-// import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
-import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/DateRangePicker.js";
 import { TaskQueue } from "../libs/TaskQueue.js";
-// import { config, getConfigJson } from "../libs/getConfigJson.js";
 
 const q = new TaskQueue();
 
@@ -20,29 +17,6 @@ const IDR = new Intl.NumberFormat("id-ID", {
 
 export default function () {
 	const db_path = "./src/php/attandances.php?m=";
-
-	// console.warn(config);
-
-	// const is_wait = {
-	// 	get: false,
-	// 	add: false,
-	// 	// edit: false,
-	// 	remove: false,
-	// };
-
-	// Handle datepicker
-	// const el_date_start = document.querySelector("#datepicker-range-start");
-	// const el_date_end = document.querySelector("#datepicker-range-end");
-
-	// const el_date_range_picker = document.querySelector("#date-range-picker");
-	// const dateRangePicker = new DateRangePicker(el_date_range_picker, {
-	// 	format: "yyyy-mm-dd",
-	// 	clearBtn: true,
-	// 	todayBtn: true,
-	// 	todayBtnMode: 1,
-	// 	language: "id",
-	// });
-	// const datepickers = dateRangePicker.datepickers;
 
 	const date = new Date().toISOString().split("T")[0];
 
@@ -100,8 +74,6 @@ export default function () {
 
 			this.formSearch.date_start = _date;
 			this.formSearch.date_end = _date;
-
-			// console.log("SET DATE", { _date });
 		},
 
 		// methods
@@ -113,9 +85,6 @@ export default function () {
 			this.getTime();
 
 			setInterval(() => this.getTime(), 1000 * 60);
-
-			// get categories
-			// await this.getCategories(true);
 
 			// set filter by url param
 			fillFormsByUrlParam(
@@ -139,64 +108,20 @@ export default function () {
 
 			// init watch date range
 			window.addEventListener("date-range-change", ({ detail }) => {
-				// console.log({ detail });
 				const { startDate, endDate } = detail;
 
-				// console.log(dateRangePicker)
 				const _start = startDate ? startDate.toISOString() : startDate;
 				const _end = endDate ? endDate.toISOString() : endDate;
 
 				this.formSearch.date_start = _start;
 				this.formSearch.date_end = _end;
-				// console.log({ _start });
 			});
 
 			this.form.username = this.auth.username;
 
 			console.error("FORM", this.form);
 
-			// regenerate UI / value input date
-			// if (this.formSearch.date_start && this.formSearch.date_end) {
-			// 	dateRangePicker.setDates(this.formSearch.date_start, this.formSearch.date_end);
-
-			// 	// datepickers[1].setDate(this.formSearch.date_end);
-			// 	// datepickers[0].setDate(this.formSearch.date_start);
-			// }
-
 			await this.get(null, true);
-
-			// const ctx = this;
-
-			// Object.defineProperty(el_date_start, "value", {
-			// 	_value: "",
-			// 	set(newValue) {
-			// 		this._value ??= "";
-			// 		if (newValue == this._value) return newValue;
-
-			// 		this._value = newValue;
-			// 		ctx.formSearch.date_start = newValue;
-
-			// 		return newValue;
-			// 	},
-			// 	get() {
-			// 		return this._value;
-			// 	},
-			// });
-
-			// Object.defineProperty(el_date_end, "value", {
-			// 	_value: "",
-			// 	set(newValue) {
-			// 		this._value ??= "";
-			// 		if (newValue == this._value) return newValue;
-
-			// 		this._value = newValue;
-			// 		ctx.formSearch.date_end = newValue;
-			// 		return newValue;
-			// 	},
-			// 	get() {
-			// 		return this._value;
-			// 	},
-			// });
 
 			this.$watch("formattedSalary", (value) => {
 				const _value = value.replace(/\D/g, "");
@@ -208,9 +133,6 @@ export default function () {
 				if (!Array.isArray(data)) return;
 
 				this.staffs = data;
-				console.log({ staffs: data });
-
-				// if (is_init) this.formSearch.categories = categories;
 			});
 		},
 
@@ -218,7 +140,6 @@ export default function () {
 		selectStaff(username) {
 			this.staff = this.staffs.find((staff) => staff.username == username);
 
-			// console.log({ staff: this.staff });
 			this.form.staff_id = this.staff.id;
 		},
 
@@ -247,27 +168,14 @@ export default function () {
 			q.add(
 				"add",
 				async () => {
-					// if (is_wait.add) return console.warn("Reject add method cause spam!");
-
-					// is_wait.add = true;
-
-					// await new Promise((resolve) => setTimeout(resolve, 6000));
-
 					const formData = new FormData();
 
 					bindAndFillFormData(formData, this.form);
-
-					// formData.forEach((value, key) => {
-					// 	console.log({ key, value });
-					// });
-
-					// return;
 
 					encodeFetchedJson(
 						await (await fetch(db_path + "add", { method: "POST", body: formData })).text(),
 						"add",
 						({ msg } = {}) => {
-							// Swal.fire({ icon: "success", title: "Selamat", text });
 							this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
 						},
 						{ swalSuccess: false }
@@ -275,17 +183,12 @@ export default function () {
 
 					console.error("THISFORM", this.form);
 
-					// if (!this.categories.includes(formData.get("amount"))) this.getCategories();
-
-					// is_wait.add = false;
-
 					await this.get(null, true);
 					this.isOpenModal = false;
 				},
 				{
 					cancelIfAlreadyInQueue: true,
 					callbackForCancelled: () => {
-						// console.warn("JANGAN SPAM ADDDDD!!!");
 						this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
 					},
 				}
@@ -315,7 +218,6 @@ export default function () {
 						await (await fetch(db_path + "remove", { method: "POST", body: formData })).text(),
 						"remove",
 						async ({ msg } = {}) => {
-							// Swal.fire({ title: "Selamat", icon: "success", text: msg });
 							this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
 							await this.get(null, true);
 						},
