@@ -172,6 +172,7 @@
 					<th scope="col" class="px-6 py-3">Total</th>
 					<th scope="col" class="px-6 py-3">Profit</th>
 					<th scope="col" class="px-6 py-3">Pembayaran</th>
+					<th scope="col" class="px-6 py-3">Nama</th>
 					<th scope="col" class="px-6 py-3">Aksi</th>
 					<th scope="col" class="px-6 py-3">Aksi Tambahan</th>
 				</tr>
@@ -188,6 +189,7 @@
 							>
 							<span x-text="transaction.payment_status"></span>
 						</td>
+						<td class="px-6 py-4" x-text="transaction.name || '-'"></td>
 						<!-- <td class="px-6 py-4" x-text="transaction.payment_status"></td> -->
 						<td class="px-6 py-4 text-xs">
 							<!-- Modal toggle -->
@@ -314,101 +316,103 @@
 	</nav>
 
 	<!-- Edit user modal -->
-	<div id="mainModal" x-show="isOpenModal" x-cloak="" class="bg-[rgba(0,0,0,.5)] modal-conn">
-		<div class="relative w-full max-w-2xl max-h-full" @click.outside="isOpenModal = false">
-			<!-- Modal content -->
-			<form id="main-form" class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700" @submit.prevent="edit">
-				<!-- Modal header -->
-				<div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 border-gray-200">
-					<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-						<span>Ubah</span>
-						Produk
-					</h3>
-					<button
-						@click="isOpenModal = false"
-						type="button"
-						class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-						<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-						</svg>
-						<span class="sr-only">Tutup modal</span>
-					</button>
-				</div>
-				<!-- Modal body -->
-				<div class="p-6 space-y-6">
-					<div class="grid grid-cols-6 gap-6">
-						<div class="col-span-6 sm:col-span-3">
-							<label for="total" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total</label>
-							<input
-								type="text"
-								name="total"
-								id="total"
-								x-model="form.total"
-								class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-								required=""
-								readonly />
-						</div>
-						<div class="col-span-6 sm:col-span-3">
-							<label for="date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal</label>
-							<input
-								type="text"
-								name="date"
-								id="date"
-								x-model="form.date"
-								class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-								required=""
-								readonly />
-						</div>
-
-						<div class="col-span-6 sm:col-span-3">
-							<label for="payment_method" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Metode Transaksi</label>
-							<select
-								id="payment_method"
-								name="payment_method"
-								x-model="form.payment_method"
-								class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-								<template x-for="status in PAYMENT_METHODS" :key="status">
-									<option :value="status" x-text="status"></option>
-								</template>
-							</select>
-						</div>
-						<div class="col-span-6 sm:col-span-3">
-							<label for="payment_status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status Transaksi</label>
-
-							<template x-if="form.payment_method == PAYMENT_METHODS[0]">
-								<select
-									id="payment_status"
-									name="payment_status"
-									class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-									<template x-for="(status, index) in [...new Set([form.payment_status, ...PAYMENT_STATUS_CASH])]" :key="(status || '') + ' '  + index">
-										<option :value="status" x-text="status"></option>
-									</template>
-								</select>
-							</template>
-							<template x-if="form.payment_method != PAYMENT_METHODS[0]">
+	<template x-if="false">
+		<div id="mainModal" x-show="isOpenModal" x-cloak="" class="bg-[rgba(0,0,0,.5)] modal-conn">
+			<div class="relative w-full max-w-2xl max-h-full" @click.outside="isOpenModal = false">
+				<!-- Modal content -->
+				<form id="main-form" class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700" @submit.prevent="edit">
+					<!-- Modal header -->
+					<div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 border-gray-200">
+						<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+							<span>Ubah</span>
+							Produk
+						</h3>
+						<button
+							@click="isOpenModal = false"
+							type="button"
+							class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+							<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+							</svg>
+							<span class="sr-only">Tutup modal</span>
+						</button>
+					</div>
+					<!-- Modal body -->
+					<div class="p-6 space-y-6">
+						<div class="grid grid-cols-6 gap-6">
+							<div class="col-span-6 sm:col-span-3">
+								<label for="total" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total</label>
 								<input
 									type="text"
-									name="payment_status"
-									id="payment_status"
-									x-model="form.payment_status"
+									name="total"
+									id="total"
+									x-model="form.total"
 									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 									required=""
 									readonly />
-							</template>
+							</div>
+							<div class="col-span-6 sm:col-span-3">
+								<label for="date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal</label>
+								<input
+									type="text"
+									name="date"
+									id="date"
+									x-model="form.date"
+									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									required=""
+									readonly />
+							</div>
+
+							<div class="col-span-6 sm:col-span-3">
+								<label for="payment_method" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Metode Transaksi</label>
+								<select
+									id="payment_method"
+									name="payment_method"
+									x-model="form.payment_method"
+									class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+									<template x-for="status in PAYMENT_METHODS" :key="status">
+										<option :value="status" x-text="status"></option>
+									</template>
+								</select>
+							</div>
+							<div class="col-span-6 sm:col-span-3">
+								<label for="payment_status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status Transaksi</label>
+
+								<template x-if="form.payment_method == PAYMENT_METHODS[0]">
+									<select
+										id="payment_status"
+										name="payment_status"
+										class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+										<template x-for="(status, index) in [...new Set([form.payment_status, ...PAYMENT_STATUS_CASH])]" :key="(status || '') + ' '  + index">
+											<option :value="status" x-text="status"></option>
+										</template>
+									</select>
+								</template>
+								<template x-if="form.payment_method != PAYMENT_METHODS[0]">
+									<input
+										type="text"
+										name="payment_status"
+										id="payment_status"
+										x-model="form.payment_status"
+										class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+										required=""
+										readonly />
+								</template>
+							</div>
 						</div>
 					</div>
-				</div>
-				<!-- Modal footer -->
-				<div class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
-					<button
-						type="submit"
-						class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-						Ubah
-					</button>
-				</div>
-			</form>
+					<!-- Modal footer -->
+					<div class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
+						<button
+							type="submit"
+							class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+							Ubah
+						</button>
+					</div>
+				</form>
+			</div>
 		</div>
-	</div>
+	</template>
 
 	<div x-show="isOpenDetailModal" x-cloak="" class="bg-[rgba(0,0,0,.5)] modal-conn">
 		<div class="relative max-w-2xl max-h-full flex items-center justify-center w-max" @click.outside="isOpenDetailModal = false">

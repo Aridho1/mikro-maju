@@ -1,4 +1,7 @@
 import encodeFetchedJson from "../libs/encodeFetchedJson.js";
+import { TaskQueue } from "../libs/TaskQueue.js";
+
+const q = new TaskQueue();
 
 export default function () {
 	const form = document.querySelector("#form-transaction");
@@ -7,36 +10,6 @@ export default function () {
 	const is_wait = {
 		submit: false,
 	};
-
-	// const CATEGORIES = {
-	//     'Makanan': [
-	//         'Nasi Goreng',
-	//         'Ayam',
-	//         'Lele',
-	//     ],
-	//     'Minuman': [
-	//         'Teh',
-	//         'kopi',
-	//         'Macca',
-	//     ],
-	//     'Disert': [],
-	// }
-
-	// const C = {
-	//     'Makanan': {
-	//         'Nasi Goreng': true,
-	//         'Ayam': true,
-	//         'Lele': false,
-	//     },
-	//     'Minuman': {
-	//         'Teh': true,
-	//         'kopi': true,
-	//         'Macca': false,
-	//     },
-	//     'Disert': {},
-	// }
-
-	const el_form_filter_category = document.querySelector("#filter-category");
 
 	return {
 		items: [],
@@ -50,6 +23,7 @@ export default function () {
 		total: 0,
 		payment_method: "Tunai",
 		inputBuy: 0,
+		name: null,
 
 		async init() {
 			// Handle get products
@@ -128,49 +102,52 @@ export default function () {
 		async submit({ target } = {}) {
 			if (!target) return console.error("Missing target");
 
-			if (is_wait.submit) return console.warn("Cancel method cause spam!");
+			q.add(
+				"submit",
+				async () => {
+					if (!this.total) this.$dispatch("notify", { variant: "danger", title: "Gagal", message: "Pilih setidaknya 1 produk!" });
 
-			if (!this.total)
-				return Swal.fire({
-					icon: "error",
-					title: "Error",
-					text: "Pilih setidaknya 1 produk!",
-				});
+					const { cart } = this;
 
-			if (false && this.payment_method == "Tunai" && (!this.inputBuy || this.inputBuy < this.total)) {
-				return Swal.fire({
-					icon: "error",
-					title: "Error",
-					text: "Uang tidak cukup!",
-				});
-			}
+					const formData = new FormData(target);
+					formData.append("user-cart", JSON.stringify(cart));
 
-			is_wait.submit = true;
+					const res = await fetch(db_path + "transactions.php?m=add-order", {
+						method: "POST",
+						body: formData,
+					});
+					const text = await res.text();
 
-			const { cart } = this;
+					encodeFetchedJson(
+						text,
+						"Tambah Transaksi",
+						({ msg: message, transaction_respon: { res: { token } = {} } = {} }) => {
+							// Swal.fire({ title: "Selamat", icon: "success", text: msg, didOpen })
+							this.clear();
 
-			const formData = new FormData(target);
-			formData.append("user-cart", JSON.stringify(cart));
+							console.warn({ message });
 
-			const res = await fetch(db_path + "transactions.php?m=add-order", {
-				method: "POST",
-				body: formData,
-			});
-			const text = await res.text();
+							// if (message)
+							//this.$dispatch("notify", { variant: "success", title: "Selamat", message });
+							this.$dispatch("notify", { variant: "success", title: "Selamat", message: "Transaksi berhasil ditambahkan!" });
 
-			encodeFetchedJson(text, "Tambah Transaksi", ({ transaction_respon: { res: { token } = {} } = {} }) => {
-				// Swal.fire({ title: "Selamat", icon: "success", text: msg, didOpen })
-				this.clear();
+							// setTimeout(() => {
+							// 	window.open(`?c=transactions&get_newest_struk=true`, "_blank");
+							// }, 2000);
 
-				// setTimeout(() => {
-				// 	window.open(`?c=transactions&get_newest_struk=true`, "_blank");
-				// }, 2000);
-
-				// Redirect
-				// if (token) window.open("pay.html?token=" + token, "_blank");
-			});
-
-			is_wait.submit = false;
+							// Redirect
+							// if (token) window.open("pay.html?token=" + token, "_blank");
+						},
+						{
+							// swalSuccess: false,
+						}
+					);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Gagal", message: "Sedang memproses aksi sebelumnya. Mohon tunggu beberapa saat lagi!" }),
+				}
+			);
 		},
 		clear() {
 			this.cart = [];

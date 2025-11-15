@@ -53,6 +53,7 @@ export default function () {
 		total: 0,
 		payment_method: "Tunai",
 		inputBuy: 0,
+		name: null,
 
 		async init() {
 			// Handle get products
@@ -200,6 +201,7 @@ export default function () {
 			this.total = 0;
 			this.setCart();
 			this.inputBuy = 0;
+			this.name = null;
 		},
 		selectItem(item) {
 			console.log({ cart: this.cart, item });

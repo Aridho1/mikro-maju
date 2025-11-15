@@ -78,6 +78,10 @@ switch (M) {
     }
     case "add": {
 
+        // echo json_encode($_POST);
+        // die;
+
+        $name = $name ? "'$name'" : "NULL";
         $date = Date('Y-m-d');
         $payment_status = 'pending';
         $payment_key = '';
@@ -123,7 +127,7 @@ switch (M) {
 
         switch ($payment_method) {
             case 'Tunai': case 'QRIS': {
-                $db->query("INSERT INTO $table SET date='$date', total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token =''");
+                $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token =''");
                 break;
             }
             case 'Transfer': {
@@ -140,7 +144,7 @@ switch (M) {
                 $token = $transaction_respon['res']->token;
 
                 // $payment_key = $transaction_respon['token'];
-                $db->query("INSERT INTO $table SET date='$date', total=$total, profit = $profit, payment_status='Pending', payment_method='$payment_method', payment_key='$payment_key', payment_token = '$token'");
+                $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Pending', payment_method='$payment_method', payment_key='$payment_key', payment_token = '$token'");
                 break;
 
             }
@@ -183,6 +187,8 @@ switch (M) {
     }
 
     case 'add-order': {
+
+        $name = $name ? "'$name'" : "NULL";
         $date = Date('Y-m-d');
         $payment_status = 'pending';
         $payment_key = '';
@@ -228,7 +234,7 @@ switch (M) {
 
         switch ($payment_method) {
             case 'Tunai': {
-                $db->query("INSERT INTO $table SET date='$date', total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token ='', is_req_by_user = 1");
+                $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token ='', is_req_by_user = 1");
                 break;
             }
 

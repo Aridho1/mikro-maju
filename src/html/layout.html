@@ -230,6 +230,8 @@
 			const id = Date.now()
 			const notification = { id, variant, sender, title, message }
 
+			console.log('Get new notification', notification)
+
 			if (this.notifications.length >= 20) {
 				this.notifications.splice(0, this.notifications.length - 19)
 			}
