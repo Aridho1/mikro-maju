@@ -75,7 +75,6 @@ export default function () {
 		},
 
 		async init() {
-			// Set filter by url
 			fillFormsByUrlParam(
 				{
 					array: ["payment_methods", "payment_statuses"],
@@ -90,12 +89,15 @@ export default function () {
 			// set date to now if no search/url
 			if (!this.formSearch.date_start && !this.formSearch.date_end) {
 				this.setDateToNow();
+			} else {
+				if (this.formSearch.date_start == "NULL") this.formSearch.date_start = null;
+				if (this.formSearch.date_end == "NULL") this.formSearch.date_end = null;
 			}
+
 			// init watch date range
 			window.addEventListener("date-range-change", ({ detail }) => {
 				const { startDate, endDate } = detail;
 
-				// console.log(dateRangePicker)
 				const _start = startDate ? startDate.toISOString() : startDate;
 				const _end = endDate ? endDate.toISOString() : endDate;
 
@@ -106,13 +108,8 @@ export default function () {
 			encodeFetchedJson(await (await fetch(db_path + "get-payment-methods")).text(), "fetch-get-payment-methods", ({ payment_methods: pm } = {}) => {
 				this.paymentMethods = pm;
 
-				// console.warn({ pm });
-
 				payment_methods = Object.keys(pm);
 				payment_statuses = payment_methods.map((prop) => pm[prop]).flat();
-				// console.warn({ pm: payment_statuses });
-
-				// console.warn("this.formSearch.payment_methods", this.formSearch.payment_methods, "this.formSearch.payment_statuses", this.formSearch.payment_statuses);
 
 				if (!this.formSearch.payment_methods.length) this.formSearch.payment_methods = payment_methods;
 				if (!this.formSearch.payment_statuses.length) this.formSearch.payment_statuses = payment_statuses;
@@ -139,8 +136,6 @@ export default function () {
 					const formData = new FormData();
 					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
-					console.log("page:", page);
-
 					// handle empty filter
 					if (!this.formSearch.payment_methods.length) (this.formSearch.payment_methods = payment_methods), console.warn({ payment_methods });
 					if (!this.formSearch.payment_statuses.length) (this.formSearch.payment_statuses = payment_statuses), console.warn({ payment_statuses });
@@ -148,12 +143,12 @@ export default function () {
 					// Asign x-model to post body | formdata
 					bindAndFillFormData(formData, this.formSearch);
 
-					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
+					if (!is_init) formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 					// console.log("page:", formData.get("page"));
 
 					// Handle rewrtie
 					const isRewriteUrl = rewriteUrl(formData, url_param);
-					// console.log({ isRewriteUrl });
+
 					if (!isRewriteUrl && !is_init) return console.warn("Reject get method cause same param!");
 
 					const res = await fetch(db_path + "search", {
@@ -177,6 +172,19 @@ export default function () {
 							swalSuccess: false,
 						}
 					);
+
+					// rewrite again
+					let shouldRewrite;
+					["date_start", "date_end"].forEach((key) => {
+						if (formData.get(key)) return;
+
+						formData.delete(key);
+						formData.append(key, "NULL");
+
+						if (!shouldRewrite) shouldRewrite = true;
+					});
+
+					if (shouldRewrite) rewriteUrl(formData, url_param);
 				},
 				{
 					cancelIfAlreadyInQueue: true,
@@ -246,7 +254,6 @@ export default function () {
 						text,
 						"remove",
 						async ({ msg: message } = {}) => {
-							// Swal.fire({ title: "Selamat", icon: "success", text: msg });
 							await this.get(null, true);
 
 							if (message) this.$dispatch("notify", { variant: "success", title: "Selamat", message });
