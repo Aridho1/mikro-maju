@@ -344,6 +344,8 @@ const alpineInitCallback = async () => {
 		let startDate = options?.startDate || null;
 		let endDate = options?.endDate || null;
 
+		console.error({ startDate, endDate });
+
 		if (startDate) {
 			try {
 				startDate = new Date(startDate);

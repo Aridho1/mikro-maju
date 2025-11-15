@@ -5,15 +5,7 @@ import Pagination from "../libs/pagination.js";
 import { url_param } from "../libs/urlParam.js";
 import { deafultConfirmProps, defaultErrorProps } from "../libs/swal2props.js";
 import { calculateTimeDifference, sleep } from "../libs/sleep.js";
-
-// import Datepicker from "../../../node_modules/flowbite-datepicker/js/Datepicker.js";
-// import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
-import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/DateRangePicker.js";
-import { oneDayOfTimestamp, timestampToDate } from "../libs/getDatepickerDate.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
-
-// import html2canvas from "../../../pkg/html2canvas-1.4.1/package/dist/html2canvas.esm.js";
-// import { DateRangePicker } from "../../../pkg/flowbite-3.1.2/package/lib/esm/components/datepicker/index.js";
 
 export default function () {
 	const db_path = "./src/php/transactions.php?m=";
@@ -36,21 +28,6 @@ export default function () {
 	let payment_methods = [];
 	let payment_statuses = [];
 
-	// Handle datepicker
-	const el_date_start = document.querySelector("#datepicker-range-start");
-	const el_date_end = document.querySelector("#datepicker-range-end");
-
-	const el_date_range_picker = document.querySelector("#date-range-picker");
-	const dateRangePicker = new DateRangePicker(el_date_range_picker, {
-		format: "yyyy-mm-dd",
-		clearBtn: true,
-		todayBtn: true,
-		todayBtnMode: 1,
-		language: "id",
-	});
-	const datepickers = dateRangePicker.datepickers;
-
-	const el_search = document.querySelector("#table-search-users");
 	return {
 		transactions: [],
 		form: {
@@ -87,29 +64,14 @@ export default function () {
 			return is_wait.search;
 		},
 
+		setDateToNow() {
+			const _date = new Date().toISOString().split("T")[0];
+
+			this.formSearch.date_start = _date;
+			this.formSearch.date_end = _date;
+		},
+
 		async init() {
-			// get dinamic payment methods for
-			// Swal.fire({
-			//     title: "Please Wait !",
-			//     html: "data <br>uploading", // add html attribute if you want or remove
-			//     allowOutsideClick: false,
-			//     onBeforeOpen: () => {
-			//         Swal.showLoading();
-			//     },
-			// });
-			encodeFetchedJson(await (await fetch(db_path + "get-payment-methods")).text(), "fetch-get-payment-methods", ({ payment_methods: pm } = {}) => {
-				this.paymentMethods = pm;
-
-				// console.warn({ pm });
-
-				payment_methods = Object.keys(pm);
-				payment_statuses = payment_methods.map((prop) => pm[prop]).flat();
-				// console.warn({ pm: payment_statuses });
-
-				this.formSearch.payment_methods = payment_methods;
-				this.formSearch.payment_statuses = payment_statuses;
-			});
-
 			// Set filter by url
 			fillFormsByUrlParam(
 				{
@@ -122,57 +84,36 @@ export default function () {
 				url_param
 			);
 
-			// regenerate UI / value input date
-			if (this.formSearch.date_start && this.formSearch.date_end) {
-				dateRangePicker.setDates(this.formSearch.date_start, this.formSearch.date_end);
-
-				// datepickers[1].setDate(this.formSearch.date_end);
-				// datepickers[0].setDate(this.formSearch.date_start);
+			// set date to now if no search/url
+			if (!this.formSearch.date_start && !this.formSearch.date_end) {
+				this.setDateToNow();
 			}
+			// init watch date range
+			window.addEventListener("date-range-change", ({ detail }) => {
+				const { startDate, endDate } = detail;
 
-			// setInterval(() => {
-			//     const x = datepickers[0].dates[0];
-			//     const y = datepickers[1].dates[0];
+				// console.log(dateRangePicker)
+				const _start = startDate ? startDate.toISOString() : startDate;
+				const _end = endDate ? endDate.toISOString() : endDate;
 
-			//     console.log({
-			//         start: this.formSearch.date_start,
-			//         end: this.formSearch.date_end,
+				this.formSearch.date_start = _start;
+				this.formSearch.date_end = _end;
+			});
 
-			//         start_input: el_date_start.value,
-			//         end_input: el_date_end.value,
+			encodeFetchedJson(await (await fetch(db_path + "get-payment-methods")).text(), "fetch-get-payment-methods", ({ payment_methods: pm } = {}) => {
+				this.paymentMethods = pm;
 
-			//         start_date: x && timestampToDate(x + oneDayOfTimestamp),
-			//         end_date: y && timestampToDate(y + oneDayOfTimestamp),
-			//     });
-			// }, 5000);
+				// console.warn({ pm });
 
-			// fillFormsByUrlParam("array", ["payment_methods", "payment_statuses"], this.formSearch);
-			// fillFormsByUrlParam("string", ["date_start", "date_end"], this.formSearch);
-			// fillFormsByUrlParam("bool", ["sort_desc"], this.formSearch);
-			// fillFormsByUrlParam("int", ["page"], this.formSearch);
-			// // default
-			// // array
-			// ["payment_methods", "payment_statuses"].forEach((prop) => {
-			//     const ctx = url_param[prop];
+				payment_methods = Object.keys(pm);
+				payment_statuses = payment_methods.map((prop) => pm[prop]).flat();
+				// console.warn({ pm: payment_statuses });
 
-			//     if (typeof ctx == "undefined") return;
+				// console.warn("this.formSearch.payment_methods", this.formSearch.payment_methods, "this.formSearch.payment_statuses", this.formSearch.payment_statuses);
 
-			//     this.formSearch[prop] = ctx.split(/\,/).filter((val) => val);
-			// });
-			// // if (url_param["payment_methods"]) this.formSearch.payment_methods = url_param["payment_methods"].split(/\,/);
-			// // if (url_param["payment_statuses"]) {
-			// //     const data = url_param["payment_statuses"].split(/\,/);
-			// //     console.warn(data);
-			// //     this.formSearch.payment_statuses = data;
-			// // }
-
-			// // normal
-			// if (url_param["date_start"]) this.formSearch.date_start = url_param["date_start"];
-			// if (url_param["date_end"]) this.formSearch.date_end = url_param["date_end"];
-			// if (url_param["sort_desc"]) this.formSearch.sort_desc = true;
-			// if (url_param["page"]) this.page.page = url_param["page"];
-
-			// Init
+				if (!this.formSearch.payment_methods.length) this.formSearch.payment_methods = payment_methods;
+				if (!this.formSearch.payment_statuses.length) this.formSearch.payment_statuses = payment_statuses;
+			});
 
 			setTimeout(async () => {
 				await this.get(this.page.page, true);
@@ -186,48 +127,6 @@ export default function () {
 
 				this.openStruct(newest);
 			}, 500);
-
-			// console.log("wait till 2 sec");
-			// await sleep(2000);
-			// console.log("udah");
-
-			// Handle datepicker
-
-			// this.$watch("formSearch.date_start", (curr, prev) => console.log("start", { curr, prev }));
-			// this.$watch("formSearch.date_end", (curr, prev) => console.log("end", { curr, prev }));
-
-			const ctx = this;
-
-			Object.defineProperty(el_date_start, "value", {
-				_value: "",
-				set(newValue) {
-					this._value ??= "";
-					if (newValue == this._value) return newValue;
-
-					this._value = newValue;
-					ctx.formSearch.date_start = newValue;
-
-					return newValue;
-				},
-				get() {
-					return this._value;
-				},
-			});
-
-			Object.defineProperty(el_date_end, "value", {
-				_value: "",
-				set(newValue) {
-					this._value ??= "";
-					if (newValue == this._value) return newValue;
-
-					this._value = newValue;
-					ctx.formSearch.date_end = newValue;
-					return newValue;
-				},
-				get() {
-					return this._value;
-				},
-			});
 		},
 
 		async get(page, is_init = false) {
@@ -246,33 +145,6 @@ export default function () {
 
 			// Asign x-model to post body | formdata
 			bindAndFillFormData(formData, this.formSearch);
-			// Object.keys(this.formSearch).forEach((prop) => {
-			//     const ctx = this.formSearch[prop];
-
-			//     switch (typeof ctx) {
-			//         case "boolean": {
-			//             formData.append(prop, ctx ? "on" : "");
-			//             break;
-			//         }
-			//         case "string": {
-			//             formData.append(prop, ctx);
-			//             break;
-			//         }
-			//         case "object": {
-			//             if (Array.isArray(ctx)) {
-			//                 formData.append(prop, ctx.join());
-			//             } else {
-			//                 formData.append(prop, "");
-			//             }
-
-			//             break;
-			//         }
-			//         default: {
-			//             formData.append(prop, "");
-			//             break;
-			//         }
-			//     }
-			// });
 
 			formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 			console.log("page:", formData.get("page"));
@@ -281,21 +153,6 @@ export default function () {
 			const isRewriteUrl = rewriteUrl(formData, url_param);
 			console.log({ isRewriteUrl });
 			if (!isRewriteUrl && !is_init) return (is_wait.search = false), console.warn("Reject get method cause same param!");
-
-			// formData.forEach((val, key) => (url_param[key] = val));
-
-			// const newUrl = new URLSearchParams(url_param);
-			// console.log(`${location.search}\n?${newUrl}\nis_same: ${location.search == "?" + newUrl}`);
-
-			// if (!is_init && location.search == "?" + newUrl) {
-			//     is_wait.search = false;
-			//     return console.log("same data...");
-			// }
-
-			// window.history.pushState([], "", "?" + newUrl);
-
-			// console.log(this.formSearch);
-			// console.log({ url_param });
 
 			const res = await fetch(db_path + "search", {
 				method: "POST",
@@ -329,25 +186,6 @@ export default function () {
 			encodeFetchedJson(text, "edit", async () => {
 				await this.get(null, true);
 			});
-
-			// try {
-			//     const json = JSON.parse(text);
-			//     console.log(json);
-			//     const { status, msg, data } = json;
-
-			//     if (!status) throw new Error(msg);
-
-			//     Swal.fire({ title: "Selamat", icon: "success", text: msg });
-			// } catch (e) {
-			//     console.log("Error while fetching:", text, { e });
-			//     Swal.fire({
-			//         title: "Error",
-			//         icon: "error",
-			//         text: "Terjadi kesalahan saat fetching: " + e.message,
-			//     });
-			// }
-
-			// await this.get(this.page.page, true);
 		},
 		async remove({ id }) {
 			if (!id) return;

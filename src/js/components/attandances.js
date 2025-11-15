@@ -101,7 +101,7 @@ export default function () {
 			this.formSearch.date_start = _date;
 			this.formSearch.date_end = _date;
 
-			console.log("SET DATE", { _date });
+			// console.log("SET DATE", { _date });
 		},
 
 		// methods
