@@ -247,7 +247,7 @@ export default function () {
 
 					// is_wait.add = true;
 
-					await new Promise((resolve) => setTimeout(resolve, 6000));
+					// await new Promise((resolve) => setTimeout(resolve, 6000));
 
 					const formData = new FormData();
 
@@ -259,10 +259,15 @@ export default function () {
 
 					// return;
 
-					encodeFetchedJson(await (await fetch(db_path + "add", { method: "POST", body: formData })).text(), "add", ({ msg } = {}) => {
-						// Swal.fire({ icon: "success", title: "Selamat", text });
-						this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
-					});
+					encodeFetchedJson(
+						await (await fetch(db_path + "add", { method: "POST", body: formData })).text(),
+						"add",
+						({ msg } = {}) => {
+							// Swal.fire({ icon: "success", title: "Selamat", text });
+							this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
+						},
+						{ swalSuccess: false }
+					);
 
 					console.error("THISFORM", this.form);
 
@@ -271,6 +276,7 @@ export default function () {
 					// is_wait.add = false;
 
 					await this.get(null, true);
+					this.isOpenModal = false;
 				},
 				{
 					cancelIfAlreadyInQueue: true,
@@ -301,11 +307,16 @@ export default function () {
 					formData.append("id", id);
 					formData.append("staff_id", staff_id);
 
-					encodeFetchedJson(await (await fetch(db_path + "remove", { method: "POST", body: formData })).text(), "remove", async ({ msg } = {}) => {
-						// Swal.fire({ title: "Selamat", icon: "success", text: msg });
-						this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
-						await this.get(null, true);
-					});
+					encodeFetchedJson(
+						await (await fetch(db_path + "remove", { method: "POST", body: formData })).text(),
+						"remove",
+						async ({ msg } = {}) => {
+							// Swal.fire({ title: "Selamat", icon: "success", text: msg });
+							this.$dispatch("notify", { variant: "success", title: "Selamat", message: msg });
+							await this.get(null, true);
+						},
+						{ swalSuccess: false }
+					);
 				},
 				{
 					cancelIfAlreadyInQueue: true,

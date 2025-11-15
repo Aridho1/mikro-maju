@@ -224,6 +224,7 @@
         notifications: [],
         displayDuration: 8000,
         soundEffect: true,
+		sound: null,
 
         addNotification({ variant = 'info', sender = null, title = null, message = null}) {
             const id = Date.now()
@@ -239,7 +240,9 @@
 
             if (this.soundEffect) {
                 // Play the notification sound
-                const notificationSound = new Audio('https://res.cloudinary.com/ds8pgw1pf/video/upload/v1728571480/penguinui/component-assets/sounds/ding.mp3')
+                // const notificationSound = new Audio('https://res.cloudinary.com/ds8pgw1pf/video/upload/v1728571480/penguinui/component-assets/sounds/ding.mp3')
+                const notificationSound = this.sound
+                // const notificationSound = new Audio('./src/sounds/notification.mp3')
                 notificationSound.play().catch((error) => {
                     console.error('Error playing the sound:', error)
                 })
@@ -252,6 +255,13 @@
                 )
             }, 400);
         },
+
+		init() {
+			const audio = new Audio('./src/sounds/ding (3).mp3');
+			this.sound = audio
+
+			console.warn({ audio })
+		}
     }"
 	x-on:notify.window="addNotification({
             variant: $event.detail.variant,
@@ -262,7 +272,7 @@
 	<div
 		x-on:mouseenter="$dispatch('pause-auto-dismiss')"
 		x-on:mouseleave="$dispatch('resume-auto-dismiss')"
-		class="group pointer-events-none fixed inset-x-8 top-0 z-[99] flex max-w-full flex-col gap-2 bg-transparent px-6 py-6 md:bottom-0 md:left-[unset] md:right-0 md:top-[unset] md:max-w-sm">
+		class="group pointer-events-none fixed inset-x-8 top-0 z-[9999] flex max-w-full flex-col gap-2 bg-transparent px-6 py-6 md:bottom-0 md:left-[unset] md:right-0 md:top-[unset] md:max-w-sm">
 		<template x-for="(notification, index) in notifications" x-bind:key="notification.id">
 			<!-- root div holds all of the notifications  -->
 			<div>

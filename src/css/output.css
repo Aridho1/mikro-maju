@@ -1689,6 +1689,10 @@ input:checked + .toggle-bg {
   z-index: 40;
 }
 
+.z-\[9999\] {
+  z-index: 9999;
+}
+
 .order-2 {
   order: 2;
 }
