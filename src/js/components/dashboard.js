@@ -210,29 +210,6 @@ export default function () {
 				this.formSearch._cost_date_start = _start;
 				this.formSearch._cost_date_end = _end;
 			});
-
-			// console.warn("HAIIII");
-			// console.warn("HAIIII");
-
-			// const cards = document.querySelectorAll(".card");
-
-			// console.warn({ cards });
-			// console.warn("HAIIII");
-
-			// const __conn = document.querySelector("#__conn");
-			// setTimeout(() => {
-			// 	console.warn({ cards });
-			// 	console.warn("HAIIII");
-			// 	console.error("NOOOOTIFFFFFFFF");
-			// 	this.$dispatch("notify", { variant: "success", title: "LOG", message: `conn: ${__conn.clientWidth}` });
-			// }, 1000);
-
-			// cards.forEach((el, i) => {
-			// 	console.warn(el);
-			// 	setTimeout(() => {
-			// 		this.$dispatch("notify", { variant: "success", title: "LOG", message: `card-${i}: ${el.clientWidth}` });
-			// 	}, 1000);
-			// });
 		},
 
 		makeFormData(isInit) {
@@ -261,32 +238,15 @@ export default function () {
 					encodeFetchedJson(await (await fetch(db_path + "get-revenue", { method: "POST", body: formData })).text(), "get-revenue", ({ revenue, revenues, sql }) => {
 						revenues.reverse();
 
-						// console.log("SQL:", sql);
-
 						this.revenues = revenues;
 
 						this.revenue = revenue;
-
-						// console.log({ revemue: this.revenue, revenues: this.revenues })
-						// console.log("json", revenue)
-
-						// chart2 = new Chart(elChart2, {
-						//     type: ''
-						// })
-
-						console.log("revenues", revenues);
 
 						const labels = revenues.map(({ date }) => (date == dateNow ? "Hari Ini" : date));
 						const tunai = revenues.map(({ tunai }) => tunai);
 						const transfer = revenues.map(({ transfer }) => transfer);
 						const QRIS = revenues.map(({ QRIS }) => QRIS);
 						const total = revenues.map(({ total }) => total);
-
-						// console.log("labels", labels);
-						// console.log("tunai", tunai);
-						// console.log("QRIS", QRIS);
-						// console.log("transfer", transfer);
-						// console.log("total", total);
 
 						const data = {
 							labels,

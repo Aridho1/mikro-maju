@@ -15,5 +15,7 @@ gitdiff/*
 !gitdiff/
 !gitdiff/help.txt
 
+config.json
+
 # pkg
 # pkg/*/
