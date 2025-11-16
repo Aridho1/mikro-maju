@@ -9,9 +9,9 @@ import { defaultErrorProps, defaultSuccessProps } from "../libs/swal2props.js";
  * @returns {Boolean}
  *
  * @example
- * encodeFetchedJson(await (await fetch('./path/to/file.ext')).text(), '', (json, textResult) => {}, { swallSuccess: false, swallError: false, errorCallback: (e) => console.error(e) })
+ * encodeFetchedJson(await (await fetch('./path/to/file.ext')).text(), '', (json, textResult) => {}, { swalSuccess: false, swalError: false, errorCallback: (e) => console.error(e) })
  */
-export default function encodeFetchedJson(text_result, act_name, callback, { swalSuccess = true, swallError = true, errorCallback = null } = {}) {
+export default function encodeFetchedJson(text_result, act_name, callback, { swalSuccess = true, swalError = true, errorCallback = null } = {}) {
 	console.log("encode,,,");
 	try {
 		const json = JSON.parse(text_result);
@@ -26,7 +26,7 @@ export default function encodeFetchedJson(text_result, act_name, callback, { swa
 	} catch (e) {
 		console.error(e, "text:", text_result);
 		console.log(text_result);
-		if (swallError && act_name) Swal.fire({ ...defaultErrorProps, text: "Terjadi kesalahan saat " + act_name + " : " + e.message });
+		if (swalError && act_name) Swal.fire({ ...defaultErrorProps, text: "Terjadi kesalahan saat " + act_name + " : " + e.message });
 
 		if (typeof errorCallback == "function") errorCallback(e);
 
