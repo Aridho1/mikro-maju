@@ -16,6 +16,25 @@ switch (M) {
 
     case "get-revenue": {
 
+        $_revenue_date_start ??= false;
+        $_revenue_date_end ??= false;
+
+        $date_queries = [];
+
+        if ($_revenue_date_start) {
+            $date_queries[] = "date >= '$_revenue_date_start' ";
+        }
+
+        if ($_revenue_date_end) {
+            $date_queries[] = "date <= '$_revenue_date_end' ";
+        }
+        
+        $date_query = "";
+        if (!empty($date_queries)) 
+            $date_query = implode(" AND ", $date_queries);
+        else 
+            $date_query = "date >= CURDATE() - INTERVAL 30 DAY";
+
         $sql = "SELECT 
                 date,
                 SUM(CASE WHEN payment_method = 'Tunai' THEN total ELSE 0 END) as tunai,
@@ -24,10 +43,13 @@ switch (M) {
                 SUM(profit) AS profit,
                 SUM(total) AS total 
             FROM transactions 
-            WHERE date >= CURDATE() - INTERVAL 30 DAY
+            WHERE $date_query 
             GROUP BY date 
             ORDER BY date DESC LIMIT 15
         ";
+
+        // die($sql);
+        // echo json_encode(['sql' => $sql]); die;
 
         $raw = $db->query($sql);
 
@@ -51,12 +73,36 @@ switch (M) {
             "status" => true,
             "revenue" => $revenue,
             "revenues" => $revenues,
+            "sql" => $sql
         ]);
 
         break;
     }
 
     case "get-margin": {
+
+        $_margin_date_start ??= false;
+        $_margin_date_end ??= false;
+
+        $date_queries = [];
+
+        if ($_margin_date_start) {
+            $date_queries[] = "date >= '$_margin_date_start' ";
+        }
+
+        if ($_margin_date_end) {
+            $date_queries[] = "date <= '$_margin_date_end' ";
+        }
+        
+        $date_query = "date >= CURDATE() - INTERVAL 30 DAY";
+        $date_query = "";
+        if (!empty($date_queries)) 
+            $date_query = implode(" AND ", $date_queries);
+        else 
+            $date_query = "date >= CURDATE() - INTERVAL 30 DAY";
+
+        
+        
         $sql = "SELECT
             date,
             SUM(total) as total,
@@ -86,12 +132,42 @@ switch (M) {
             "status" => true,
             "margin" => $margin,
             "margins" => $margins,
+            'sql' => $sql,
+            'post' => $_POST
         ]);
         
         break;
     }
 
     case "get-monthly-cost": {
+
+        $_cost_date_start ??= false;
+        $_cost_date_end ??= false;
+
+        $date_query = "date BETWEEN ";
+        $date_query .= $_cost_date_start ? "'$_cost_date_start'" : "CURDATE() - INTERVAL 30 DAY";
+        $date_query .= " AND ";
+        $date_query .= $_cost_date_end ? "'$_cost_date_end'" : "CURDATE()";
+
+        // if ($_cost_date_start)
+
+        // $date_queries = [];
+
+        // if ($_cost_date_start) {
+        //     $date_queries[] = "date >= '$_cost_date_start' ";
+        // }
+
+        // if ($_cost_date_end) {
+        //     $date_queries[] = "date <= '$_cost_date_end' ";
+        // }
+        
+        // $date_query = "date >= CURDATE() - INTERVAL 30 DAY";
+        // $date_query = "date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE()";
+        // $date_query = "";
+        // if (!empty($date_queries)) 
+        //     $date_query = implode(" AND ", $date_queries);
+        // else 
+        //     $date_query = "date >= CURDATE() - INTERVAL 30 DAY";
 
         // $sql = "SELECT category, date, SUM(amount) AS total
         //     FROM costs
@@ -101,7 +177,7 @@ switch (M) {
 
         $sql = "SELECT category, SUM(amount) AS total
             FROM costs
-            WHERE date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE()
+            WHERE $date_query 
             GROUP BY category
         ";
 
@@ -122,6 +198,8 @@ switch (M) {
             "status" => true,
             "monthly_cost" => $monthly_cost,
             "monthly_costs" => $monthly_costs,
+            'sql' => $sql,
+            'post' => $_POST
         ]);
 
         break;

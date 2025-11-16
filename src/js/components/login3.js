@@ -17,8 +17,6 @@ export default function () {
 			password: null,
 		},
 
-		init() {},
-
 		clear() {
 			this.form.username = null;
 			this.form.password = null;

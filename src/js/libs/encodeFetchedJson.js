@@ -30,6 +30,8 @@ export default function encodeFetchedJson(text_result, act_name, callback, { swa
 
 		if (typeof errorCallback == "function") errorCallback(e);
 
+		console.log(e.message);
+
 		return false;
 	}
 

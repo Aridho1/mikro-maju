@@ -461,7 +461,7 @@ const alpineInitCallback = async () => {
 				this.dispatchChange();
 			},
 			dispatchChange() {
-				this.$dispatch("date-range-change", {
+				this.$dispatch(`date-range-change${options?.id || ""}`, {
 					startDate: this.startDate,
 					endDate: this.endDate,
 				});
@@ -469,26 +469,12 @@ const alpineInitCallback = async () => {
 
 			init() {
 				// dengarkan event clear dari parent
-				this.$el.addEventListener("clear-range", () => this.clear());
+				this.$el.addEventListener(`clear-range${options?.id || ""}`, () => this.clear());
 
 				console.log("INIT DATE RANGE PICKER");
 			},
 		};
 	});
-
-	// Alpine.data('app', () => ({
-	//     // isOpenBlackBarrier: true,
-	//     // IDR,
-	//     // didOpen() {
-	//     //     Swal.getConfirmButton()?.classList.add("bg-blue-400")
-	//     //     Swal.getConfirmButton()?.classList.add("bg-blue-400")
-	//     // },
-	//     // success({ text, title = 'Selamat' } = {}) {
-	//     //     return Swal.fire({
-	//     //         title, text, didOpen: this.didOpen
-	//     //     })
-	//     // }
-	// }))
 
 	await loadComponent();
 };
