@@ -1,13 +1,12 @@
 import bindAndFillFormData from "../libs/bindAndFillFormData.js";
 import encodeFetchedJson from "../libs/encodeFetchedJson.js";
-import { defaultErrorProps } from "../libs/swal2props.js";
+// import { defaultErrorProps } from "../libs/swal2props.js";
+import { TaskQueue } from "../libs/TaskQueue.js";
+
+const q = new TaskQueue();
 
 export default function () {
 	const db_path = "./src/php/staffs.php?m=";
-
-	const is_wait = {
-		login: false,
-	};
 
 	return {
 		appName: "login",
@@ -19,20 +18,27 @@ export default function () {
 		init() {},
 
 		async login() {
-			if (is_wait.login) return await Swal.fire({ ...defaultErrorProps, text: "Mohon Tunggu. Sedang memproses aksi sebelumnya!" });
+			q.add(
+				"login",
+				async () => {
+					const formData = new FormData();
+					bindAndFillFormData(formData, this.form);
 
-			is_wait.login = true;
+					encodeFetchedJson(
+						await (await fetch(db_path + "login", { method: "POST", body: formData })).text(),
+						"Login",
+						({ msg: message }) => {
+							setTimeout(() => {
+								location.href = "?c=menu";
+							}, 3000);
 
-			const formData = new FormData();
-			bindAndFillFormData(formData, this.form);
-
-			encodeFetchedJson(await (await fetch(db_path + "login", { method: "POST", body: formData })).text(), "Login", () => {
-				setTimeout(() => {
-					location.href = "?c=menu";
-				}, 3000);
-			});
-
-			is_wait.login = false;
+							if (message) this.$dispatch("notify", { variant: "success", title: "Selamat", message });
+						},
+						{ swallError: false, errorCallback: ({ message }) => this.$dispatch("notify", { variant: "danger", title: "Gagal", message }) }
+					);
+				},
+				{ cancelIfAlreadyInQueue: true, callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu beberapa saat! Sedang memproses aaksi sebelumnya." }) }
+			);
 		},
 	};
 }

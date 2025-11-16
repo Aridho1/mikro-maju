@@ -53,6 +53,8 @@ async function loadComponent() {
 
 	let app;
 
+	const notifHtml = await (await fetch("./src/html/notif.html")).text();
+
 	// look for component exlusive
 	if (!exlusiveComponent.includes(componentName)) {
 		console.log(`${componentName} is not exlusive`);
@@ -116,6 +118,8 @@ async function loadComponent() {
 			console.error("Error while fetching component...", e.message);
 		}
 	}
+
+	app.innerHTML += notifHtml;
 
 	if (window.initFlowbite) {
 		initFlowbite();

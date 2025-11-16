@@ -366,7 +366,7 @@ export default function () {
 
 						const { isConfirmed } = await Swal.fire({ ...deafultConfirmProps, title: "Yakin ingin sync status nya lagi?", text: `Aksi yang sama baru saja di lakukan ${times.minutes > 0 ? times.minutes + " menit" : times.seconds + " detik"} yang lalu.` });
 
-						console.log("confirm:", isConfirmed);
+						// console.log("confirm:", isConfirmed);
 						if (!isConfirmed) return;
 					}
 
@@ -406,7 +406,7 @@ export default function () {
 					encodeFetchedJson(
 						await (await fetch(db_path + "remake-transaction", { method: "POST", body: formData })).text(),
 						"Remake Transaction",
-						({ nsg: message }) => {
+						({ msg: message }) => {
 							// console.log(json);
 							this.get(null, true);
 
