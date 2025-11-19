@@ -25,6 +25,7 @@ Define("DB_NAME", IS_PRODUCTION ? $config["DB_NAME"] : $config["LOCAL_DB_NAME"])
 Define("USER_NAME", IS_PRODUCTION ? $config["DB_USER"] : $config["LOCAL_DB_USER"]);
 Define("PASSWORD", IS_PRODUCTION ? $config["DB_PASSWORD"] : $config["LOCAL_DB_PASSWORD"]);
 
+
 // force_debug
 if (IS_PRODUCTION && ($config['is_force_debug'] ?? false)) {
     ini_set('display_errors', 1);
