@@ -25,6 +25,11 @@ Define("DB_NAME", IS_PRODUCTION ? $config["DB_NAME"] : $config["LOCAL_DB_NAME"])
 Define("USER_NAME", IS_PRODUCTION ? $config["DB_USER"] : $config["LOCAL_DB_USER"]);
 Define("PASSWORD", IS_PRODUCTION ? $config["DB_PASSWORD"] : $config["LOCAL_DB_PASSWORD"]);
 
+if (IS_PRODUCTION) {
+    echo "DB_NAME: " . DB_NAME;
+    echo "USER_NAME: " . USER_NAME;
+    echo "PASSWORD: " . PASSWORD;
+}
 
 // force_debug
 if (IS_PRODUCTION && ($config['is_force_debug'] ?? false)) {

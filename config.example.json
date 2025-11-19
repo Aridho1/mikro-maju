@@ -11,9 +11,9 @@
 	"is_production": false,
 	"is_force_debug": false,
 
-	"DB_NAME": "mobo7639_mikro_maju",
-	"DB_USERNAME": "mobo7639_mikro_maju_ku",
-	"DB_PASSWORD": "mobo7639_mikro_maju_ku",
+	"DB_NAME": "",
+	"DB_USERNAME": "",
+	"DB_PASSWORD": "",
 
 	"LOCAL_DB_NAME": "mikro_maju",
 	"LOCAL_DB_USERNAME": "root",
