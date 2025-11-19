@@ -1,247 +1,35 @@
-import encodeFetchedJson from "../libs/encodeFetchedJson.js";
 import { TaskQueue } from "../libs/TaskQueue.js";
 
 const q = new TaskQueue();
 
 export default function () {
-	const form = document.querySelector("#form-transaction");
-	const db_path = "./src/php/";
-
-	const is_wait = {
-		submit: false,
-	};
+	const db_path = "./src/php/tables.php?m=";
 
 	return {
-		items: [],
-		products: [],
-		filteredProducts: [],
-		searchKeyword: "",
-		categories: {},
-		filterCategories: {},
-		cart: [],
-		quantity: 0,
-		total: 0,
-		payment_method: "Tunai",
-		inputBuy: 0,
-		name: null,
+		appName: "Tables",
+		link: "#",
 
 		async init() {
-			// Handle get products
-			encodeFetchedJson(await (await fetch(db_path + "products.php?m=get")).text(), false, (json) => {
-				// const { data } = json
-				this.products = json.data || [];
-				this.getCart();
+			const canvas = document.getElementById("qr-code");
+
+			const qr = await new QRCode("qr-code", {
+				text: "HALO SEMUA",
+				width: 128,
+				height: 128,
+				colorDark: "#000000",
+				colorLight: "#ffffff",
+				correctLevel: QRCode.CorrectLevel.H,
 			});
 
-			// Handle get categories
-			encodeFetchedJson(await (await fetch(db_path + "products.php?m=get-categories")).text(), false, (json) => {
-				this.categories = json.categories;
+			await qr;
 
-				// Handle localstorage & filter categories
-				Object.keys(this.categories).forEach((key) => {
-					this.filterCategories[key] = {
-						enabled: false,
-						items: [],
-					};
-				});
+			this.$nextTick(() => {
+				const link = qr._el.querySelector("img").src;
 
-				const local = this.getStorageFilterCategories() ?? {};
-
-				if (local && typeof localStorage == "object") Object.assign(this.filterCategories, local);
+				console.log({ link });
 			});
 
-			this.$watch("filterCategories", () => {
-				this.setStorageFilterCategories();
-			});
-
-			this.$watch("inputBuy", (curr, prev) => {
-				if (isNaN(curr) || isNaN(prev)) return;
-
-				console.log({ curr, prev });
-
-				if (prev - 1 == curr) this.inputBuy = prev - 1000;
-				else if (prev - 0 + 1 == curr) this.inputBuy = prev - 0 + 1000;
-			});
-
-			this.$watch("payment_method", (curr, prev) => {
-				console.log({ curr, prev });
-			});
-
-			// Handle quantity & storage
-			let qty = 0;
-
-			this.cart.forEach(({ quantity, sub_total }) => {
-				qty += quantity;
-				this.total += sub_total;
-			});
-
-			this.quantity = qty;
-		},
-
-		filterCategory(e) {
-			const category = e?.target?.name?.split(/^filter-category-/)[1];
-
-			if (!category) return;
-
-			if (!e.target.checked) {
-				delete this.filterCategories[category];
-			} else this.filterCategories[category] = {};
-		},
-
-		filterSubcategory(e) {
-			const subcategory = e?.target?.name?.split(/^filter-subcategory-/)[1];
-			const category = e?.target?.dataset?.category;
-
-			if (!subcategory || !category) return;
-
-			if (!this.filterCategories[category]) return;
-
-			this.filterCategories[category][subcategory] = e.target.checked;
-		},
-
-		async submit({ target } = {}) {
-			if (!target) return console.error("Missing target");
-
-			q.add(
-				"submit",
-				async () => {
-					if (!this.total) this.$dispatch("notify", { variant: "danger", title: "Gagal", message: "Pilih setidaknya 1 produk!" });
-
-					const { cart } = this;
-
-					const formData = new FormData(target);
-					formData.append("user-cart", JSON.stringify(cart));
-
-					const res = await fetch(db_path + "transactions.php?m=add-order", {
-						method: "POST",
-						body: formData,
-					});
-					const text = await res.text();
-
-					encodeFetchedJson(
-						text,
-						"Tambah Transaksi",
-						({ msg: message, transaction_respon: { res: { token } = {} } = {} }) => {
-							// Swal.fire({ title: "Selamat", icon: "success", text: msg, didOpen })
-							this.clear();
-
-							console.warn({ message });
-
-							// if (message)
-							//this.$dispatch("notify", { variant: "success", title: "Selamat", message });
-							this.$dispatch("notify", { variant: "success", title: "Selamat", message: "Transaksi berhasil ditambahkan!" });
-
-							// setTimeout(() => {
-							// 	window.open(`?c=transactions&get_newest_struk=true`, "_blank");
-							// }, 2000);
-
-							// Redirect
-							// if (token) window.open("pay.html?token=" + token, "_blank");
-						},
-						{
-							// swalSuccess: false,
-						}
-					);
-				},
-				{
-					cancelIfAlreadyInQueue: true,
-					callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Gagal", message: "Sedang memproses aksi sebelumnya. Mohon tunggu beberapa saat lagi!" }),
-				}
-			);
-		},
-		clear() {
-			this.cart = [];
-			this.quantity = 0;
-			this.total = 0;
-			this.setCart();
-			this.inputBuy = 0;
-		},
-		selectItem(item) {
-			console.log({ cart: this.cart, item });
-
-			const cart = this.cart?.find(({ id }) => id == item.id);
-
-			if (!cart) {
-				item = {
-					...item,
-					quantity: item.quantity - 0,
-					price: item.price - 0,
-				};
-				this.cart.push({ ...item, quantity: 1, sub_total: item.price });
-				this.quantity++;
-				this.total += item.price;
-			} else {
-				this.cart = this.cart.map((_item) => {
-					if (_item.id == item.id) {
-						_item.quantity++;
-						_item.sub_total += item.price - 0;
-						this.quantity++;
-						this.total += item.price - 0;
-					}
-
-					return _item;
-				});
-			}
-		},
-		addQuantity({ id }) {
-			this.cart = this.cart.map((item) => {
-				if (item.id == id) {
-					item.quantity++;
-					item.sub_total += item.price - 0;
-					this.total += item.price - 0;
-				}
-
-				return item;
-			});
-
-			this.quantity++;
-		},
-		removeQuantity({ id }) {
-			let isRemove = false;
-
-			this.cart = this.cart.map((item) => {
-				if (item.id == id) {
-					isRemove = --item.quantity == 0;
-					item.sub_total -= item.price;
-					this.quantity--;
-					this.total -= item.price;
-
-					if (isRemove) return false;
-				}
-
-				return item;
-			});
-
-			if (isRemove) this.cart = this.cart.filter((val) => val);
-		},
-		setCart() {
-			console.log(this);
-			localStorage.setItem("user-cart", JSON.stringify(this.cart));
-			// console.log('set cart')
-		},
-		getCart() {
-			const rawCart = localStorage.getItem("user-cart");
-
-			try {
-				this.cart = JSON.parse(rawCart) || [];
-			} catch (e) {
-				console.warn("cart error...", { rawCart, e });
-			}
-
-			// console.log('get cart')
-		},
-
-		getStorageFilterCategories() {
-			const storage = localStorage.getItem("filterCategories");
-			try {
-				return JSON.parse(storage);
-			} catch (e) {
-				console.log(e, "storage:", storage);
-			}
-		},
-		setStorageFilterCategories() {
-			const data = this.filterCategories;
-			localStorage.setItem("filterCategories", JSON.stringify(data));
+			// this.link = link;
 		},
 	};
 }
