@@ -22,7 +22,7 @@ Define("IS_PRODUCTION", $config['is_production'] ?? false);
 
 Define("HOST_NAME", "localhost");
 Define("DB_NAME", IS_PRODUCTION ? $config["DB_NAME"] : $config["LOCAL_DB_NAME"]);
-Define("USER_NAME", IS_PRODUCTION ? $config["DB_USER"] : $config["LOCAL_DB_USER"]);
+Define("USER_NAME", IS_PRODUCTION ? $config["DB_USERNAME"] : $config["LOCAL_DB_USERNAME"]);
 Define("PASSWORD", IS_PRODUCTION ? $config["DB_PASSWORD"] : $config["LOCAL_DB_PASSWORD"]);
 
 if (IS_PRODUCTION) {
