@@ -9,5 +9,17 @@
 		"client_key": ""
 	},
 	"is_production": false,
-	"is_force_debug": false
+	"is_force_debug": false,
+
+	"DB_NAME": "mobo7639_mikro_maju",
+	"DB_USERNAME": "mobo7639_mikro_maju_ku",
+	"DB_PASSWORD": "mobo7639_mikro_maju_ku",
+
+	"LOCAL_DB_NAME": "mikro_maju",
+	"LOCAL_DB_USERNAME": "root",
+	"LOCAL_DB_PASSWORD": "",
+
+	"EXAMPLE_DB_NAME": "username_my_db_name",
+	"EXAMPLE_DB_USERNAME": "username_my_db_username",
+	"EXAMPLE_DB_PASSWORD": "username_my_db_password"
 }

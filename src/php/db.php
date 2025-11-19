@@ -21,9 +21,9 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 Define("IS_PRODUCTION", $config['is_production'] ?? false);
 
 Define("HOST_NAME", "localhost");
-Define("USER_NAME", IS_PRODUCTION ? "mobo7639_mikro_maju_ku" : "root");
-Define("PASSWORD", IS_PRODUCTION ? "mobo7639_mikro_maju_ku" : "");
-Define("DB_NAME", IS_PRODUCTION ? "mobo7639_mikro_maju" : "mikro_maju");
+Define("DB_NAME", IS_PRODUCTION ? $config["DB_NAME"] : $config["LOCAL_DB_NAME"]);
+Define("USER_NAME", IS_PRODUCTION ? $config["DB_USER"] : $config["LOCAL_DB_USER"]);
+Define("PASSWORD", IS_PRODUCTION ? $config["DB_PASSWORD"] : $config["LOCAL_DB_PASSWORD"]);
 
 // force_debug
 if (IS_PRODUCTION && ($config['is_force_debug'] ?? false)) {
