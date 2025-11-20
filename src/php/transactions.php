@@ -272,6 +272,21 @@ switch (M) {
 
         echo json_encode(['status' => true, 'msg' => 'Berhasil menambahkan pesanan. Mohon tunggu, pesanan anda akan di proses.', 'affected_rows' => $affected_rows, 'queries' => $queries, 'transaction_id' => $transaction_id, 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details, 'urlData' => encodeKey($transaction_id)]);
 
+        // -------------------------------
+        // Put File For SSE
+        // -------------------------------
+
+        $item = [];
+
+        $item = [
+            "name" => $name,
+            "total" => $total,
+            "payment_method" => $payment_method,
+            "category_count" => $num,
+        ];
+
+        putSSE("sse_order.json", $item);
+
         break;
     }
     

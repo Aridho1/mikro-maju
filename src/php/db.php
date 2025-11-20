@@ -156,3 +156,19 @@ function validateEmptyVar(string $str, bool $is_with_message = false): bool|stri
     // return true;
     return empty($unpass) ? true : ($is_with_message ? "Missing Required Value: " : "") . implode(", ", $unpass);
 }
+
+function putSSE(string $fileName, array $item) {
+    $folder = __DIR__ . '/../../sse/';
+    if (!is_dir($folder)) mkdir($folder, 0755, true);
+
+    $eventFile = $folder . $fileName;
+    $eventObj = [
+        'last_event' => time(),
+        'payload'    => $item
+    ];
+
+    file_put_contents(
+        $eventFile,
+        json_encode($eventObj, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+    );
+}

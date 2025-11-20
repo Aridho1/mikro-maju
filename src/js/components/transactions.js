@@ -10,6 +10,12 @@ import { TaskQueue } from "../libs/TaskQueue.js";
 
 const q = new TaskQueue();
 
+const IDR = new Intl.NumberFormat("id-ID", {
+	style: "currency",
+	currency: "IDR",
+	minimumFractionDigits: 0,
+});
+
 export default function () {
 	const db_path = "./src/php/transactions.php?m=";
 
@@ -127,6 +133,23 @@ export default function () {
 
 				this.openStruct(newest);
 			}, 500);
+
+			(() => {
+				// SSE NOTIF
+				const es = new EventSource("./src/php/sse-server.php");
+
+				es.addEventListener("sse_order", (e) => {
+					try {
+						const payload = JSON.parse(e.data);
+
+						const { name, total, payment_method, category_count } = payload;
+
+						this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
+					} catch (error) {
+						console.log("ERROR IN SSE ORDER", error);
+					}
+				});
+			})();
 		},
 
 		async get(page, is_init = false) {

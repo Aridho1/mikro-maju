@@ -48,12 +48,6 @@ if (empty($data['amount'])) {
 $data['note'] = $data['note'] ?? '';
 
 // -------------------------------
-// Prepare folder
-// -------------------------------
-$folder = __DIR__ . '/../../sse/';
-if (!is_dir($folder)) mkdir($folder, 0755, true);
-
-// -------------------------------
 // Build item
 // -------------------------------
 $item = [
@@ -62,6 +56,12 @@ $item = [
     'note'       => (string)$data['note'],
     'created_at' => date('Y-m-d H:i:s'),
 ];
+
+// -------------------------------
+// Prepare folder
+// -------------------------------
+$folder = __DIR__ . '/../../sse/';
+if (!is_dir($folder)) mkdir($folder, 0755, true);
 
 // die("DUARRRRaaa");
 
