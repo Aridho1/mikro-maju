@@ -142,6 +142,9 @@ export default function () {
 					try {
 						const payload = JSON.parse(e.data);
 
+						console.warn(e);
+						console.warn(payload);
+
 						const { name, total, payment_method, category_count } = payload;
 
 						this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
