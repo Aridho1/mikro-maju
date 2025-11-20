@@ -17,5 +17,7 @@ gitdiff/*
 
 config.json
 
+sse/*
+
 # pkg
 # pkg/*/

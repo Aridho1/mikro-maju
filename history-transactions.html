@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>History Listener</title>
+	</head>
+	<body>
+		<h3>History Listener (multi-event)</h3>
+		<br />
+		<a href="./order.html">TO Order</a>
+		<br />
+		<div id="log"></div>
+
+		<script>
+			const log = document.getElementById("log");
+
+			function append(msg) {
+				const p = document.createElement("div");
+				p.textContent = "[" + new Date().toLocaleTimeString() + "] " + msg;
+				log.prepend(p);
+			}
+
+			// connect to SSE
+			const es = new EventSource("./src/php/sse-server.php");
+
+			// generic onmessage fallback (when event name not used)
+			es.onmessage = (e) => {
+				append("message: " + e.data);
+			};
+
+			// listen specifically to "order" events
+			es.addEventListener("order", (e) => {
+				try {
+					const payload = JSON.parse(e.data);
+					append("order event: " + JSON.stringify(payload));
+					// you can show toast, update UI, prepend to list, dsb
+				} catch (err) {
+					append("order parse error");
+				}
+			});
+
+			// also listen transaction events if exist
+			es.addEventListener("transaction", (e) => {
+				try {
+					const payload = JSON.parse(e.data);
+					append("transaction event: " + JSON.stringify(payload));
+				} catch (err) {
+					append("transaction parse error");
+				}
+			});
+
+			es.onopen = () => append("SSE OPEN");
+			es.onerror = (ev) => append("SSE ERROR (check server / network)");
+		</script>
+	</body>
+</html>
