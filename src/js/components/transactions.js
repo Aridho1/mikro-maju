@@ -151,7 +151,7 @@ export default function () {
 
 						const { name, total, payment_method, category_count } = payload;
 
-						if (!count++) this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
+						if (count++) this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
 					} catch (error) {
 						console.log("ERROR IN SSE ORDER", error);
 					}
