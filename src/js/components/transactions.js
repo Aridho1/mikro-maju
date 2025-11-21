@@ -7,6 +7,7 @@ import { deafultConfirmProps, defaultErrorProps } from "../libs/swal2props.js";
 import { calculateTimeDifference, sleep } from "../libs/sleep.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
 import { TaskQueue } from "../libs/TaskQueue.js";
+import { config } from "../libs/getConfigJson.js";
 
 const q = new TaskQueue();
 
@@ -135,6 +136,10 @@ export default function () {
 			}, 500);
 
 			(() => {
+				// if in local n not good to use sse (its very lag in laragon - nginx)
+				if (config?.IS_USING_SSE == false) return console.warn("NOT USING SSE");
+				else console.warn("USING SSE");
+
 				// SSE NOTIF
 				const es = new EventSource("./src/php/sse-server.php");
 

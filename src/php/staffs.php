@@ -28,7 +28,12 @@ switch (M) {
             break;
         }
 
-        $staff = $db->query("SELECT * FROM $table WHERE username = '$username'")->fetch_assoc();
+        $q = "SELECT * FROM $table WHERE username = '$username'";
+
+        // die($q);
+
+
+        $staff = $db->query($q)->fetch_assoc();
 
         // validate db
         if (empty($staff)) {
@@ -37,7 +42,7 @@ switch (M) {
         }
 
         if ($staff['password'] !== $password) {
-            echo json_encode(['status' => false, 'msg' => "Password salah!", 'post' => $_POST]);
+            echo json_encode(['status' => false, "a" => 'a', "staff" => $staff, 'msg' => "Password salah!", 'post' => $_POST]);
             break;
         }
 

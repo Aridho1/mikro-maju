@@ -4,7 +4,7 @@
 
 // echo  json_encode(['data' => explode('duara', 'duar-meledak-3')]);
 
-include_once 'db.php';
+// include_once 'db.php';
 
 // $key = '777';
 
@@ -86,10 +86,10 @@ include_once 'db.php';
 //     echo "key: $key | value $value <br>";
 // }
 
-$txt = "hello world";
-$txt2 = "hello world2";
-$txt3 = "hello world3";
-$txt4 = "hello world4";
+// $txt = "hello world";
+// $txt2 = "hello world2";
+// $txt3 = "hello world3";
+// $txt4 = "hello world4";
 
 
 // echo ucfirst($txt);
@@ -101,4 +101,12 @@ $txt4 = "hello world4";
 // echo json_encode($config ?? []);
 // echo json_encode($config['pagination'] ?? []);
 
-echo (int) microtime(true);
+// echo (int) microtime(true);
+
+$arr = [
+    "item_1" => "MY ITEM 1",
+];
+
+$item = $arr['item_11'] ?? '';
+
+echo "item = $item";

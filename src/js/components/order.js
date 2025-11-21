@@ -13,6 +13,8 @@ export default function () {
 		submit: false,
 	};
 
+	const { t } = url_param;
+
 	return {
 		items: [],
 		products: [],
@@ -26,6 +28,10 @@ export default function () {
 		payment_method: "Tunai",
 		inputBuy: 0,
 		name: null,
+
+		get t() {
+			return t;
+		},
 
 		async init() {
 			// Validate table name
@@ -141,6 +147,7 @@ export default function () {
 
 					const formData = new FormData(target);
 					formData.append("user-cart", JSON.stringify(cart));
+					formData.append("t", t);
 
 					const res = await fetch(db_path + "transactions.php?m=add-order", {
 						method: "POST",
