@@ -21,5 +21,7 @@
 
 	"EXAMPLE_DB_NAME": "username_my_db_name",
 	"EXAMPLE_DB_USERNAME": "username_my_db_username",
-	"EXAMPLE_DB_PASSWORD": "username_my_db_password"
+	"EXAMPLE_DB_PASSWORD": "username_my_db_password",
+
+	"IS_USING_SSE": true
 }

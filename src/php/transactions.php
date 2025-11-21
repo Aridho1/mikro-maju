@@ -195,11 +195,13 @@ switch (M) {
         $payment_key = '';
 
         $total ??= false;
+        $t ??= false;
         $payment_method = "Tunai";
 
-        if (!$total || !$payment_method) {
-            echo json_encode(['staus' => false, 'msg' => 'Missing required value!', 'post' => $_POST]);
-            die;
+        // validate param
+        if (($validate = validateEmptyVar("name|total|t", true)) !== true) {
+            echo json_encode(['status' => false, 'msg' => $validate, 'post' => $_POST]);
+            break;
         }
 
         $carts = json_decode($_POST['user-cart'] ?? [], true);
@@ -235,7 +237,7 @@ switch (M) {
 
         switch ($payment_method) {
             case 'Tunai': {
-                $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token ='', is_req_by_user = 1");
+                $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token ='', is_req_by_user = 1, table_name = '$t'");
                 break;
             }
 
