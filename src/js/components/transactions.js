@@ -138,16 +138,20 @@ export default function () {
 				// SSE NOTIF
 				const es = new EventSource("./src/php/sse-server.php");
 
+				let count = 0;
+
 				es.addEventListener("sse_order", (e) => {
 					try {
-						const payload = JSON.parse(e.data);
+						const data = JSON.parse(e.data);
+
+						const { payload } = data;
 
 						console.warn(e);
 						console.warn(payload);
 
 						const { name, total, payment_method, category_count } = payload;
 
-						this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
+						if (!count++) this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
 					} catch (error) {
 						console.log("ERROR IN SSE ORDER", error);
 					}
