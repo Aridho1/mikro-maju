@@ -125,9 +125,10 @@ export default function () {
 			q.add(
 				"get",
 				async () => {
+					console.warn("GET DATA");
 					const formData = new FormData();
 					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
-					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
+					// formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
 					// Asign x-model to post body | formdata
 					bindAndFillFormData(formData, this.formSearch);

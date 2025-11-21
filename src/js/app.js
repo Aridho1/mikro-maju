@@ -45,7 +45,7 @@ async function loadXData(name) {
 	console.log("THISISISIS");
 }
 
-const exlusiveComponent = ["login", "login2", "login3", "pay", "tables"];
+const exlusiveComponent = ["login", "login2", "login3", "pay", "order"];
 
 async function loadComponent() {
 	const { c: componentName } = url_param;

@@ -1,5 +1,7 @@
 import encodeFetchedJson from "../libs/encodeFetchedJson.js";
+import { defaultErrorProps } from "../libs/swal2props.js";
 import { TaskQueue } from "../libs/TaskQueue.js";
+import { url_param } from "../libs/urlParam.js";
 
 const q = new TaskQueue();
 
@@ -26,6 +28,34 @@ export default function () {
 		name: null,
 
 		async init() {
+			// Validate table name
+			encodeFetchedJson(
+				await (await fetch(db_path + "tables.php?m=validate-by-name&name=" + url_param["t"])).text(),
+				false,
+				({ status }) => {
+					if (!status) {
+						Swal.fire({
+							...defaultErrorProps,
+							title: "ERROR!!!",
+							text: "KAMU TIDAK MEMILIKI AKSES!",
+						});
+
+						this.$el.innerHTML = "";
+					}
+				},
+				{
+					errorCallback: () => {
+						Swal.fire({
+							...defaultErrorProps,
+							title: "ERROR!!!",
+							text: "KAMU TIDAK MEMILIKI AKSES!",
+						});
+
+						this.$el.innerHTML = "";
+					},
+				}
+			);
+
 			// Handle get products
 			encodeFetchedJson(await (await fetch(db_path + "products.php?m=get")).text(), false, (json) => {
 				// const { data } = json
