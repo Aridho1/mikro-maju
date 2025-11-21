@@ -188,6 +188,7 @@ switch (M) {
 
     case 'add-order': {
 
+        $_name = $name ?: '';
         $name = $name ? "'$name'" : "NULL";
         $date = Date('Y-m-d');
         $payment_status = 'pending';
@@ -279,7 +280,7 @@ switch (M) {
         $item = [];
 
         $item = [
-            "name" => $name,
+            "name" => $_name,
             "total" => $total,
             "payment_method" => $payment_method,
             "category_count" => $num,
