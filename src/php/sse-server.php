@@ -1,89 +1,84 @@
 <?php
-// sse-multi.php — FINAL VERSION
-// Long-running SSE watcher for all *.json files in /sse
-
 set_time_limit(0);
 ignore_user_abort(true);
 
 header("Content-Type: text/event-stream");
 header("Cache-Control: no-cache");
 header("Connection: keep-alive");
-header("X-Accel-Buffering: no"); // for nginx
+header("X-Accel-Buffering: no");
 
 $folder = __DIR__ . '/../../sse/';
-$pollIntervalUs = 300000; // 0.3s
+$pollIntervalUs = 300000;
 
-// create folder if not exists
 if (!is_dir($folder)) @mkdir($folder, 0755, true);
 
-$lastMap = []; // store: mtime, hash, data
+$lastMap = [];
 
-while (ob_get_level() > 0) ob_end_flush();
+while (ob_get_level()) ob_end_flush();
 flush();
 
-// main loop
 while (true) {
     if (connection_aborted()) break;
 
-    $files = glob($folder . '*.json');
+    foreach (glob($folder . '*.json') as $file) {
 
-    foreach ($files as $file) {
         clearstatcache(true, $file);
-
         $mtime = @filemtime($file) ?: 0;
-        $hash  = is_file($file) ? @md5_file($file) : null;
-
-        $basename = basename($file);
-        $name = pathinfo($basename, PATHINFO_FILENAME);
+        $hash  = @md5_file($file) ?: null;
 
         $prev = $lastMap[$file] ?? null;
-        $prevMtime = $prev['mtime'] ?? 0;
-        $prevHash  = $prev['hash'] ?? null;
+        $prevData        = $prev['data']     ?? null; // payload full
+        $prevOriginal    = $prev['original'] ?? null; // payload original JSON
 
-        // Nothing changed at all
-        if ($mtime === $prevMtime && $hash === $prevHash) {
+        // Skip jika tidak berubah
+        if ($prev && $prev['mtime'] === $mtime && $prev['hash'] === $hash) {
             continue;
         }
 
-        // File modified but hash same → skip duplicates
-        if ($prevHash !== null && $hash === $prevHash) {
-            // only update mtime (so next scans stay correct)
+        // Modified tapi hash sama → skip
+        if ($prev && $prev['hash'] === $hash) {
             $lastMap[$file]['mtime'] = $mtime;
             continue;
         }
 
-        // Load file content safely
+        // Baca file
         $content = @file_get_contents($file);
         if ($content === false) continue;
 
         $decoded = json_decode($content, true);
-        $payload = json_last_error() === JSON_ERROR_NONE
-            ? $decoded
-            : ['raw' => $content];
+        $isJson = json_last_error() === JSON_ERROR_NONE;
 
-        // previous payload check (extra guard)
-        $prevPayload = $prev['data'] ?? null;
-        if ($prevPayload !== null && $prevPayload == $payload) {
-            // payload same → skip
+        $originalPayload = $isJson ? $decoded : null;
+        $payload         = $isJson ? $decoded : ['raw' => $content];
+
+        // Tambahkan __prev_json dan __curr_json (tanpa internal extra)
+        if ($isJson) {
+            $payload['__curr_json'] = json_encode($originalPayload);
+            $payload['__prev_json'] = $prevOriginal ? json_encode($prevOriginal) : null;
+        }
+
+        // Skip jika payload sama
+        if ($prevData !== null && $prevData == $payload) {
             $lastMap[$file]['mtime'] = $mtime;
             $lastMap[$file]['hash']  = $hash;
             continue;
         }
 
-        // Update memory
+        // Simpan state (payload full + payload original)
         $lastMap[$file] = [
-            'mtime' => $mtime,
-            'hash'  => $hash,
-            'data'  => $payload,
+            'mtime'    => $mtime,
+            'hash'     => $hash,
+            'data'     => $payload,         // full (untuk guard)
+            'original' => $originalPayload, // hanya JSON asli user
         ];
 
-        // SEND SSE
-        $safeEvent = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
-        $dataLine = json_encode($payload);
+        // Kirim SSE
+        $event = preg_replace('/[^a-zA-Z0-9_\-]/', '_', pathinfo($file, PATHINFO_FILENAME));
+        $json  = json_encode($payload);
 
-        echo "event: {$safeEvent}\n";
-        foreach (explode("\n", $dataLine) as $line) {
-            echo "data: {$line}\n";
+        echo "event: {$event}\n";
+        foreach (explode("\n", $json) as $line) {
+            echo "data: $line\n";
         }
         echo "\n";
 
