@@ -273,8 +273,6 @@ switch (M) {
 
         $affected_rows = $db->affected_rows;
 
-        echo json_encode(['status' => true, 'msg' => 'Berhasil menambahkan pesanan. Mohon tunggu, pesanan anda akan di proses.', 'affected_rows' => $affected_rows, 'queries' => $queries, 'transaction_id' => $transaction_id, 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details, 'urlData' => encodeKey($transaction_id)]);
-
         // -------------------------------
         // Put File For SSE
         // -------------------------------
@@ -285,7 +283,7 @@ switch (M) {
         $__rand = rand(1, 100);
 
         $item = [
-            "__time" => $time,
+            "__time" => $__time,
             "__time__rand" => "$__time-$__rand",
             "name" => $_name,
             "total" => $total,
@@ -294,6 +292,9 @@ switch (M) {
         ];
 
         putSSE("sse_order.json", $item);
+
+        echo json_encode(['status' => true, 'msg' => 'Berhasil menambahkan pesanan. Mohon tunggu, pesanan anda akan di proses.', 'affected_rows' => $affected_rows, 'queries' => $queries, 'transaction_id' => $transaction_id, 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details, 'urlData' => encodeKey($transaction_id)]);
+
 
         break;
     }
