@@ -29,50 +29,49 @@ while (true) {
 
     // get list of json files
     $files = glob($folder . '*.json');
-
+    
     foreach ($files as $file) {
         clearstatcache(true, $file);
         $mtime = @filemtime($file) ?: 0;
 
-        // if new file not seen before, add it to map (but don't emit if last_event=0)
-        $basename = basename($file); // e.g. order.json
-        $name = pathinfo($basename, PATHINFO_FILENAME); // e.g. order
+        $basename = basename($file);
+        $name = pathinfo($basename, PATHINFO_FILENAME);
 
-        $prev = isset($lastMap[$file]) ? $lastMap[$file] : 0;
+        $prevMtime = $lastMap[$file]['mtime'] ?? 0;
 
-        if ($mtime > $prev[0]) {
-            $lastMap[$file] = $mtime;
-            $lastMap[$file] = [$mtime];
+        // file modified?
+        if ($mtime > $prevMtime) {
 
             $content = @file_get_contents($file);
             if ($content === false) continue;
 
-            // normalize content: prefer to send JSON object
-            $payload = null;
             $decoded = json_decode($content, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $payload = $decoded;
-            } else {
-                // fallback: send raw string
-                $payload = ['raw' => $content];
+            $payload = json_last_error() === JSON_ERROR_NONE
+                ? $decoded
+                : ['raw' => $content];
+
+            // compare payload with previous payload
+            $prevPayload = $lastMap[$file]['data'] ?? null;
+
+            if ($prevPayload !== null && $prevPayload == $payload) {
+                // same content → skip
+                $lastMap[$file]['mtime'] = $mtime; // still update mtime
+                continue;
             }
 
-            // check same value
-            if ($prev[1] == $payload) continue;
+            // update lastMap
+            $lastMap[$file] = [
+                'mtime' => $mtime,
+                'data'  => $payload,
+            ];
 
-            $lastMap[$file][] = $payload;
-
-            // SSE requires "event:" and "data:" then blank line
-            // event name: use $name (safe characters)
+            // SEND SSE
             $safeEvent = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $name);
-
-            // data must not contain raw newlines without prefix, so json_encode and prefix
             $dataLine = json_encode($payload);
 
             echo "event: {$safeEvent}\n";
-            // split json into lines prefixed `data: `
-            $lines = explode("\n", $dataLine);
-            foreach ($lines as $line) {
+
+            foreach (explode("\n", $dataLine) as $line) {
                 echo "data: {$line}\n";
             }
             echo "\n";
