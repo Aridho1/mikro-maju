@@ -39,6 +39,7 @@ export default function () {
 	let payment_statuses = [];
 
 	const sseOrder = [];
+	let newSSeOrder = false;
 
 	return {
 		transactions: [],
@@ -161,7 +162,11 @@ export default function () {
 
 						const { name, total, payment_method, category_count } = payload;
 
-						if (count++) this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
+						if (count++) {
+							this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
+
+							newSSeOrder = true;
+						}
 					} catch (error) {
 						console.log("ERROR IN SSE ORDER", error);
 					}
@@ -188,7 +193,7 @@ export default function () {
 					// Handle rewrtie
 					const isRewriteUrl = rewriteUrl(formData, url_param);
 
-					if (!isRewriteUrl && !is_init) return console.warn("Reject get method cause same param!");
+					if (!isRewriteUrl && !is_init && !newSSeOrder) return console.warn("Reject get method cause same param!");
 
 					const res = await fetch(db_path + "search", {
 						method: "POST",
