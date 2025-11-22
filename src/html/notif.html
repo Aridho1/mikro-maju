@@ -79,6 +79,14 @@
 		init() {
 			this.baseAudio = new Audio('./src/sounds/ding (3).mp3')
 			console.warn('Base audio loaded:', this.baseAudio)
+
+			const unlock = () => {
+				const a = this.baseAudio.cloneNode(true);
+				a.volume = 0;
+				a.play().catch(_=>{});
+				window.removeEventListener("click", unlock);
+			};
+			window.addEventListener("click", unlock);
 		}
 	}"
 		x-on:notify.window="addNotification({
