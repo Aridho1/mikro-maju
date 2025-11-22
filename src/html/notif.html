@@ -40,55 +40,92 @@
 	<!-- Notifications -->
 	<div
 		x-data="{
-		notifications: [],
-		displayDuration: 8000,
-		soundEffect: true,
-		baseAudio: null,
+			notifications: [],
+			displayDuration: 8000,
+			soundEffect: true,
+			baseAudio: null,
+			interactionBound: false,   // memastikan listener tidak dobel
+			recoveryTimer: null,       // cek berkala untuk auto-recover
 
-		addNotification({ variant = 'info', sender = null, title = null, message = null }) {
-			const id = Date.now()
-			const notification = { id, variant, sender, title, message }
+			addNotification({ variant = 'info', sender = null, title = null, message = null }) {
+				const id = Date.now()
+				const notification = { id, variant, sender, title, message }
 
-			console.log('Get new notification', notification)
+				console.log('Get new notification', notification)
 
-			if (this.notifications.length >= 20) {
-				this.notifications.splice(0, this.notifications.length - 19)
+				if (this.notifications.length >= 20) {
+					this.notifications.splice(0, this.notifications.length - 19)
+				}
+
+				this.notifications.push(notification)
+
+				if (this.soundEffect) {
+					this.playSound()
+				}
+			},
+
+			removeNotification(id) {
+				setTimeout(() => {
+					this.notifications = this.notifications.filter(n => n.id !== id)
+				}, 400)
+			},
+
+			playSound() {
+				const audio = this.baseAudio.cloneNode(true)
+
+				audio.play().catch(err => {
+					console.error('Sound error:', err)
+
+					// Jika autoplay diblokir → pasang ulang listener
+					if (err.name === 'NotAllowedError') {
+						this.setupInteractionUnlock(true)
+					}
+				})
+			},
+
+			// AUTO FIX jika lost permission atau listener hilang
+			setupInteractionUnlock(force = false) {
+				if (this.interactionBound && !force) return
+
+				console.warn('[AUDIO] Binding interaction unlock listener...')
+
+				const unlock = () => {
+					const a = this.baseAudio.cloneNode(true)
+					a.volume = 0
+					a.play().catch(_ => {})
+					console.warn('[AUDIO] Unlocked by user interaction.')
+
+					window.removeEventListener('click', unlock)
+					this.interactionBound = false
+				}
+
+				this.interactionBound = true
+				window.addEventListener('click', unlock)
+			},
+
+			init() {
+				this.baseAudio = new Audio('./src/sounds/ding (3).mp3')
+				console.warn('Base audio loaded:', this.baseAudio)
+
+				// pertama kali load → lock siap
+				this.setupInteractionUnlock()
+
+				// periodic worker: kadang JS clear listener → pasang ulang otomatis
+				this.recoveryTimer = setInterval(() => {
+					if (!this.interactionBound) {
+						// Test apakah play masih forbidden
+						const t = this.baseAudio.cloneNode(true)
+						t.volume = 0
+						t.play().catch(err => {
+							if (err.name === 'NotAllowedError') {
+								console.warn('[AUDIO] Autoplay lost → rebinding listener.')
+								this.setupInteractionUnlock(true)
+							}
+						})
+					}
+				}, 2000)
 			}
-
-			this.notifications.push(notification)
-
-			if (this.soundEffect) {
-				this.playSound()
-			}
-		},
-
-		removeNotification(id) {
-			setTimeout(() => {
-				this.notifications = this.notifications.filter(
-					(notification) => notification.id !== id,
-				)
-			}, 400)
-		},
-
-		playSound() {
-			// clone instance, ini yang memungkinkan spam overlap
-			const audio = this.baseAudio.cloneNode(true)
-			audio.play().catch(err => console.error('Sound error:', err))
-		},
-
-		init() {
-			this.baseAudio = new Audio('./src/sounds/ding (3).mp3')
-			console.warn('Base audio loaded:', this.baseAudio)
-
-			const unlock = () => {
-				const a = this.baseAudio.cloneNode(true);
-				a.volume = 0;
-				a.play().catch(_=>{});
-				window.removeEventListener('click', unlock);
-			};
-			window.addEventListener('click', unlock);
-		}
-	}"
+		}"
 		x-on:notify.window="addNotification({
             variant: $event.detail.variant,
             sender: $event.detail.sender,
