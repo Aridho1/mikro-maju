@@ -153,6 +153,8 @@ export default function () {
 					try {
 						const data = JSON.parse(e.data);
 
+						let pushAlready = false;
+
 						if (!data) return;
 
 						// filter duplicate value
@@ -160,9 +162,13 @@ export default function () {
 							const json = JSON.stringify(data);
 
 							if (sseOrderJson.includes(json)) return;
+
+							sseOrderJson.push(json);
+							pushAlready = true;
 						} else if (sseOrder.includes(data)) return;
 
 						sseOrder.push(data);
+						if (!pushAlready) sseOrderJson.push(data);
 						console.warn(sseOrder);
 						console.warn(sseOrderJson);
 
