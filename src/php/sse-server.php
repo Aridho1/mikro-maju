@@ -12,7 +12,8 @@ $pollIntervalUs = 300000;
 
 if (!is_dir($folder)) @mkdir($folder, 0755, true);
 
-$lastMap = [];
+$state = [];
+$files = glob($folder . '*.json');
 
 while (ob_get_level()) ob_end_flush();
 flush();
@@ -20,59 +21,54 @@ flush();
 while (true) {
     if (connection_aborted()) break;
 
-    foreach (glob($folder . '*.json') as $file) {
+    // refresh file list jika ada perubahan jumlah file
+    $currentFiles = glob($folder . '*.json');
+    if (count($currentFiles) !== count($files)) {
+        $files = $currentFiles;
+    }
 
+    foreach ($files as $file) {
         clearstatcache(true, $file);
-        $mtime = @filemtime($file) ?: 0;
-        $hash  = @md5_file($file) ?: null;
 
-        $prev = $lastMap[$file] ?? null;
-        $prevData        = $prev['data']     ?? null; // payload full
-        $prevOriginal    = $prev['original'] ?? null; // payload original JSON
+        $mtime = filemtime($file) ?: 0;
+        $prev  = $state[$file] ?? null;
 
-        // Skip jika tidak berubah
-        if ($prev && $prev['mtime'] === $mtime && $prev['hash'] === $hash) {
-            continue;
-        }
+        // mtime sama → skip langsung (efisiensi)
+        if ($prev && $prev['mtime'] === $mtime) continue;
 
-        // Modified tapi hash sama → skip
+        // hitung hash hanya jika mtime berubah
+        $hash = md5_file($file);
         if ($prev && $prev['hash'] === $hash) {
-            $lastMap[$file]['mtime'] = $mtime;
+            // mtime berubah tapi hash sama → skip
+            $state[$file]['mtime'] = $mtime;
             continue;
         }
 
-        // Baca file
-        $content = @file_get_contents($file);
-        if ($content === false) continue;
+        // baca file
+        $raw = file_get_contents($file);
+        if ($raw === false) continue;
 
-        $decoded = json_decode($content, true);
-        $isJson = json_last_error() === JSON_ERROR_NONE;
+        // decode JSON
+        $decoded = json_decode($raw, true);
+        $payload = (json_last_error() === JSON_ERROR_NONE)
+            ? $decoded
+            : ['raw' => $raw];
 
-        $originalPayload = $isJson ? $decoded : null;
-        $payload         = $isJson ? $decoded : ['raw' => $content];
-
-        // Tambahkan __prev_json dan __curr_json (tanpa internal extra)
-        if ($isJson) {
-            $payload['__curr_json'] = json_encode($originalPayload);
-            $payload['__prev_json'] = $prevOriginal ? json_encode($prevOriginal) : null;
-        }
-
-        // Skip jika payload sama
-        if ($prevData !== null && $prevData == $payload) {
-            $lastMap[$file]['mtime'] = $mtime;
-            $lastMap[$file]['hash']  = $hash;
+        // payload sama → skip
+        if ($prev && $prev['payload'] == $payload) {
+            $state[$file]['mtime'] = $mtime;
+            $state[$file]['hash']  = $hash;
             continue;
         }
 
-        // Simpan state (payload full + payload original)
-        $lastMap[$file] = [
-            'mtime'    => $mtime,
-            'hash'     => $hash,
-            'data'     => $payload,         // full (untuk guard)
-            'original' => $originalPayload, // hanya JSON asli user
+        // update state
+        $state[$file] = [
+            'mtime'   => $mtime,
+            'hash'    => $hash,
+            'payload' => $payload
         ];
 
-        // Kirim SSE
+        // kirim SSE
         $event = preg_replace('/[^a-zA-Z0-9_\-]/', '_', pathinfo($file, PATHINFO_FILENAME));
         $json  = json_encode($payload);
 
@@ -80,10 +76,9 @@ while (true) {
         foreach (explode("\n", $json) as $line) {
             echo "data: $line\n";
         }
-        echo "\n";
+        echo "\n\n";
 
-        @ob_flush();
-        @flush();
+        flush();
     }
 
     usleep($pollIntervalUs);

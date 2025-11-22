@@ -39,6 +39,7 @@ export default function () {
 	let payment_statuses = [];
 
 	const sseOrder = [];
+	const sseOrderJson = [];
 	let newSSeOrder = false;
 
 	return {
@@ -151,6 +152,15 @@ export default function () {
 				es.addEventListener("sse_order", (e) => {
 					try {
 						const data = JSON.parse(e.data);
+
+						if (!data) return;
+
+						// filter duplicate value
+						if (typeof data == "object") {
+							const json = JSON.stringify(data);
+
+							if (sseOrderJson.includes(json)) return;
+						} else if (sseOrder.includes(data)) return;
 
 						sseOrder.push(data);
 						console.warn(sseOrder);
