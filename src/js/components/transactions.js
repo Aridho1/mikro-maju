@@ -164,6 +164,7 @@ export default function () {
 
 						sseOrder.push(data);
 						console.warn(sseOrder);
+						console.warn(sseOrderJson);
 
 						const { payload } = data;
 
