@@ -38,6 +38,8 @@ export default function () {
 	let payment_methods = [];
 	let payment_statuses = [];
 
+	const sseOrder = [];
+
 	return {
 		transactions: [],
 		form: {
@@ -148,6 +150,9 @@ export default function () {
 				es.addEventListener("sse_order", (e) => {
 					try {
 						const data = JSON.parse(e.data);
+
+						sseOrder.push(data);
+						console.warn(data);
 
 						const { payload } = data;
 

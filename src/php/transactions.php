@@ -281,7 +281,12 @@ switch (M) {
 
         $item = [];
 
+        $__time = time();
+        $__rand = rand(1, 100);
+
         $item = [
+            "__time" => $time,
+            "__time__rand" => "$__time-$__rand",
             "name" => $_name,
             "total" => $total,
             "payment_method" => $payment_method,

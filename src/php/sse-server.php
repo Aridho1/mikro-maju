@@ -40,8 +40,9 @@ while (true) {
 
         $prev = isset($lastMap[$file]) ? $lastMap[$file] : 0;
 
-        if ($mtime > $prev) {
+        if ($mtime > $prev[0]) {
             $lastMap[$file] = $mtime;
+            $lastMap[$file] = [$mtime];
 
             $content = @file_get_contents($file);
             if ($content === false) continue;
@@ -55,6 +56,11 @@ while (true) {
                 // fallback: send raw string
                 $payload = ['raw' => $content];
             }
+
+            // check same value
+            if ($prev[1] == $payload) continue;
+
+            $lastMap[$file][] = $payload;
 
             // SSE requires "event:" and "data:" then blank line
             // event name: use $name (safe characters)
