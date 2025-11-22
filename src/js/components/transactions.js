@@ -152,7 +152,7 @@ export default function () {
 						const data = JSON.parse(e.data);
 
 						sseOrder.push(data);
-						console.warn(data);
+						console.warn(sseOrder);
 
 						const { payload } = data;
 
