@@ -18,6 +18,7 @@ gitdiff/*
 config.json
 
 sse/*
+src/img/db/*
 
 # pkg
 # pkg/*/
