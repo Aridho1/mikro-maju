@@ -9,25 +9,24 @@ import rewriteUrl from "../libs/rewriteUrl.js";
 import { TaskQueue } from "../libs/TaskQueue.js";
 import { config } from "../libs/getConfigJson.js";
 
-const printRawBT = (text) => {
-	// const encoded = encodeURIComponent(text);
-	// alert("encoded: " + encoded);
+let isPrinting = false;
 
-	// const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.text=" + encoded + ";" + "end";
+function printRawBT(text) {
+	if (isPrinting) return;
 
-	// window.location.href = url;
-	// const base64 = toBase64(text);
-
-	// const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.base64=" + base64 + ";" + "end";
-
-	// window.location.href = url;
+	isPrinting = true;
 
 	const encoded = encodeURIComponent(text);
 
 	const url = "rawbt:" + encoded;
 
 	window.location.href = url;
-};
+
+	// unlock setelah RawBT kebuka
+	setTimeout(() => {
+		isPrinting = false;
+	}, 1500);
+}
 
 function toBase64(str) {
 	return btoa(unescape(encodeURIComponent(str)));
@@ -532,7 +531,7 @@ export default function () {
 
 				let __struk = buildStruk(_struk);
 				console.log(JSON.stringify(_struk));
-				alert("__struk:\n" + __struk);
+				// alert("__struk:\n" + __struk);
 				console.log("__struk:\n\n", __struk);
 				printRawBT(__struk);
 			}
