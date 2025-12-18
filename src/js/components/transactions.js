@@ -513,6 +513,9 @@ export default function () {
 				_struk.td = "";
 
 				console.log("_struk:", _struk);
+
+				let __struk = "";
+				console.log(JSON.stringify(_struk));
 				printRawBT(content);
 			}
 			// const { jsPDF } = window.jspdf || {};
