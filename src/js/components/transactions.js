@@ -516,6 +516,7 @@ export default function () {
 
 				let __struk = buildStruk(_struk);
 				console.log(JSON.stringify(_struk));
+				alert("__struk:\n" + __struk);
 				console.log("__struk:\n\n", __struk);
 				printRawBT(__struk);
 			}
