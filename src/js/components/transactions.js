@@ -507,7 +507,12 @@ export default function () {
 			if (useManualPrint) {
 				print();
 			} else {
-				console.log("struk:", this.struk);
+				const _struk = { ...this.struk };
+
+				// delete _struk.td;
+				_struk.td = "";
+
+				console.log("_struk:", _struk);
 				printRawBT(content);
 			}
 			// const { jsPDF } = window.jspdf || {};
