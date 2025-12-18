@@ -514,8 +514,9 @@ export default function () {
 
 				console.log("_struk:", _struk);
 
-				let __struk = "";
+				let __struk = buildStruk(_struk);
 				console.log(JSON.stringify(_struk));
+				console.log("__struk:\n\n", __struk);
 				printRawBT(content);
 			}
 			// const { jsPDF } = window.jspdf || {};
@@ -543,4 +544,56 @@ export default function () {
 			// this.whilePrint = false;
 		},
 	};
+}
+
+function buildStruk(_struk) {
+	const ESC = "\x1B";
+	const GS = "\x1D";
+
+	let text = "";
+
+	// Reset printer
+	text += ESC + "@";
+
+	// ===== HEADER =====
+	text += ESC + "a" + "\x01"; // center
+	text += ESC + "!" + "\x38"; // font besar
+	text += "KEDAI ANAKOS\n";
+	text += ESC + "!" + "\x00"; // normal
+	text += "-------------------------------\n";
+
+	// ===== INFO =====
+	text += ESC + "a" + "\x00"; // left
+	text += `Tanggal : ${_struk.date}\n`;
+	text += `No Trx  : ${_struk.id}\n`;
+	text += `Kasir  : ${_struk.name}\n`;
+	text += "-------------------------------\n";
+
+	// ===== ITEMS =====
+	_struk.transaction_details.forEach((item) => {
+		text += `${item.name}\n`;
+		text += `  ${item.quantity} x ${rupiah(item.price)}`;
+		text += ` = ${rupiah(item.sub_total)}\n`;
+	});
+
+	text += "-------------------------------\n";
+
+	// ===== TOTAL =====
+	text += ESC + "a" + "\x02"; // right
+	text += `TOTAL : ${rupiah(_struk.total)}\n`;
+
+	text += ESC + "a" + "\x00";
+	text += `Bayar  : ${_struk.payment_method}\n`;
+	text += `Status : ${_struk.payment_status}\n`;
+
+	// ===== FOOTER =====
+	text += "\n";
+	text += ESC + "a" + "\x01";
+	text += "Terima kasih 🙏\n";
+	text += "Powered by Kedai Anakos\n\n";
+
+	// Cut paper
+	text += GS + "V" + "\x01";
+
+	return text;
 }
