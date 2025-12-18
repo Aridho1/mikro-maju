@@ -639,7 +639,8 @@
 				</div>
 				<div class="text-center">Thank you for using our service.</div>
 				<div class="buttons mt-4 flex gap-4 print:hidden" x-show="!whilePrint">
-					<button class="border border-slate-400 rounded-md py-1 px-2 hover:text-slate-400 hover:border-black" @click="print">Print</button>
+					<button class="border border-slate-400 rounded-md py-1 px-2 hover:text-slate-400 hover:border-black" @click="() => print()">Print</button>
+					<button class="border border-slate-400 rounded-md py-1 px-2 hover:text-slate-400 hover:border-black" @click="() => print(false)">Print2</button>
 					<button class="border border-slate-400 rounded-md py-1 px-2 hover:text-slate-400 hover:border-black" @click="isOpenStructModal = false">Close</button>
 				</div>
 			</div>

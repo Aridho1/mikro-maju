@@ -9,6 +9,14 @@ import rewriteUrl from "../libs/rewriteUrl.js";
 import { TaskQueue } from "../libs/TaskQueue.js";
 import { config } from "../libs/getConfigJson.js";
 
+const printRawBT = (text) => {
+	const encoded = encodeURIComponent(text);
+
+	const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.text=" + encoded + ";" + "end";
+
+	window.location.href = url;
+};
+
 const q = new TaskQueue();
 
 const IDR = new Intl.NumberFormat("id-ID", {
@@ -495,8 +503,13 @@ export default function () {
 			this.isOpenStructModal = true;
 		},
 
-		async print() {
-			print();
+		async print(useManualPrint = true, content = "-- content --") {
+			if (useManualPrint) {
+				print();
+			} else {
+				console.log("struk:", this.struk);
+				printRawBT(content);
+			}
 			// const { jsPDF } = window.jspdf || {};
 
 			// if (!jsPDF) return;
