@@ -10,13 +10,22 @@ import { TaskQueue } from "../libs/TaskQueue.js";
 import { config } from "../libs/getConfigJson.js";
 
 const printRawBT = (text) => {
-	const encoded = encodeURIComponent(text);
-	alert("encoded: " + encoded);
+	// const encoded = encodeURIComponent(text);
+	// alert("encoded: " + encoded);
 
-	const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.text=" + encoded + ";" + "end";
+	// const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.text=" + encoded + ";" + "end";
+
+	// window.location.href = url;
+	const base64 = toBase64(text);
+
+	const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.base64=" + base64 + ";" + "end";
 
 	window.location.href = url;
 };
+
+function toBase64(str) {
+	return btoa(unescape(encodeURIComponent(str)));
+}
 
 const q = new TaskQueue();
 
