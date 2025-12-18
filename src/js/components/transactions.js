@@ -16,9 +16,15 @@ const printRawBT = (text) => {
 	// const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.text=" + encoded + ";" + "end";
 
 	// window.location.href = url;
-	const base64 = toBase64(text);
+	// const base64 = toBase64(text);
 
-	const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.base64=" + base64 + ";" + "end";
+	// const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.base64=" + base64 + ";" + "end";
+
+	// window.location.href = url;
+
+	const encoded = encodeURIComponent(text);
+
+	const url = "rawbt:" + encoded;
 
 	window.location.href = url;
 };
