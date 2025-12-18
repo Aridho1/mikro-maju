@@ -11,5 +11,13 @@ node_modules/
 
 .cache
 
+gitdiff/*
+!gitdiff/
+!gitdiff/help.txt
+
+config.json
+
+sse/*
+
 # pkg
 # pkg/*/

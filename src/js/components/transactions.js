@@ -5,15 +5,17 @@ import Pagination from "../libs/pagination.js";
 import { url_param } from "../libs/urlParam.js";
 import { deafultConfirmProps, defaultErrorProps } from "../libs/swal2props.js";
 import { calculateTimeDifference, sleep } from "../libs/sleep.js";
-
-// import Datepicker from "../../../node_modules/flowbite-datepicker/js/Datepicker.js";
-// import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
-import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/DateRangePicker.js";
-import { oneDayOfTimestamp, timestampToDate } from "../libs/getDatepickerDate.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
+import { TaskQueue } from "../libs/TaskQueue.js";
+import { config } from "../libs/getConfigJson.js";
 
-// import html2canvas from "../../../pkg/html2canvas-1.4.1/package/dist/html2canvas.esm.js";
-// import { DateRangePicker } from "../../../pkg/flowbite-3.1.2/package/lib/esm/components/datepicker/index.js";
+const q = new TaskQueue();
+
+const IDR = new Intl.NumberFormat("id-ID", {
+	style: "currency",
+	currency: "IDR",
+	minimumFractionDigits: 0,
+});
 
 export default function () {
 	const db_path = "./src/php/transactions.php?m=";
@@ -36,21 +38,10 @@ export default function () {
 	let payment_methods = [];
 	let payment_statuses = [];
 
-	// Handle datepicker
-	const el_date_start = document.querySelector("#datepicker-range-start");
-	const el_date_end = document.querySelector("#datepicker-range-end");
+	const sseOrder = [];
+	const sseOrderJson = [];
+	let newSSeOrder = false;
 
-	const el_date_range_picker = document.querySelector("#date-range-picker");
-	const dateRangePicker = new DateRangePicker(el_date_range_picker, {
-		format: "yyyy-mm-dd",
-		clearBtn: true,
-		todayBtn: true,
-		todayBtnMode: 1,
-		language: "id",
-	});
-	const datepickers = dateRangePicker.datepickers;
-
-	const el_search = document.querySelector("#table-search-users");
 	return {
 		transactions: [],
 		form: {
@@ -70,6 +61,7 @@ export default function () {
 			date_start: null,
 			date_end: null,
 			sort_desc: true,
+			is_req_by_user: false,
 		},
 		inputPage: null,
 		PAYMENT_METHODS,
@@ -86,92 +78,53 @@ export default function () {
 			return is_wait.search;
 		},
 
+		setDateToNow() {
+			const _date = new Date().toISOString().split("T")[0];
+
+			this.formSearch.date_start = _date;
+			this.formSearch.date_end = _date;
+		},
+
 		async init() {
-			// get dinamic payment methods for
-			// Swal.fire({
-			//     title: "Please Wait !",
-			//     html: "data <br>uploading", // add html attribute if you want or remove
-			//     allowOutsideClick: false,
-			//     onBeforeOpen: () => {
-			//         Swal.showLoading();
-			//     },
-			// });
-			encodeFetchedJson(await (await fetch(db_path + "get-payment-methods")).text(), "fetch-get-payment-methods", ({ payment_methods: pm } = {}) => {
-				this.paymentMethods = pm;
-
-				// console.warn({ pm });
-
-				payment_methods = Object.keys(pm);
-				payment_statuses = payment_methods.map((prop) => pm[prop]).flat();
-				// console.warn({ pm: payment_statuses });
-
-				this.formSearch.payment_methods = payment_methods;
-				this.formSearch.payment_statuses = payment_statuses;
-			});
-
-			// Set filter by url
 			fillFormsByUrlParam(
 				{
 					array: ["payment_methods", "payment_statuses"],
 					string: ["date_start", "date_end"],
-					boolean: "sort_desc",
+					boolean: ["sort_desc", "is_req_by_user"],
 					int: "page",
 				},
 				this.formSearch,
 				url_param
 			);
 
-			// regenerate UI / value input date
-			if (this.formSearch.date_start && this.formSearch.date_end) {
-				dateRangePicker.setDates(this.formSearch.date_start, this.formSearch.date_end);
-
-				// datepickers[1].setDate(this.formSearch.date_end);
-				// datepickers[0].setDate(this.formSearch.date_start);
+			// set date to now if no search/url
+			if (!this.formSearch.date_start && !this.formSearch.date_end) {
+				this.setDateToNow();
+			} else {
+				if (this.formSearch.date_start == "NULL") this.formSearch.date_start = null;
+				if (this.formSearch.date_end == "NULL") this.formSearch.date_end = null;
 			}
 
-			// setInterval(() => {
-			//     const x = datepickers[0].dates[0];
-			//     const y = datepickers[1].dates[0];
+			// init watch date range
+			window.addEventListener("date-range-change", ({ detail }) => {
+				const { startDate, endDate } = detail;
 
-			//     console.log({
-			//         start: this.formSearch.date_start,
-			//         end: this.formSearch.date_end,
+				const _start = startDate ? startDate.toISOString() : startDate;
+				const _end = endDate ? endDate.toISOString() : endDate;
 
-			//         start_input: el_date_start.value,
-			//         end_input: el_date_end.value,
+				this.formSearch.date_start = _start;
+				this.formSearch.date_end = _end;
+			});
 
-			//         start_date: x && timestampToDate(x + oneDayOfTimestamp),
-			//         end_date: y && timestampToDate(y + oneDayOfTimestamp),
-			//     });
-			// }, 5000);
+			encodeFetchedJson(await (await fetch(db_path + "get-payment-methods")).text(), "fetch-get-payment-methods", ({ payment_methods: pm } = {}) => {
+				this.paymentMethods = pm;
 
-			// fillFormsByUrlParam("array", ["payment_methods", "payment_statuses"], this.formSearch);
-			// fillFormsByUrlParam("string", ["date_start", "date_end"], this.formSearch);
-			// fillFormsByUrlParam("bool", ["sort_desc"], this.formSearch);
-			// fillFormsByUrlParam("int", ["page"], this.formSearch);
-			// // default
-			// // array
-			// ["payment_methods", "payment_statuses"].forEach((prop) => {
-			//     const ctx = url_param[prop];
+				payment_methods = Object.keys(pm);
+				payment_statuses = payment_methods.map((prop) => pm[prop]).flat();
 
-			//     if (typeof ctx == "undefined") return;
-
-			//     this.formSearch[prop] = ctx.split(/\,/).filter((val) => val);
-			// });
-			// // if (url_param["payment_methods"]) this.formSearch.payment_methods = url_param["payment_methods"].split(/\,/);
-			// // if (url_param["payment_statuses"]) {
-			// //     const data = url_param["payment_statuses"].split(/\,/);
-			// //     console.warn(data);
-			// //     this.formSearch.payment_statuses = data;
-			// // }
-
-			// // normal
-			// if (url_param["date_start"]) this.formSearch.date_start = url_param["date_start"];
-			// if (url_param["date_end"]) this.formSearch.date_end = url_param["date_end"];
-			// if (url_param["sort_desc"]) this.formSearch.sort_desc = true;
-			// if (url_param["page"]) this.page.page = url_param["page"];
-
-			// Init
+				if (!this.formSearch.payment_methods.length) this.formSearch.payment_methods = payment_methods;
+				if (!this.formSearch.payment_statuses.length) this.formSearch.payment_statuses = payment_statuses;
+			});
 
 			setTimeout(async () => {
 				await this.get(this.page.page, true);
@@ -186,193 +139,196 @@ export default function () {
 				this.openStruct(newest);
 			}, 500);
 
-			// console.log("wait till 2 sec");
-			// await sleep(2000);
-			// console.log("udah");
+			(() => {
+				// if in local n not good to use sse (its very lag in laragon - nginx)
+				if (config?.IS_USING_SSE == false) return console.warn("NOT USING SSE");
+				else console.warn("USING SSE");
 
-			// Handle datepicker
+				// SSE NOTIF
+				const es = new EventSource("./src/php/sse-server.php");
 
-			// this.$watch("formSearch.date_start", (curr, prev) => console.log("start", { curr, prev }));
-			// this.$watch("formSearch.date_end", (curr, prev) => console.log("end", { curr, prev }));
+				let count = 0;
 
-			const ctx = this;
+				es.addEventListener("sse_order", (e) => {
+					try {
+						const data = JSON.parse(e.data);
 
-			Object.defineProperty(el_date_start, "value", {
-				_value: "",
-				set(newValue) {
-					this._value ??= "";
-					if (newValue == this._value) return newValue;
+						let pushAlready = false;
 
-					this._value = newValue;
-					ctx.formSearch.date_start = newValue;
+						if (!data) return;
 
-					return newValue;
-				},
-				get() {
-					return this._value;
-				},
-			});
+						// filter duplicate value
+						if (typeof data == "object") {
+							const json = JSON.stringify(data);
 
-			Object.defineProperty(el_date_end, "value", {
-				_value: "",
-				set(newValue) {
-					this._value ??= "";
-					if (newValue == this._value) return newValue;
+							if (sseOrderJson.includes(json)) return;
 
-					this._value = newValue;
-					ctx.formSearch.date_end = newValue;
-					return newValue;
-				},
-				get() {
-					return this._value;
-				},
-			});
+							sseOrderJson.push(json);
+							pushAlready = true;
+						} else if (sseOrder.includes(data)) return;
+
+						sseOrder.push(data);
+						if (!pushAlready) sseOrderJson.push(data);
+						console.warn(sseOrder);
+						console.warn(sseOrderJson);
+
+						const { payload } = data;
+
+						console.warn(e);
+						console.warn(payload);
+
+						const { name, total, payment_method, category_count } = payload;
+
+						if (count++) {
+							this.$dispatch("notify", { variant: "info", title: "Transaksi Baru", message: `${name || "unkown"} telah melakukan transaksi sebesar ${IDR.format(total)} via ${payment_method}. (${category_count} jenis produk)` });
+
+							newSSeOrder = true;
+						}
+					} catch (error) {
+						console.log("ERROR IN SSE ORDER", error);
+					}
+				});
+			})();
 		},
 
 		async get(page, is_init = false) {
-			if (is_wait.search) return console.warn("cancel cause spam");
+			q.add(
+				"get",
+				async () => {
+					const formData = new FormData();
+					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
-			is_wait.search = true;
+					// handle empty filter
+					if (!this.formSearch.payment_methods.length) (this.formSearch.payment_methods = payment_methods), console.warn({ payment_methods });
+					if (!this.formSearch.payment_statuses.length) (this.formSearch.payment_statuses = payment_statuses), console.warn({ payment_statuses });
 
-			const formData = new FormData();
-			formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
+					// Asign x-model to post body | formdata
+					bindAndFillFormData(formData, this.formSearch);
 
-			console.log("page:", page);
+					if (!is_init) formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
-			// handle empty filter
-			if (!this.formSearch.payment_methods.length) (this.formSearch.payment_methods = payment_methods), console.warn({ payment_methods });
-			if (!this.formSearch.payment_statuses.length) (this.formSearch.payment_statuses = payment_statuses), console.warn({ payment_statuses });
+					// Handle rewrtie
+					const isRewriteUrl = rewriteUrl(formData, url_param);
 
-			// Asign x-model to post body | formdata
-			bindAndFillFormData(formData, this.formSearch);
-			// Object.keys(this.formSearch).forEach((prop) => {
-			//     const ctx = this.formSearch[prop];
+					if (!isRewriteUrl && !is_init && !newSSeOrder) return console.warn("Reject get method cause same param!");
 
-			//     switch (typeof ctx) {
-			//         case "boolean": {
-			//             formData.append(prop, ctx ? "on" : "");
-			//             break;
-			//         }
-			//         case "string": {
-			//             formData.append(prop, ctx);
-			//             break;
-			//         }
-			//         case "object": {
-			//             if (Array.isArray(ctx)) {
-			//                 formData.append(prop, ctx.join());
-			//             } else {
-			//                 formData.append(prop, "");
-			//             }
+					const res = await fetch(db_path + "search", {
+						method: "POST",
+						body: formData,
+					});
 
-			//             break;
-			//         }
-			//         default: {
-			//             formData.append(prop, "");
-			//             break;
-			//         }
-			//     }
-			// });
+					const text = await res.text();
 
-			formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
-			console.log("page:", formData.get("page"));
+					encodeFetchedJson(
+						text,
+						null,
+						(json) => {
+							const { status, msg: message, data, pagination, query_page, query } = json;
 
-			// Handle rewrtie
-			const isRewriteUrl = rewriteUrl(formData, url_param);
-			console.log({ isRewriteUrl });
-			if (!isRewriteUrl && !is_init) return (is_wait.search = false), console.warn("Reject get method cause same param!");
+							console.log(query);
+							this.transactions = data;
+							Object.assign(this.page, pagination);
+						},
+						{
+							swalSuccess: false,
+						}
+					);
 
-			// formData.forEach((val, key) => (url_param[key] = val));
+					// rewrite again
+					let shouldRewrite;
+					["date_start", "date_end"].forEach((key) => {
+						if (formData.get(key)) return;
 
-			// const newUrl = new URLSearchParams(url_param);
-			// console.log(`${location.search}\n?${newUrl}\nis_same: ${location.search == "?" + newUrl}`);
+						formData.delete(key);
+						formData.append(key, "NULL");
 
-			// if (!is_init && location.search == "?" + newUrl) {
-			//     is_wait.search = false;
-			//     return console.log("same data...");
-			// }
+						if (!shouldRewrite) shouldRewrite = true;
+					});
 
-			// window.history.pushState([], "", "?" + newUrl);
-
-			// console.log(this.formSearch);
-			// console.log({ url_param });
-
-			const res = await fetch(db_path + "search", {
-				method: "POST",
-				body: formData,
-			});
-
-			const text = await res.text();
-
-			encodeFetchedJson(text, null, (json) => {
-				const { status, msg, data, pagination, query_page, query } = json;
-
-				console.log(query);
-				this.transactions = data;
-				Object.assign(this.page, pagination);
-			});
-
-			is_wait.search = false;
+					if (shouldRewrite) rewriteUrl(formData, url_param);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" }),
+				}
+			);
 		},
 		async edit() {
-			const formData = new FormData(form);
-			formData.append("id", this.form.id);
-			formData.append("prev_payment_method", this.form.prev_payment_method);
-			formData.append("prev_payment_status", this.form.prev_payment_status);
+			q.add(
+				"edit",
+				async () => {
+					const formData = new FormData(form);
+					formData.append("id", this.form.id);
+					formData.append("prev_payment_method", this.form.prev_payment_method);
+					formData.append("prev_payment_status", this.form.prev_payment_status);
 
-			const res = await fetch(db_path + "edit", {
-				method: "POST",
-				body: formData,
-			});
-			const text = await res.text();
+					const res = await fetch(db_path + "edit", {
+						method: "POST",
+						body: formData,
+					});
+					const text = await res.text();
 
-			encodeFetchedJson(text, "edit", async () => {
-				await this.get(null, true);
-			});
+					encodeFetchedJson(
+						text,
+						"edit",
+						async ({ msg: message }) => {
+							if (message) this.$dispatch("notify", { variant: "success", title: "Selamat", message });
 
-			// try {
-			//     const json = JSON.parse(text);
-			//     console.log(json);
-			//     const { status, msg, data } = json;
-
-			//     if (!status) throw new Error(msg);
-
-			//     Swal.fire({ title: "Selamat", icon: "success", text: msg });
-			// } catch (e) {
-			//     console.log("Error while fetching:", text, { e });
-			//     Swal.fire({
-			//         title: "Error",
-			//         icon: "error",
-			//         text: "Terjadi kesalahan saat fetching: " + e.message,
-			//     });
-			// }
-
-			// await this.get(this.page.page, true);
+							await this.get(null, true);
+						},
+						{
+							swalSuccess: false,
+						}
+					);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" }),
+				}
+			);
 		},
 		async remove({ id }) {
 			if (!id) return;
 
-			const { isConfirmed } = await Swal.fire({
-				...deafultConfirmProps,
-				title: "Yakin ingin hapus transaksi?",
-				text: "Transaksi yang dihapus tidak bisa di kembalikan!",
-			});
+			q.add(
+				"remove",
+				async () => {
+					const { isConfirmed } = await Swal.fire({
+						...deafultConfirmProps,
+						title: "Yakin ingin hapus transaksi?",
+						text: "Transaksi yang dihapus tidak bisa di kembalikan!",
+					});
 
-			if (!isConfirmed) return;
+					if (!isConfirmed) return;
 
-			const formData = new FormData();
-			// console.log({ id });
-			formData.append("id", id);
+					const formData = new FormData();
+					// console.log({ id });
+					formData.append("id", id);
 
-			const res = await fetch(db_path + "remove", {
-				method: "POST",
-				body: formData,
-			});
-			const text = await res.text();
+					const res = await fetch(db_path + "remove", {
+						method: "POST",
+						body: formData,
+					});
+					const text = await res.text();
 
-			encodeFetchedJson(text, "remove", async ({ msg } = {}) => {
-				Swal.fire({ title: "Selamat", icon: "success", text: msg });
-				await this.get(null, true);
-			});
+					encodeFetchedJson(
+						text,
+						"remove",
+						async ({ msg: message } = {}) => {
+							await this.get(null, true);
+
+							if (message) this.$dispatch("notify", { variant: "success", title: "Selamat", message });
+						},
+						{
+							swalSuccess: false,
+						}
+					);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" }),
+				}
+			);
 		},
 
 		openModal() {
@@ -406,7 +362,7 @@ export default function () {
 			// console.log({ data, transaction });
 		},
 		openModalDetail(detail) {
-			// console.log(detail.td);
+			console.log(detail);
 			// console.log(JSON.stringify(detail));
 
 			try {
@@ -433,9 +389,18 @@ export default function () {
 
 			formData.append("id", id);
 
-			encodeFetchedJson(await (await fetch(db_path + "transaction-status-to-bayar", { method: "POST", body: formData })).text(), "ubah-status-transaksi", async () => {
-				await this.get(null, true);
-			});
+			encodeFetchedJson(
+				await (await fetch(db_path + "transaction-status-to-bayar", { method: "POST", body: formData })).text(),
+				"ubah-status-transaksi",
+				async ({ msg: message }) => {
+					await this.get(null, true);
+
+					if (message) this.$dispatch("notify", { variant: "success", title: "Selamat", message });
+				},
+				{
+					swalSuccess: false,
+				}
+			);
 		},
 
 		get syncTransactionStatus() {
@@ -445,42 +410,43 @@ export default function () {
 		async syncTransactionStatus({ id, payment_key, payment_status } = {}) {
 			if (!id || !payment_key || !payment_status) return;
 
-			if (is_wait.syncTransactionStatus) return Swal.fire({ ...defaultErrorProps, text: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
+			q.add(
+				"sync-status",
+				async () => {
+					// check cache for to much re-request
+					const now = Date.now();
+					const cache_name = "cache-syncTransaction";
+					const _cache = {};
+					try {
+						const _json = JSON.parse(localStorage.getItem(cache_name));
+						Object.assign(_cache, _json);
+					} catch (e) {}
 
-			is_wait.syncTransactionStatus = true;
+					// formula: 1 hour
+					if (_cache[id] && !isNaN(_cache[id]) && _cache[id] - now < 1000 * 60 * 60) {
+						const times = calculateTimeDifference(_cache[id], now);
 
-			// check cache for to much re-request
-			const now = Date.now();
-			const cache_name = "cache-syncTransaction";
-			const _cache = {};
-			try {
-				const _json = JSON.parse(localStorage.getItem(cache_name));
-				Object.assign(_cache, _json);
-			} catch (e) {}
+						const { isConfirmed } = await Swal.fire({ ...deafultConfirmProps, title: "Yakin ingin sync status nya lagi?", text: `Aksi yang sama baru saja di lakukan ${times.minutes > 0 ? times.minutes + " menit" : times.seconds + " detik"} yang lalu.` });
 
-			// formula: 1 hour
-			if (_cache[id] && !isNaN(_cache[id]) && _cache[id] - now < 1000 * 60 * 60) {
-				const times = calculateTimeDifference(_cache[id], now);
+						// console.log("confirm:", isConfirmed);
+						if (!isConfirmed) return;
+					}
 
-				const { isConfirmed } = await Swal.fire({ ...deafultConfirmProps, title: "Yakin ingin sync status nya lagi?", text: `Aksi yang sama baru saja di lakukan ${times.minutes > 0 ? times.minutes + " menit" : times.seconds + " detik"} yang lalu.` });
+					const formData = new FormData();
+					formData.append("payment_key", payment_key);
+					formData.append("payment_status", payment_status);
 
-				console.log("confirm:", isConfirmed);
-				if (!isConfirmed) return (is_wait.syncTransactionStatus = false);
-			}
-
-			const formData = new FormData();
-			formData.append("payment_key", payment_key);
-			formData.append("payment_status", payment_status);
-
-			Object.assign(_cache, { [id]: now });
-			localStorage.setItem(cache_name, JSON.stringify(_cache));
-			encodeFetchedJson(await (await fetch(db_path + "check-status", { method: "POST", body: formData })).text(), "sync-status", () => {
-				this.get(null, true);
-			});
-
-			console.log({ _cache, cache_name });
-
-			is_wait.syncTransactionStatus = false;
+					Object.assign(_cache, { [id]: now });
+					localStorage.setItem(cache_name, JSON.stringify(_cache));
+					encodeFetchedJson(await (await fetch(db_path + "check-status", { method: "POST", body: formData })).text(), "sync-status", () => {
+						this.get(null, true);
+					});
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" }),
+				}
+			);
 		},
 
 		async remakeTransaction(transaction) {
@@ -488,24 +454,36 @@ export default function () {
 
 			if (!id || !payment_key || !payment_status || !total || !payment_method || !transaction_details) return;
 
-			if (is_wait.remakeTransaction) return Swal.fire({ ...defaultErrorProps, text: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" });
+			q.add(
+				"remake-transaction",
+				async () => {
+					const formData = new FormData();
 
-			is_wait.remakeTransaction = true;
+					const _data = { ...transaction };
+					delete _data.transaction_details;
 
-			const formData = new FormData();
+					bindAndFillFormData(formData, _data);
+					formData.append("cart", JSON.stringify(transaction.transaction_details));
 
-			const _data = { ...transaction };
-			delete _data.transaction_details;
-			// const _context = { ..._data, cart: transaction.transaction_details };
-			// console.log({ transaction });
-			bindAndFillFormData(formData, _data);
-			formData.append("cart", JSON.stringify(transaction.transaction_details));
+					encodeFetchedJson(
+						await (await fetch(db_path + "remake-transaction", { method: "POST", body: formData })).text(),
+						"Remake Transaction",
+						({ msg: message }) => {
+							// console.log(json);
+							this.get(null, true);
 
-			encodeFetchedJson(await (await fetch(db_path + "remake-transaction", { method: "POST", body: formData })).text(), "Remake Transaction", (json) => {
-				// console.log(json);
-				this.get(null, true);
-			});
-			is_wait.remakeTransaction = false;
+							if (message) this.$dispatch("notify", { variant: "success", title: "Selamat", message });
+						},
+						{
+							swalSuccess: false,
+						}
+					);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" }),
+				}
+			);
 		},
 
 		openStruct(product) {

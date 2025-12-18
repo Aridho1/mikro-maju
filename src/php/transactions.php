@@ -78,6 +78,10 @@ switch (M) {
     }
     case "add": {
 
+        // echo json_encode($_POST);
+        // die;
+
+        $name = $name ? "'$name'" : "NULL";
         $date = Date('Y-m-d');
         $payment_status = 'pending';
         $payment_key = '';
@@ -123,7 +127,7 @@ switch (M) {
 
         switch ($payment_method) {
             case 'Tunai': case 'QRIS': {
-                $db->query("INSERT INTO $table SET date='$date', total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token =''");
+                $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token =''");
                 break;
             }
             case 'Transfer': {
@@ -140,7 +144,7 @@ switch (M) {
                 $token = $transaction_respon['res']->token;
 
                 // $payment_key = $transaction_respon['token'];
-                $db->query("INSERT INTO $table SET date='$date', total=$total, profit = $profit, payment_status='Pending', payment_method='$payment_method', payment_key='$payment_key', payment_token = '$token'");
+                $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Pending', payment_method='$payment_method', payment_key='$payment_key', payment_token = '$token'");
                 break;
 
             }
@@ -181,6 +185,120 @@ switch (M) {
 
         break;
     }
+
+    case 'add-order': {
+
+        $_name = $name ?: '';
+        $name = $name ? "'$name'" : "NULL";
+        $date = Date('Y-m-d');
+        $payment_status = 'pending';
+        $payment_key = '';
+
+        $total ??= false;
+        $t ??= false;
+        $payment_method = "Tunai";
+
+        // validate param
+        if (($validate = validateEmptyVar("name|total|t", true)) !== true) {
+            echo json_encode(['status' => false, 'msg' => $validate, 'post' => $_POST]);
+            break;
+        }
+
+        $carts = json_decode($_POST['user-cart'] ?? [], true);
+
+        if (!$carts || !is_array($carts)) {
+            echo json_encode(['status' => false, 'msg' => 'Cart kosong!', 'post' => $_POST]);
+            die;
+        }
+
+        $transaction_respon = [];
+        $item_details = [];
+
+        $profit = 0;
+
+        foreach ($carts as $cart) {
+
+            $sub_profit = ($cart['price'] - $cart['purchase_price']) * $cart['quantity'];
+
+            $item_details[] = [
+                'id' => $cart['id'],
+                'name' => $cart['name'],
+                'price' => $cart['price'],
+                'quantity' => $cart['quantity'],
+                'sub_total' => $cart['sub_total'],
+                'sub_profit' => $sub_profit,
+            ];
+
+            $profit += $sub_profit;
+        }
+
+        // echo json_encode($item_details);
+        // die;
+
+        switch ($payment_method) {
+            case 'Tunai': {
+                $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token ='', is_req_by_user = 1, table_name = '$t'");
+                break;
+            }
+
+            default: {
+                echo json_encode(['status' => false, 'msg' => 'Invalid payment Method']);
+                die;
+            }
+        }
+
+        $transaction_id = $db->insert_id;
+
+        $num = 0;
+
+        $sql = "INSERT INTO transaction_details (transaction_id, product_id, quantity, sub_total, sub_profit) VALUES ";
+
+        $queries = [];
+        foreach ($carts as $cart) {
+            $product_id = $cart['id'];
+            $quantity = $cart['quantity'];
+            $sub_total = $cart['sub_total'];
+
+            $sub_profit = $cart['price'] * $cart['quantity'];
+
+            $queries[] = " ('$transaction_id', '$product_id', '$quantity', '$sub_total', '$sub_profit') ";
+            $num++;
+        }
+
+        if (!empty($queries)) {
+            $sql .= implode(", ", $queries);
+        }
+
+        $db->query($sql);
+
+        $affected_rows = $db->affected_rows;
+
+        // -------------------------------
+        // Put File For SSE
+        // -------------------------------
+
+        $item = [];
+
+        $__time = time();
+        $__rand = rand(1, 100);
+
+        $item = [
+            "__time" => $__time,
+            "__time__rand" => "$__time-$__rand",
+            "name" => $_name,
+            "total" => $total,
+            "payment_method" => $payment_method,
+            "category_count" => $num,
+        ];
+
+        putSSE("sse_order.json", $item);
+
+        echo json_encode(['status' => true, 'msg' => 'Berhasil menambahkan pesanan. Mohon tunggu, pesanan anda akan di proses.', 'affected_rows' => $affected_rows, 'queries' => $queries, 'transaction_id' => $transaction_id, 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details, 'urlData' => encodeKey($transaction_id)]);
+
+
+        break;
+    }
+    
     case 'search': {
 
         $page ??= false;
@@ -190,7 +308,14 @@ switch (M) {
         $payment_methods ??= false;
         $payment_statuses ??= false;
 
-        $sql = " FROM $table t JOIN transaction_details td ON t.id = td.transaction_id JOIN products p ON td.product_id = p.id WHERE 1=1 ";
+        $is_req_by_user = $is_req_by_user ? 1 : 'null';
+        $sql_is_req_by_user = $is_req_by_user == 'null' ? '' : "AND is_req_by_user = $is_req_by_user";
+
+        $sort_desc ??= false;
+
+
+        $sql = " FROM $table t JOIN transaction_details td ON t.id = td.transaction_id JOIN products p ON td.product_id = p.id WHERE 1=1 $sql_is_req_by_user";
+        // die($sql);
         $conditions = [];
 
         if ($keyword) {

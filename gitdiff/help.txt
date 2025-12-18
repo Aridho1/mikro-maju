@@ -1,0 +1,14 @@
+
+# Command for get changes
+git diff > gitdiff/changes.txt
+
+# Command for get changes in staged (git add)
+git diff --staged > gitdiff/changes.txt
+
+# Command for get all log
+git log --oneline --graph --all --decorate > gitdiff/gitlog.txt
+
+
+# Dont forget to add this to .gitignore
+gitdiff/*
+!gitdiff/help.txt

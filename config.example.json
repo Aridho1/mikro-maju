@@ -1,0 +1,27 @@
+{
+	"pagination": {
+		"max_data": 10,
+		"max_button": 5
+	},
+	"midtrans": {
+		"is_production": false,
+		"server_key": "",
+		"client_key": ""
+	},
+	"is_production": false,
+	"is_force_debug": false,
+
+	"DB_NAME": "",
+	"DB_USERNAME": "",
+	"DB_PASSWORD": "",
+
+	"LOCAL_DB_NAME": "mikro_maju",
+	"LOCAL_DB_USERNAME": "root",
+	"LOCAL_DB_PASSWORD": "",
+
+	"EXAMPLE_DB_NAME": "username_my_db_name",
+	"EXAMPLE_DB_USERNAME": "username_my_db_username",
+	"EXAMPLE_DB_PASSWORD": "username_my_db_password",
+
+	"IS_USING_SSE": true
+}

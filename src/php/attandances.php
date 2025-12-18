@@ -33,7 +33,10 @@ switch (M) {
             die;
         }
 
-        $staff_id = $auth['id'];
+        // check owner
+        $staff_id = $auth['level'] ? $staff_id : $auth['id'];
+        $salary = $auth['level'] ? $salary : "NULL";
+
         $date = date('Y-m-d');
         $timestamp = ((int) microtime(true)) * 1000;
 
@@ -44,7 +47,11 @@ switch (M) {
         // date_default_timezone_set("Asia/Jakarta");
         // $time = date("H:i");
 
-        $db->query("INSERT INTO $table SET staff_id = $staff_id, date = '$date', time = '$time', status = '$status', type = '$type', timestamp = $timestamp");
+        $query = "INSERT INTO $table SET staff_id = $staff_id, date = '$date', time = '$time', status = '$status', salary = $salary, type = '$type', timestamp = $timestamp";
+
+        // die($query);
+
+        $db->query($query);
 
         echo json_encode(['status' => true, 'msg' => 'Absen berhasil ditamahkan.']);
         break;
@@ -55,6 +62,13 @@ switch (M) {
         $page = (Int) ($page ?? 1);
 
         $sql = " FROM $table a JOIN staffs s ON s.id = a.staff_id WHERE 1 ";
+
+        // check owner
+        if (!$_SESSION['auth']['level']) {
+            $id = $_SESSION['auth']['id'];
+            $sql .= " AND a.staff_id = $id ";
+        }
+        
         $conditions = [];
 
         if ($keyword ?? false) {

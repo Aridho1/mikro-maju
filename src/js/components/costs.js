@@ -5,9 +5,16 @@ import Pagination from "../libs/pagination.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
 import { url_param } from "../libs/urlParam.js";
 import { deafultConfirmProps } from "../libs/swal2props.js";
-// import DateRangePicker from "../../../node_modules/flowbite-datepicker/js/DateRangePicker.js";
-import DateRangePicker from "../../../pkg/flowbite-datepicker-1.3.2/package/js/DateRangePicker.js";
-import { config, getConfigJson } from "../libs/getConfigJson.js";
+
+import { TaskQueue } from "../libs/TaskQueue.js";
+
+const q = new TaskQueue();
+
+const IDR = new Intl.NumberFormat("id-ID", {
+	style: "currency",
+	currency: "IDR",
+	minimumFractionDigits: 0,
+});
 
 export default function () {
 	const db_path = "./src/php/costs.php?m=";
@@ -19,20 +26,6 @@ export default function () {
 		add: false,
 		edit: false,
 	};
-
-	// Handle datepicker
-	const el_date_start = document.querySelector("#datepicker-range-start");
-	const el_date_end = document.querySelector("#datepicker-range-end");
-
-	const el_date_range_picker = document.querySelector("#date-range-picker");
-	const dateRangePicker = new DateRangePicker(el_date_range_picker, {
-		format: "yyyy-mm-dd",
-		clearBtn: true,
-		todayBtn: true,
-		todayBtnMode: 1,
-		language: "id",
-	});
-	const datepickers = dateRangePicker.datepickers;
 
 	return {
 		appName: "Pengeluaran",
@@ -61,13 +54,16 @@ export default function () {
 		isOpenDescModal: false,
 		description_of_cost: null,
 
+		setDateToNow() {
+			const _date = new Date().toISOString().split("T")[0];
+
+			this.formSearch.date_start = _date;
+			this.formSearch.date_end = _date;
+		},
+
 		// methods
 		async init() {
 			// get categories
-			await this.getCategories(true);
-
-			const config = await getConfigJson();
-			console.warn("a", { config });
 
 			// set filter by url param
 			fillFormsByUrlParam(
@@ -81,13 +77,26 @@ export default function () {
 				url_param
 			);
 
-			// regenerate UI / value input date
-			if (this.formSearch.date_start && this.formSearch.date_end) {
-				dateRangePicker.setDates(this.formSearch.date_start, this.formSearch.date_end);
-
-				// datepickers[1].setDate(this.formSearch.date_end);
-				// datepickers[0].setDate(this.formSearch.date_start);
+			// set date to now if no search/url
+			if (!this.formSearch.date_start && !this.formSearch.date_end) {
+				this.setDateToNow();
+			} else {
+				if (this.formSearch.date_start == "NULL") this.formSearch.date_start = null;
+				if (this.formSearch.date_end == "NULL") this.formSearch.date_end = null;
 			}
+
+			// init watch date range
+			window.addEventListener("date-range-change", ({ detail }) => {
+				const { startDate, endDate } = detail;
+
+				const _start = startDate ? startDate.toISOString() : startDate;
+				const _end = endDate ? endDate.toISOString() : endDate;
+
+				this.formSearch.date_start = _start;
+				this.formSearch.date_end = _end;
+			});
+
+			await this.getCategories(true);
 
 			await this.get(null, true);
 
@@ -100,72 +109,61 @@ export default function () {
 				if (prev - 1 == curr) this.form.amount = prev - 1000;
 				else if (prev - 0 + 1 == curr) this.form.amount = prev - 0 + 1000;
 			});
-
-			const ctx = this;
-
-			Object.defineProperty(el_date_start, "value", {
-				_value: "",
-				set(newValue) {
-					this._value ??= "";
-					if (newValue == this._value) return newValue;
-
-					this._value = newValue;
-					ctx.formSearch.date_start = newValue;
-
-					return newValue;
-				},
-				get() {
-					return this._value;
-				},
-			});
-
-			Object.defineProperty(el_date_end, "value", {
-				_value: "",
-				set(newValue) {
-					this._value ??= "";
-					if (newValue == this._value) return newValue;
-
-					this._value = newValue;
-					ctx.formSearch.date_end = newValue;
-					return newValue;
-				},
-				get() {
-					return this._value;
-				},
-			});
 		},
 
 		async getCategories(is_init) {
 			encodeFetchedJson(await (await fetch(db_path + "get-categories")).text(), "get-categories", ({ data, categories }) => {
 				if (!Array.isArray(categories)) return;
 
-				this.categories = categories;
-				console.log({ categories });
+				if (!this.categories.length) this.categories = categories;
 
-				if (is_init) this.formSearch.categories = categories;
+				if ((is_init && !this.deafultConfirmProps, categories.length)) this.formSearch.categories = categories;
 			});
 		},
 
 		async get(page, is_init = false) {
-			if (is_wait.get) return console.warn("Reject get method cause spam!");
+			q.add(
+				"get",
+				async () => {
+					console.warn("GET DATA");
+					const formData = new FormData();
+					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
+					// formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
-			is_wait.get = true;
+					// Asign x-model to post body | formdata
+					bindAndFillFormData(formData, this.formSearch);
 
-			const formData = new FormData();
-			bindAndFillFormData(formData, this.formSearch);
-			formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
-			console.log(this.formSearch);
+					if (!is_init) formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
 
-			// Filter | same url param = same result
-			if (!rewriteUrl(formData, url_param) && !is_init) return (is_wait.get = false), console.warn("Reject get method cause same url param!");
+					// Handle rewrtie
+					const isRewriteUrl = rewriteUrl(formData, url_param);
 
-			encodeFetchedJson(await (await fetch(db_path + "search", { method: "POST", body: formData })).text(), "search", ({ data, pagination } = {}) => {
-				this.costs = data;
+					if (!isRewriteUrl && !is_init) return console.warn("Reject get method cause same param!");
 
-				if (pagination && typeof pagination == "object") Object.assign(this.page, pagination);
-			});
+					encodeFetchedJson(await (await fetch(db_path + "search", { method: "POST", body: formData })).text(), "search", ({ data, pagination } = {}) => {
+						this.costs = data;
 
-			is_wait.get = false;
+						if (pagination && typeof pagination == "object") Object.assign(this.page, pagination);
+					});
+
+					// rewrite again
+					let shouldRewrite;
+					["date_start", "date_end"].forEach((key) => {
+						if (formData.get(key)) return;
+
+						formData.delete(key);
+						formData.append(key, "NULL");
+
+						if (!shouldRewrite) shouldRewrite = true;
+					});
+
+					if (shouldRewrite) rewriteUrl(formData, url_param);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", { variant: "warning", title: "Warning", message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!" }),
+				}
+			);
 		},
 		async add() {
 			if (is_wait.add) return console.warn("Reject add method cause spam!");

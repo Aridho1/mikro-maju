@@ -12,52 +12,70 @@
 	<form id="formSearch" @submit.prevent="get(1)" class="flex items-center justify-between flex-row flex-wrap space-y-4 md:space-y-0 py-4 bg-white dark:bg-gray-900 relative gap-3">
 		<div class="sr-only">DOR</div>
 
-		<div id="date-range-picker" class="flex items-center w-[19rem] gap-3">
-			<div class="relative">
-				<div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"></div>
+		<div
+			x-data="dateRangePicker({ withToday: true, withLabel: true, startDate: formSearch.date_start, endDate: formSearch.date_end, labels: ['Tanggal Awal', 'Tanggal Akhir']})"
+			x-init="console.log('dateRangePicker init html')"
+			class="flex items-start gap-4">
+			<!-- START & END PICKERS -->
+			<template x-for="picker in pickers" :key="picker.key">
+				<div class="relative">
+					<label class="block text-sm font-medium text-gray-700 mb-1" x-text="picker.label"></label>
 
-				<input
-					id="datepicker-range-start"
-					datepicker-title="Tanggal Awal"
-					type="search"
-					readonly
-					x-model="formSearch.date_start"
-					class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 placeholder-shown:text-xs text-center"
-					placeholder="Tanggal Awal" />
+					<div @click.stop="toggleCalendar(picker.key)" class="border rounded-lg px-3 py-2 bg-white w-44 cursor-pointer hover:border-blue-400 flex justify-between items-center">
+						<span x-text="format(picker.key === 'start' ? startDate : endDate) || 'Select date'" class="text-gray-600 text-sm"></span>
+						<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+						</svg>
+					</div>
 
-				<div class="absolute inset-1 pointer-events-none bg-gray-50 grid place-content-center">
-					<span class="text-xs" x-text="formSearch.date_start || 'Tanggal Awal'"></span>
+					<!-- CALENDAR -->
+					<div x-show="open === picker.key" @click.away="open = null" x-transition class="absolute mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 w-80">
+						<div class="text-sm font-medium text-gray-600 mb-1 text-center" x-show="withLabel && picker.key === open" x-text="picker.label"></div>
+
+						<div class="flex justify-between items-center mb-2">
+							<button @click="prevMonth" class="px-2 py-1 rounded hover:bg-gray-100">&lt;</button>
+							<div class="text-gray-700 font-semibold" x-text="`${monthName()} ${currentYear}`"></div>
+							<button @click="nextMonth" class="px-2 py-1 rounded hover:bg-gray-100">&gt;</button>
+						</div>
+
+						<div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-500 mb-1">
+							<template x-for="d in days" :key="d">
+								<div x-text="d"></div>
+							</template>
+						</div>
+
+						<div class="grid grid-cols-7 text-center text-sm">
+							<template x-for="(day, index) in daysInMonth()" :key="index">
+								<div class="p-1">
+									<template x-if="day">
+										<div
+											@click="selectDay(day, picker.key)"
+											class="rounded-lg py-1 cursor-pointer transition-all"
+											:class="{
+                                                'bg-blue-500 text-white': isSelected(day, picker.key),
+                                                'bg-blue-100 text-blue-700': isInRange(day) && !isSelected(day, picker.key),
+                                                'hover:bg-blue-50': !isInRange(day) && !isSelected(day, picker.key)
+                                            }"
+											x-text="day.getDate()"></div>
+									</template>
+								</div>
+							</template>
+						</div>
+
+						<div class="flex justify-end mt-3" x-show="withToday">
+							<button type="button" @click="selectDay(new Date(), picker.key)" class="text-blue-600 text-sm font-medium hover:underline">Select Today</button>
+						</div>
+					</div>
 				</div>
+			</template>
 
-				<div x-show="false" class="absolute top-0 bottom-0 right-1 flex items-center pl-4">
-					<button type="button" x-show="formSearch.date_start" @click="formSearch.date_start = null" class="font-bold text-gray-6 border-gray-600 rounded-md px-2 scale-75">&cross;</button>
-				</div>
-			</div>
-
-			<span class="text-gray-500">sampai</span>
-
-			<div class="relative">
-				<div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"></div>
-				<input
-					id="datepicker-range-end"
-					datepicker-title="Tanggal Akhir"
-					type="search"
-					readonly
-					x-model="formSearch.date_end"
-					class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 placeholder-shown:text-xs text-center"
-					placeholder="Tanggal Akhir" />
-
-				<div class="absolute inset-1 pointer-events-none bg-gray-50 grid place-content-center">
-					<span class="text-xs" x-text="formSearch.date_end || 'Tanggal Akhir'"></span>
-				</div>
-
-				<div x-show="false" class="absolute top-0 bottom-0 right-1 flex items-center pl-4">
-					<button type="button" x-show="formSearch.date_end" @click="formSearch.date_end = null" class="font-bold text-gray-6border-gray-600 rounded-md px-2 scale-75">&cross;</button>
-				</div>
+			<!-- CLEAR BUTTON -->
+			<div class="pt-7">
+				<button type="button" @click="clear()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-2 rounded-lg">Clear</button>
 			</div>
 		</div>
 
-		<div class="relative" x-data="dropdown">
+		<div class="relative slen" x-data="dropdown">
 			<button
 				@click="toggleDropdown"
 				class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
@@ -187,6 +205,7 @@
 						<td class="px-6 py-4" x-text="attandance.username"></td>
 						<td class="px-6 py-4" x-text="attandance.type"></td>
 						<td class="px-6 py-4" x-text="attandance.status"></td>
+						<td class="px-6 py-4" x-text="IDR.format(attandance.salary)"></td>
 						<td class="px-6 py-4">
 							<!-- Modal toggle -->
 							<!-- <button type="button" @click="selectAttandanceEdit(attandance)" class="btn-edit font-medium text-blue-600 dark:text-blue-500 hover:underline">Ubah</button> -->
@@ -330,14 +349,28 @@
 
 						<div class="col-span-6 sm:col-span-3">
 							<label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-							<input
-								type="text"
-								id="username"
-								class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-								required=""
-								:value="form.username"
-								autocomplete="off"
-								disabled />
+							<template x-if="auth.level">
+								<select
+									id="username"
+									x-model="form.username"
+									@change="() => selectStaff(form.username)"
+									class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+									<option value="">Pilih Staff</option>
+									<template x-for="(staff, i) in staffs" :key="staff.username + '' + i">
+										<option x-bind:selected="i == 0" x-text="staff.username" :value="staff.username"></option>
+									</template>
+								</select>
+							</template>
+							<template x-if="!auth.level">
+								<input
+									type="text"
+									id="username"
+									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									required=""
+									:value="form.username"
+									autocomplete="off"
+									disabled />
+							</template>
 						</div>
 
 						<!-- <div class="col-span-6 sm:col-span-3">
@@ -385,6 +418,19 @@
 								</template>
 							</select>
 						</div>
+
+						<template x-if="auth.level && form.type == 'Clock out' && form.status == 'Hadir'">
+							<div class="col-span-6 sm:col-span-3">
+								<label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Gaji</label>
+								<input
+									type="text"
+									id="description"
+									x-model="formattedSalary"
+									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									autocomplete="off" />
+							</div>
+						</template>
+
 						<!-- <div class="col-span-6 sm:col-span-3">
 							<label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
 							<input

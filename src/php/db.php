@@ -21,9 +21,9 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 Define("IS_PRODUCTION", $config['is_production'] ?? false);
 
 Define("HOST_NAME", "localhost");
-Define("USER_NAME", IS_PRODUCTION ? "mobo7639_lohjiena_ku" : "root");
-Define("PASSWORD", IS_PRODUCTION ? "mobo7639_lohjiena_ku" : "");
-Define("DB_NAME", IS_PRODUCTION ? "mobo7639_lohjiena_mie" : "mikro_maju");
+Define("DB_NAME", IS_PRODUCTION ? $config["DB_NAME"] : $config["LOCAL_DB_NAME"]);
+Define("USER_NAME", IS_PRODUCTION ? $config["DB_USERNAME"] : $config["LOCAL_DB_USERNAME"]);
+Define("PASSWORD", IS_PRODUCTION ? $config["DB_PASSWORD"] : $config["LOCAL_DB_PASSWORD"]);
 
 // force_debug
 if (IS_PRODUCTION && ($config['is_force_debug'] ?? false)) {
@@ -155,4 +155,20 @@ function validateEmptyVar(string $str, bool $is_with_message = false): bool|stri
 
     // return true;
     return empty($unpass) ? true : ($is_with_message ? "Missing Required Value: " : "") . implode(", ", $unpass);
+}
+
+function putSSE(string $fileName, array $item) {
+    $folder = __DIR__ . '/../../sse/';
+    if (!is_dir($folder)) mkdir($folder, 0755, true);
+
+    $eventFile = $folder . $fileName;
+    $eventObj = [
+        'last_event' => time(),
+        'payload'    => $item
+    ];
+
+    file_put_contents(
+        $eventFile,
+        json_encode($eventObj, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+    );
 }
