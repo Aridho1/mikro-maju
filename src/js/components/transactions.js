@@ -11,6 +11,7 @@ import { config } from "../libs/getConfigJson.js";
 
 const printRawBT = (text) => {
 	const encoded = encodeURIComponent(text);
+	alert("encoded: " + encoded);
 
 	const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.text=" + encoded + ";" + "end";
 
