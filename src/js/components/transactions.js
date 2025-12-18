@@ -517,7 +517,7 @@ export default function () {
 				let __struk = buildStruk(_struk);
 				console.log(JSON.stringify(_struk));
 				console.log("__struk:\n\n", __struk);
-				printRawBT(content);
+				printRawBT(__struk);
 			}
 			// const { jsPDF } = window.jspdf || {};
 
@@ -572,15 +572,15 @@ function buildStruk(_struk) {
 	// ===== ITEMS =====
 	_struk.transaction_details.forEach((item) => {
 		text += `${item.name}\n`;
-		text += `  ${item.quantity} x ${rupiah(item.price)}`;
-		text += ` = ${rupiah(item.sub_total)}\n`;
+		text += `  ${item.quantity} x ${IDR.format(item.price)}`;
+		text += ` = ${IDR.format(item.sub_total)}\n`;
 	});
 
 	text += "-------------------------------\n";
 
 	// ===== TOTAL =====
 	text += ESC + "a" + "\x02"; // right
-	text += `TOTAL : ${rupiah(_struk.total)}\n`;
+	text += `TOTAL : ${IDR.format(_struk.total)}\n`;
 
 	text += ESC + "a" + "\x00";
 	text += `Bayar  : ${_struk.payment_method}\n`;
