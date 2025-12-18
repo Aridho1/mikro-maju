@@ -1,35 +1,35 @@
 {
-    "name": "MO-Kasir",
-    "short_name": "MO-Kasir",
-    "description": "Aplikasi Digital Manajemen UMKN",
-    "start_url": "./",
-    "icons": [
-        {
-            "src": "./src/img/app/logo-korma.png",
-            "sizes": "52x52",
-            "type": "image/png"
-        }
-    ],
-    "background_color": "#ffffff",
-    "display": "standalone",
-    "display_override": ["standalone"],
-    "theme_color": "#000000",
-    "orientation": "portrait",
-    "dir": "ltr",
-    "lang": "id",
-    "categories": ["productivity"],
-    "screenshots": [
-        {
-            "src": "./src/img/app/Screenshot (290).png",
-            "type": "image/png",
-            "form_factor": "wide",
-            "sizes": "1366x768"
-        },
-        {
-            "src": "./src/img/app/screenshot-mobile.png",
-            "type": "image/png",
-            "form_factor": "narrow",
-            "sizes": "396x597"
-        }
-    ]
+	"name": "MO-Kasir",
+	"short_name": "MO-Kasir",
+	"description": "Aplikasi Digital Manajemen UMKN",
+	"start_url": "./",
+	"icons": [
+		{
+			"src": "./src/img/app/logo-kedai-2.png",
+			"sizes": "52x52",
+			"type": "image/png"
+		}
+	],
+	"background_color": "#ffffff",
+	"display": "standalone",
+	"display_override": ["standalone"],
+	"theme_color": "#000000",
+	"orientation": "portrait",
+	"dir": "ltr",
+	"lang": "id",
+	"categories": ["productivity"],
+	"screenshots": [
+		{
+			"src": "./src/img/app/Screenshot (290).png",
+			"type": "image/png",
+			"form_factor": "wide",
+			"sizes": "1366x768"
+		},
+		{
+			"src": "./src/img/app/screenshot-mobile.png",
+			"type": "image/png",
+			"form_factor": "narrow",
+			"sizes": "396x597"
+		}
+	]
 }
