@@ -4,11 +4,6 @@
 if (!session_id())
     session_start();
 
-// dotenv
-// require_once "../../vendor/autoload.php";
-
-// $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../..');
-// $dotenv->load();
 
 // config.json
 $json = file_get_contents('../../config.json');
@@ -188,4 +183,9 @@ function isDiscountActiveNow($start_date, $end_date, $is_active = 1)
     }
 
     return true;
+}
+
+function json_encode_and_die(array $data) {
+    echo json_encode($data);
+    die;
 }

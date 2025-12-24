@@ -232,7 +232,6 @@ ORDER BY id DESC;
         }
     }
 } catch (Exception $e) {
-
     $err = $e->getMessage();
 
     die(json_encode([
