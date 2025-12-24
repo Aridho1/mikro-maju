@@ -101,13 +101,13 @@ function uploadFile(string $name, string $tmpPath): array
 
 }
 
-function toGlobal(array $data, bool $isFilterByHtmlSpecialChar = true, bool $setNullIfEmpty = true): void
+function toGlobal(array $keys, bool $isFilterByHtmlSpecialChar = true, bool $setNullIfEmpty = true): void
 {
 
-    if (array_keys($data) == range(0, count($data) - 1))
+    if (array_keys($keys) == range(0, count($keys) - 1))
         throw new InvalidArgumentException("Args must be array associative");
 
-    foreach ($data as $key => $val) {
+    foreach ($keys as $key => $val) {
         if ($setNullIfEmpty && empty($val)) {
             $GLOBALS[$key] = null;
             continue;

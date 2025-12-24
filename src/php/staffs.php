@@ -10,7 +10,7 @@ if (!M ?? false) {
 }
 
 require_once 'db.php';
-require_once 'rate_limiter.php';
+// require_once 'rate_limiter.php';
 
 
 toGlobal($_POST);
