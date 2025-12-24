@@ -101,13 +101,17 @@ function uploadFile(string $name, string $tmpPath): array
 
 }
 
-function toGlobal(array $data, bool $isFilterByHtmlSpecialChar = true): void
+function toGlobal(array $data, bool $isFilterByHtmlSpecialChar = true, bool $setNullIfEmpty = true): void
 {
 
     if (array_keys($data) == range(0, count($data) - 1))
         throw new InvalidArgumentException("Args must be array associative");
 
     foreach ($data as $key => $val) {
+        if ($setNullIfEmpty && empty($val)) {
+            $GLOBALS[$key] = null;
+            continue;
+        }
         $GLOBALS[$key] = $isFilterByHtmlSpecialChar ? htmlspecialchars($val) : $val;
     }
 }
@@ -127,7 +131,7 @@ function datePickerToDate(string|bool $date): bool|string
     return $arr[1] . '-' . $arr[0] . '-' . $arr[2];
 }
 
-function validateEmptyVar(string $str, bool $is_with_message = false, bool $thowIfInvalid = false): bool|string
+function validateEmptyVar(string $str, bool $isWithMessage = false, bool $thowIfInvalid = false): bool|string
 {
     $arr = explode("|", $str);
 
@@ -142,14 +146,14 @@ function validateEmptyVar(string $str, bool $is_with_message = false, bool $thow
     $is_empty = empty($unpass);
 
     if ($is_empty) return true;
-    if (!$is_with_message) return false;
+    if (!$isWithMessage) return false;
 
     $error_message = "Missing Required Value: " . implode(", ", $unpass);
 
     if ($thowIfInvalid) throw new Exception($error_message);
     return $error_message;
 
-    // return empty($unpass) ? true : ($is_with_message ? "Missing Required Value: " : "") . implode(", ", $unpass);
+    // return empty($unpass) ? true : ($isWithMessage ? "Missing Required Value: " : "") . implode(", ", $unpass);
 }
 
 function putSSE(string $fileName, array $item) {

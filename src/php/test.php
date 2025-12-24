@@ -103,10 +103,16 @@
 
 // echo (int) microtime(true);
 
-$arr = [
-    "item_1" => "MY ITEM 1",
-];
+// $arr = [
+//     "item_1" => "MY ITEM 1",
+// ];
 
-$item = $arr['item_11'] ?? '';
+// $item = $arr['item_11'] ?? '';
 
-echo "item = $item";
+// echo "item = $item";
+
+header("Content-Type: application/json");
+
+echo json_encode([
+    'test' => empty('0a'),
+]);
