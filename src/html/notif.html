@@ -46,10 +46,18 @@
 			baseAudio: null,
 			interactionBound: false,   // memastikan listener tidak dobel
 			recoveryTimer: null,       // cek berkala untuk auto-recover
-
-			addNotification({ variant = 'info', sender = null, title = null, message = null }) {
+			
+			addNotification({ variant = 'info', sender = null, title = null, message = null, duration = null }) {
 				const id = Date.now()
-				const notification = { id, variant, sender, title, message }
+
+				const notification = {
+					id,
+					variant,
+					sender,
+					title,
+					message,
+					duration: duration ?? this.displayDuration
+				}
 
 				console.log('Get new notification', notification)
 
@@ -63,6 +71,23 @@
 					this.playSound()
 				}
 			},
+
+			// addNotification({ variant = 'info', sender = null, title = null, message = null }) {
+			// 	const id = Date.now()
+			// 	const notification = { id, variant, sender, title, message }
+
+			// 	console.log('Get new notification', notification)
+
+			// 	if (this.notifications.length >= 20) {
+			// 		this.notifications.splice(0, this.notifications.length - 19)
+			// 	}
+
+			// 	this.notifications.push(notification)
+
+			// 	if (this.soundEffect) {
+			// 		this.playSound()
+			// 	}
+			// },
 
 			removeNotification(id) {
 				setTimeout(() => {

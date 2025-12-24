@@ -235,7 +235,7 @@ export default function () {
 
 					if (!isRewriteUrl && !is_init && !newSSeOrder) return console.warn("Reject get method cause same param!");
 
-					const res = await fetch(db_path + "search", {
+					const res = await fetch(db_path + "search-view", {
 						method: "POST",
 						body: formData,
 					});

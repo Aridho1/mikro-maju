@@ -11,6 +11,7 @@ require_once 'db.php';
 toGlobal($_POST);
 
 $table = "transactions";
+$view_name = "view_transactions";
 
 switch (M) {
     case "remake-transaction": {
@@ -44,7 +45,7 @@ switch (M) {
 
         foreach ($carts as $cart) {
 
-            $sub_profit = $cart['price'] * $cart['quantity'];
+            $sub_profit = ($cart['price'] - $cart['purchase_price']) * $cart['quantity'];
 
             $item_details[] = [
                 'id' => $cart['id'],
@@ -159,29 +160,45 @@ switch (M) {
 
         $num = 0;
 
-        $sql = "INSERT INTO transaction_details (transaction_id, product_id, quantity, sub_total, sub_profit) VALUES ";
+        $db->begin_transaction();
 
-        $queries = [];
-        foreach ($carts as $cart) {
-            $product_id = $cart['id'];
-            $quantity = $cart['quantity'];
-            $sub_total = $cart['sub_total'];
+        try {
+            $stmt = $db->prepare("
+                INSERT INTO transaction_details
+                (transaction_id, product_id, product_discount_id, quantity, sub_total, sub_profit)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
 
-            $sub_profit = $cart['price'] * $cart['quantity'];
+            foreach ($carts as $cart) {
+                $discount_id = empty($cart['discount_id']) ? null : (int)$cart['discount_id'];
+                $sub_profit = ($cart['price'] - $cart['purchase_price']) * $cart['quantity'];
 
-            $queries[] = " ('$transaction_id', '$product_id', '$quantity', '$sub_total', '$sub_profit') ";
-            $num++;
+                $stmt->bind_param(
+                    "iiiidd",
+                    $transaction_id,
+                    $cart['id'],
+                    $discount_id,
+                    $cart['quantity'],
+                    $cart['sub_total'],
+                    $sub_profit
+                );
+
+                $stmt->execute();
+            }
+
+            $db->commit();
+        } catch (Throwable $e) {
+            $db->rollback();
+            throw $e;
         }
 
-        if (!empty($queries)) {
-            $sql .= implode(", ", $queries);
-        }
+        // die($sql);
 
-        $db->query($sql);
+        // $db->query($sql);
 
         $affected_rows = $db->affected_rows;
 
-        echo json_encode(['status' => true, 'msg' => 'Berhasil menambahkan transaksi.', 'affected_rows' => $affected_rows, 'queries' => $queries, 'transaction_id' => $transaction_id, 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details, 'urlData' => encodeKey($transaction_id)]);
+        echo json_encode(['status' => true, 'msg' => 'Berhasil menambahkan transaksi.', 'affected_rows' => $affected_rows, 'transaction_id' => $transaction_id, 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details, 'urlData' => encodeKey($transaction_id)]);
 
         break;
     }
@@ -297,6 +314,120 @@ switch (M) {
 
 
         break;
+    }
+
+    case 'search-view': {
+
+    $page      = max(1, (int)($_GET['page'] ?? 1));
+    $limit     = max(1, (int)($_GET['limit'] ?? 10));
+    $offset    = ($page - 1) * $limit;
+
+    $keyword   = trim($_GET['keyword'] ?? '');
+    $methods   = $_GET['payment_method'] ?? [];
+    $statuses  = $_GET['payment_status'] ?? [];
+    $dateStart = $_GET['date_start'] ?? null;
+    $dateEnd   = $_GET['date_end'] ?? null;
+
+    /* ===============================
+       BUILD WHERE
+    =============================== */
+    $where = [];
+    $params = [];
+    $types  = '';
+
+    if ($keyword !== '') {
+        $where[] = "(vt.code LIKE ? OR vt.payment_method LIKE ?)";
+        $params[] = "%$keyword%";
+        $params[] = "%$keyword%";
+        $types .= 'ss';
+    }
+
+    if (!empty($methods)) {
+        $in = implode(',', array_fill(0, count($methods), '?'));
+        $where[] = "vt.payment_method IN ($in)";
+        foreach ($methods as $m) {
+            $params[] = $m;
+            $types .= 's';
+        }
+    }
+
+    if (!empty($statuses)) {
+        $in = implode(',', array_fill(0, count($statuses), '?'));
+        $where[] = "vt.payment_status IN ($in)";
+        foreach ($statuses as $s) {
+            $params[] = $s;
+            $types .= 's';
+        }
+    }
+
+    if ($dateStart && $dateEnd) {
+        $where[] = "vt.date BETWEEN ? AND ?";
+        $params[] = $dateStart;
+        $params[] = $dateEnd;
+        $types .= 'ss';
+    }
+
+    $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+    /* ===============================
+       MAIN QUERY
+    =============================== */
+    $sql = "
+        SELECT SQL_CALC_FOUND_ROWS *
+        FROM view_transactions vt
+        $whereSql
+        ORDER BY vt.id DESC
+        LIMIT ?, ?
+    ";
+
+    $stmt = $db->prepare($sql);
+
+    $params[] = $offset;
+    $params[] = $limit;
+    $types   .= 'ii';
+
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $data   = [];
+
+    /* ===============================
+       PREPARE DETAIL QUERY
+    =============================== */
+    $detailStmt = $db->prepare("
+        SELECT *
+        FROM view_transaction_details
+        WHERE transaction_id = ?
+    ");
+
+    while ($row = $result->fetch_assoc()) {
+
+        $detailStmt->bind_param("i", $row['id']);
+        $detailStmt->execute();
+
+        $row['transaction_details'] = $detailStmt
+            ->get_result()
+            ->fetch_all(MYSQLI_ASSOC);
+
+        $data[] = $row;
+    }
+
+    /* ===============================
+       TOTAL ROWS
+    =============================== */
+    $totalRes = $db->query("SELECT FOUND_ROWS() total");
+    $total    = $totalRes->fetch_assoc()['total'];
+
+    echo json_encode([
+        'status' => true,
+        'page'    => $page,
+        'limit'   => $limit,
+        'total'   => (int)$total,
+        'data'    => $data
+    ]);
+    // exit;
+    break;
     }
     
     case 'search': {

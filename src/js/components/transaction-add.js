@@ -57,7 +57,7 @@ export default function () {
 
 		async init() {
 			// Handle get products
-			encodeFetchedJson(await (await fetch(db_path + "products.php?m=get")).text(), false, (json) => {
+			encodeFetchedJson(await (await fetch(db_path + "products.php?m=get-views")).text(), false, (json) => {
 				// const { data } = json
 				this.products = json.data || [];
 				this.getCart();
@@ -195,13 +195,19 @@ export default function () {
 		selectItem(item) {
 			console.log({ cart: this.cart, item });
 
+			// discount
+			if (item.final_price != item.price) {
+				item._price = item.price;
+				item.price = item.final_price;
+			}
+
 			const cart = this.cart?.find(({ id }) => id == item.id);
 
 			if (!cart) {
 				item = {
 					...item,
-					quantity: item.quantity - 0,
-					price: item.price - 0,
+					quantity: +item.quantity,
+					price: +item.price,
 				};
 				this.cart.push({ ...item, quantity: 1, sub_total: item.price });
 				this.quantity++;

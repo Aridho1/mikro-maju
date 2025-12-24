@@ -1,86 +1,53 @@
-<div x-data="productsComponent" class="py-4 px-0 md:px-2">
-	<h2 class="text-2xl font-bold mb-4">Management Menu</h2>
-
-	<button id="button-add" @click="openModal" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded mb-4">Tambah Menu</button>
-
-	<form id="formSearch" @submit.prevent="get(1)" class="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 bg-white dark:bg-gray-900 relative gap-3">
-		<div class="sr-only">DOR</div>
-
-		<!-- filter categories -->
-		<div class="relative hidden" x-data="dropdown" x-show="false">
+<div x-data="productsComponent" class="py-4 px-0 md:px-2 isolate" style="anchor-name: --mainComponentAnchor">
+	<div>
+		<div class="tabs absolute z-20 flex gap-1 rounded-lg bg-white/90 backdrop-blur border border-gray-200 shadow-sm p-1" style="position-anchor: --mainComponentAnchor; top: anchor(top)">
 			<button
-				@click="toggleDropdown"
-				class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
-				type="button">
-				<span class="sr-only pr-3">Filter button</span>
-				<span class="pr-1">Filter Kategori</span>
-				<svg class="ml-4 w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
-				</svg>
-			</button>
+				x-text="tabList[0]"
+				@click="tabActive = tabKeys[0]"
+				:class="tabActive === tabKeys[0]
+					? 'bg-blue-600 text-white shadow'
+					: 'text-gray-600 hover:bg-gray-100'"
+				class="px-4 py-2 text-sm font-medium rounded-md transition-all"></button>
 
-			<!-- Dropdown menu -->
-			<div
-				x-show="isDropdownOpen"
-				x-cloak=""
-				@click.outside="disableDropdown"
-				class="dropdown-menu top-full left-0 absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-md dark:bg-gray-700 dark:divide-gray-600">
-				<ul class="flex flex-col gap-4 py-2 px-3 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-					<template x-for="(category, key) in categories" :key="key">
-						<li class="flex">
-							<div class="relative flex w-full" x-data="dropdown">
-								<button
-									@click="toggleDropdown"
-									class="inline-flex w-full justify-between items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
-									type="button">
-									<span class="sr-only pr-3">Filter button</span>
-									<span class="pr-1 flex gap-1">
-										Filter
-										<span x-text="key"></span>
-									</span>
-									<svg class="ml-4 w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
-									</svg>
-								</button>
+			<button
+				x-text="tabList[1]"
+				@click="tabActive = tabKeys[1]"
+				:disabled="!selectedDiscount.id"
+				:class="[
+					tabActive === tabKeys[1]
+					? 'bg-blue-600 text-white shadow'
+					: 'text-gray-600 hover:bg-gray-100',
+					!selectedDiscount.id
+					? 'opacity-50 cursor-not-allowed hover:bg-transparent'
+					: ''
+				]"
+				class="px-4 py-2 text-sm font-medium rounded-md transition-all"></button>
 
-								<!-- Dropdown menu -->
-								<div
-									x-show="isDropdownOpen"
-									x-cloak=""
-									@click.outside="disableDropdown"
-									class="dropdown-menu top-full left-0 absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-md w-80 max-w-[20rem] dark:bg-gray-700 dark:divide-gray-600">
-									<ul
-										class="grid grid-cols-1 sm:grid-cols-2 gap-1 py-1 max-w-fit w-auto text-sm text-gray-700 dark:text-gray-200 max-h-64 overflow-y-auto"
-										aria-labelledby="dropdownActionButton">
-										<template x-for="option in category" :key="option">
-											<li>
-												<label
-													:for="`s_${ key }_${ option }`"
-													class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-													<input type="checkbox" :id="`s_${ key }_${ option }`" x-model="formSearch.categories[key]" :value="option" />
-													<span x-text="option"></span>
-												</label>
-											</li>
-										</template>
-									</ul>
-								</div>
-							</div>
-						</li>
-					</template>
-				</ul>
-			</div>
+			<!-- <div class="tabs absolute flex gap-3" style="position-anchor: --mainComponentAnchor; top: anchor(top)"> -->
+			<!-- <button x-text="tabList[0]" @click="tabActive = tabKeys[0]"></button>
+			<button x-text="tabList[1]" @click="tabActive = tabKeys[1]" x-bind:disabled="!selectedDiscount.id" :class="{ 'cursor-not-allowed': !selectedDiscount.id}"></button> -->
+			<!-- <template x-for="(display, tab) in tabMap" :key="tab">
+				<button x-text="display" @click="tabActive = tab; console.log({tab, tabList})"></button>
+			</template> -->
 		</div>
+	</div>
 
-		<div class="inline-flex gap-4 items-center justify-end ml-auto">
-			<label for="table-search" class="sr-only">Search</label>
+	<div class="contents" x-show="tabActive == tabKeys[0]">
+		<h2 class="text-2xl font-bold mb-4 mt-12">Management Menu</h2>
 
+		<button id="button-add" @click="openModal" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded mb-4">Tambah Menu</button>
+
+		<form id="formSearch" @submit.prevent="get(1)" class="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 bg-white dark:bg-gray-900 relative gap-3">
+			<div class="sr-only">DOR</div>
+
+			<!-- filter categories -->
 			<div class="relative hidden" x-data="dropdown" x-show="false">
 				<button
 					@click="toggleDropdown"
 					class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
 					type="button">
 					<span class="sr-only pr-3">Filter button</span>
-					<span class="pr-1">Filter</span>
+					<span class="pr-1">Filter Kategori</span>
 					<svg class="ml-4 w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
 						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
 					</svg>
@@ -91,188 +58,507 @@
 					x-show="isDropdownOpen"
 					x-cloak=""
 					@click.outside="disableDropdown"
-					class="dropdown-menu top-full left-0 absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-md w-80 dark:bg-gray-700 dark:divide-gray-600">
-					<ul class="grid grid-cols-2 py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-						<li>
-							<label for="s_name" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-								<input type="checkbox" id="s_name" name="name" x-model="formSearch.filters" value="name" />
-								<span>Nama</span>
-							</label>
-						</li>
-						<li>
-							<label for="s_purchase_price" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-								<input type="checkbox" id="s_purchase_price" name="purchase_price" x-model="formSearch.filters" value="purchase_price" />
-								<span>Harga Beli</span>
-							</label>
-						</li>
-						<li>
-							<label for="s_price" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-								<input type="checkbox" id="s_price" name="price" x-model="formSearch.filters" value="price" />
-								<span>Harga Jual</span>
-							</label>
-						</li>
-						<li>
-							<label for="s_category" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-								<input type="checkbox" id="s_category" name="category" x-model="formSearch.filters" value="category" />
-								<span>Kategori</span>
-							</label>
-						</li>
-						<li>
-							<label for="s_subcategory" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-								<input type="checkbox" id="s_subcategory" name="subcategory" x-model="formSearch.filters" value="subcategory" />
-								<span>Sub Kategori</span>
-							</label>
-						</li>
-						<li>
-							<label for="sort_desc" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-								<input type="checkbox" id="sort_desc" name="sort_desc" x-model="formSearch.sort_desc" />
-								<span>Sortir Terbalik</span>
-							</label>
-						</li>
-						<!-- <li>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Promote</a>
-                    </li>
-                    <li>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Activate account</a>
-                    </li> -->
-					</ul>
-					<!-- <div class="py-1">
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Delete User</a>
-                </div> -->
-				</div>
-			</div>
+					class="dropdown-menu top-full left-0 absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-md dark:bg-gray-700 dark:divide-gray-600">
+					<ul class="flex flex-col gap-4 py-2 px-3 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
+						<template x-for="(category, key) in categories" :key="key">
+							<li class="flex">
+								<div class="relative flex w-full" x-data="dropdown">
+									<button
+										@click="toggleDropdown"
+										class="inline-flex w-full justify-between items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+										type="button">
+										<span class="sr-only pr-3">Filter button</span>
+										<span class="pr-1 flex gap-1">
+											Filter
+											<span x-text="key"></span>
+										</span>
+										<svg class="ml-4 w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+											<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
+										</svg>
+									</button>
 
-			<div class="relative">
-				<div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-					<svg class="ml-2 w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-					</svg>
-				</div>
-				<input
-					type="search"
-					id="table-search-users"
-					name="keyword"
-					x-model="formSearch.keyword"
-					class="block pt-2 py-2 pl-8 text-sm text-gray-900 border border-gray-300 rounded-lg w-44 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-					placeholder="Cari Product..."
-					autocomplete="off" />
-			</div>
-
-			<button type="submit" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded text-sm">Cari</button>
-		</div>
-	</form>
-
-	<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-		<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-			<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-				<tr>
-					<th scope="col" class="px-6 py-3">No</th>
-					<th scope="col" class="px-6 py-3">Nama</th>
-					<th scope="col" class="px-6 py-3">Harga Beli</th>
-					<th scope="col" class="px-6 py-3">Harga Jual</th>
-					<th scope="col" class="px-6 py-3">category</th>
-					<!-- <th scope="col" class="px-6 py-3">Subcategory</th> -->
-					<th scope="col" class="px-6 py-3">Gambar</th>
-					<th scope="col" class="px-6 py-3">Aksi</th>
-				</tr>
-			</thead>
-			<tbody>
-				<template x-for="(product, index) in products" :key="product.name + product.id">
-					<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-						<td class="px-6 py-4" x-text="index + page.start_index"></td>
-						<td class="px-6 py-4" x-text="product.name"></td>
-						<td class="px-6 py-4" x-text="IDR.format(product.purchase_price)"></td>
-						<td class="px-6 py-4" x-text="IDR.format(product.price)"></td>
-						<td class="px-6 py-4" x-text="product.category"></td>
-						<template x-if="false">
-							<td class="px-6 py-4" x-text="product.subcategory"></td>
+									<!-- Dropdown menu -->
+									<div
+										x-show="isDropdownOpen"
+										x-cloak=""
+										@click.outside="disableDropdown"
+										class="dropdown-menu top-full left-0 absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-md w-80 max-w-[20rem] dark:bg-gray-700 dark:divide-gray-600">
+										<ul
+											class="grid grid-cols-1 sm:grid-cols-2 gap-1 py-1 max-w-fit w-auto text-sm text-gray-700 dark:text-gray-200 max-h-64 overflow-y-auto"
+											aria-labelledby="dropdownActionButton">
+											<template x-for="option in category" :key="option">
+												<li>
+													<label
+														:for="`s_${ key }_${ option }`"
+														class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+														<input type="checkbox" :id="`s_${ key }_${ option }`" x-model="formSearch.categories[key]" :value="option" />
+														<span x-text="option"></span>
+													</label>
+												</li>
+											</template>
+										</ul>
+									</div>
+								</div>
+							</li>
 						</template>
-						<td class="px-6 py-4">
-							<img @click="openImageModal(product)" loading="lazy" class="w-16 object-cover object-center cursor-pointer" :src="`./src/img/db/${product.image}`" :alt="product.name" />
-						</td>
-						<td class="px-6 py-4">
-							<!-- Modal toggle -->
-							<button type="button" @click="selectEditItem(product)" class="btn-edit font-medium text-blue-600 dark:text-blue-500 hover:underline">Ubah</button>
-							<button type="button" @click="remove(product)" class="btn-remove font-medium text-red-600 dark:text-red-500 hover:underline">Hapus</button>
-						</td>
-					</tr>
-				</template>
-				<tr x-show="!products.length">
-					<th scope="col" colspan="9" class="px-4 py-4 text-xl font-bold text-center">Tidak ada data!</th>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+					</ul>
+				</div>
+			</div>
 
-	<!-- Pagination -->
-	<nav x-show="products.length" class="flex flex-wrap justify-between items-center gap-3 gap-x-5 pt-4" aria-label="Table navigation">
-		<!-- Showing Info -->
-		<div class="text-sm text-gray-600 dark:text-gray-300 text-center md:text-left mx-auto">
-			Menampilkan
-			<span class="font-semibold text-gray-900 dark:text-white">
-				<span x-text="page.start_index"></span>
-				-
-				<span x-text="page.end_index"></span>
-			</span>
-			dari
-			<span class="font-semibold text-gray-900 dark:text-white" x-text="page.total_data"></span>
-			data.
+			<div class="inline-flex gap-4 items-center justify-end ml-auto">
+				<label for="table-search" class="sr-only">Search</label>
+
+				<div class="relative hidden" x-data="dropdown" x-show="false">
+					<button
+						@click="toggleDropdown"
+						class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+						type="button">
+						<span class="sr-only pr-3">Filter button</span>
+						<span class="pr-1">Filter</span>
+						<svg class="ml-4 w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
+						</svg>
+					</button>
+
+					<!-- Dropdown menu -->
+					<div
+						x-show="isDropdownOpen"
+						x-cloak=""
+						@click.outside="disableDropdown"
+						class="dropdown-menu top-full left-0 absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-md w-80 dark:bg-gray-700 dark:divide-gray-600">
+						<ul class="grid grid-cols-2 py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
+							<li>
+								<label for="s_name" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+									<input type="checkbox" id="s_name" name="name" x-model="formSearch.filters" value="name" />
+									<span>Nama</span>
+								</label>
+							</li>
+							<li>
+								<label for="s_purchase_price" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+									<input type="checkbox" id="s_purchase_price" name="purchase_price" x-model="formSearch.filters" value="purchase_price" />
+									<span>Harga Beli</span>
+								</label>
+							</li>
+							<li>
+								<label for="s_price" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+									<input type="checkbox" id="s_price" name="price" x-model="formSearch.filters" value="price" />
+									<span>Harga Jual</span>
+								</label>
+							</li>
+							<li>
+								<label for="s_category" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+									<input type="checkbox" id="s_category" name="category" x-model="formSearch.filters" value="category" />
+									<span>Kategori</span>
+								</label>
+							</li>
+							<li>
+								<label for="s_subcategory" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+									<input type="checkbox" id="s_subcategory" name="subcategory" x-model="formSearch.filters" value="subcategory" />
+									<span>Sub Kategori</span>
+								</label>
+							</li>
+							<li>
+								<label for="sort_desc" class="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+									<input type="checkbox" id="sort_desc" name="sort_desc" x-model="formSearch.sort_desc" />
+									<span>Sortir Terbalik</span>
+								</label>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="relative">
+					<div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+						<svg class="ml-2 w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+						</svg>
+					</div>
+					<input
+						type="search"
+						id="table-search-users"
+						name="keyword"
+						x-model="formSearch.keyword"
+						class="block pt-2 py-2 pl-8 text-sm text-gray-900 border border-gray-300 rounded-lg w-44 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+						placeholder="Cari Product..."
+						autocomplete="off" />
+				</div>
+
+				<button type="submit" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded text-sm">Cari</button>
+			</div>
+		</form>
+
+		<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+					<tr>
+						<th scope="col" class="px-6 py-3">No</th>
+						<th scope="col" class="px-6 py-3">Nama</th>
+						<th scope="col" class="px-6 py-3">Harga Beli</th>
+						<th scope="col" class="px-6 py-3">Harga Original</th>
+						<th scope="col" class="px-6 py-3">Diskon</th>
+						<th scope="col" class="px-6 py-3">category</th>
+						<!-- <th scope="col" class="px-6 py-3">Subcategory</th> -->
+						<th scope="col" class="px-6 py-3">Gambar</th>
+						<th scope="col" class="px-6 py-3">Aksi</th>
+					</tr>
+				</thead>
+				<tbody>
+					<template x-for="(product, index) in products" :key="product.name + product.id">
+						<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+							<td class="td-base text-gray-400" x-text="index + page.start_index"></td>
+							<!-- <td class="px-6 py-4" x-text="index + page.start_index"></td> -->
+							<td class="td-base">
+								<div class="font-semibold text-gray-900 dark:text-gray-100" x-text="product.name"></div>
+							</td>
+
+							<!-- <td class="px-6 py-4" x-text="product.name"></td> -->
+							<td class="td-base text-gray-500" x-text="IDR.format(product.purchase_price)"></td>
+							<td class="td-base font-medium text-gray-900" x-text="IDR.format(product.price)"></td>
+
+							<!-- <td class="px-6 py-4" x-text="IDR.format(product.purchase_price)"></td>
+							<td class="px-6 py-4" x-text="IDR.format(product.price)"></td> -->
+							<td class="td-base">
+								<div class="flex flex-col gap-0.5 text-sm">
+									<!-- Persen -->
+									<div x-show="product.discount_type == discountTypeKeys[0]" class="flex items-center gap-2">
+										<span class="font-semibold text-blue-600">
+											<span x-text="`${cleanFloat(product.discount_value)}%`"></span>
+										</span>
+										<span class="text-gray-400">→</span>
+										<span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+											<span x-text="IDR.format(product.price - (product.price * (product.discount_value / 100)))"></span>
+										</span>
+									</div>
+
+									<!-- Nominal -->
+									<div x-show="product.discount_type == discountTypeKeys[1]">
+										<span class="font-semibold text-green-600" x-text="IDR.format(product.discount_value)"></span>
+									</div>
+
+									<!-- Tidak ada -->
+									<div x-show="product.discount_type != discountTypeKeys[0] && product.discount_type != discountTypeKeys[1]" class="text-gray-400">–</div>
+								</div>
+							</td>
+
+							<!-- <td class="px-6 py-4">
+								<div class="flex gap-2 items-centesr">
+									<div class="contents" x-show="product.discount_type == discountTypeKeys[0]">
+										<span>
+											<span x-text="product.discount_value"></span>
+											%
+										</span>
+										&raquo;
+										<span x-text="IDR.format(product.price - (product.price * (product.discount_value / 100)))"></span>
+									</div>
+									<div class="contents" x-show="product.discount_type == discountTypeKeys[1]">
+										<span x-text="IDR.format(product.discount_value)"></span>
+									</div>
+									<div class="contents" x-show="product.discount_type != discountTypeKeys[0] && product.discount_type != discountTypeKeys[1]">
+										<span>-</span>
+									</div>
+								</div>
+							</td> -->
+							<td class="td-base">
+								<span class="inline-flex items-center rounded bg-gray-100 text-gray-700 px-2 py-0.5 text-xs font-medium">
+									<span x-text="product.category"></span>
+								</span>
+							</td>
+
+							<!-- <td class="px-6 py-4" x-text="product.category"></td> -->
+							<template x-if="false">
+								<td class="px-6 py-4" x-text="product.subcategory"></td>
+							</template>
+							<td class="td-base">
+								<img
+									@click="openImageModal(product)"
+									loading="lazy"
+									class="w-14 h-14 rounded-md object-cover object-center cursor-pointer border hover:scale-105 transition"
+									:src="`./src/img/db/${product.image}`"
+									:alt="product.name" />
+							</td>
+
+							<!-- <td class="px-6 py-4">
+								<img
+									@click="openImageModal(product)"
+									loading="lazy"
+									class="w-16 object-cover object-center cursor-pointer"
+									:src="`./src/img/db/${product.image}`"
+									:alt="product.name" />
+							</td> -->
+
+							<td class="td-base">
+								<div class="flex gap-3 flex-wrap items-center text-sm">
+									<button type="button" @click="selectDiscountProduct(product)" class="btn-detail font-medium hover:underline">Atur Diskon</button>
+
+									<button type="button" @click="selectEditItem(product)" class="btn-edit font-medium hover:underline">Ubah</button>
+
+									<button type="button" @click="remove(product)" class="btn-remove font-medium hover:underline">Hapus</button>
+								</div>
+							</td>
+							<!-- <td class="px-6 py-4">
+								<div class="flex gap-2 flex-wrap items-center">
+									<button type="button" @click="selectDiscountProduct(product)" class="btn-detail font-medium text-blue-600 dark:text-blue-500 hover:underline">Atur Diskon</button>
+									<button type="button" @click="selectEditItem(product)" class="btn-edit font-medium text-blue-600 dark:text-blue-500 hover:underline">Ubah</button>
+									<button type="button" @click="remove(product)" class="btn-remove font-medium text-red-600 dark:text-red-500 hover:underline">Hapus</button>
+								</div>
+							</td> -->
+						</tr>
+					</template>
+					<tr x-show="!products.length">
+						<th scope="col" colspan="9" class="px-4 py-4 text-xl font-bold text-center">Tidak ada data!</th>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 
-		<!-- Pagination Group -->
-		<ul class="mx-auto self-center inline-flex -space-x-px rtl:space-x-reverse text-xs h-8 rounded-m md:text-sm" x-show="products.length">
-			<li>
-				<a
-					href="#formSearch"
-					@click="page.page != 1 && get(1)"
-					:class="page.page === 1 ? 'pointer-events-none opacity-50' : ''"
-					class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-					&laquo;
-				</a>
-			</li>
-			<li>
-				<a
-					href="#formSearch"
-					@click="page.page != 1 && get(page.page - 1)"
-					:class="page.page === 1 ? 'pointer-events-none opacity-50' : ''"
-					class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-					&lsaquo;
-				</a>
-			</li>
+		<!-- Pagination -->
+		<nav x-show="products.length" class="flex flex-wrap justify-between items-center gap-3 gap-x-5 pt-4" aria-label="Table navigation">
+			<!-- Showing Info -->
+			<div class="text-sm text-gray-600 dark:text-gray-300 text-center md:text-left mx-auto">
+				Menampilkan
+				<span class="font-semibold text-gray-900 dark:text-white">
+					<span x-text="page.start_index"></span>
+					-
+					<span x-text="page.end_index"></span>
+				</span>
+				dari
+				<span class="font-semibold text-gray-900 dark:text-white" x-text="page.total_data"></span>
+				data.
+			</div>
 
-			<template x-for="(num,index) in page.buttons" :key="num">
+			<!-- Pagination Group -->
+			<ul class="mx-auto self-center inline-flex -space-x-px rtl:space-x-reverse text-xs h-8 rounded-m md:text-sm" x-show="products.length">
 				<li>
 					<a
 						href="#formSearch"
-						@click="page.page != num && get(num)"
-						x-text="num"
-						:class="page.page != num ? ' text-gray-500 bg-white dark:bg-gray-800 dark:text-gray-400 ' : 'bg-gray-100 text-gray-700  dark:bg-gray-700 dark:text-white'"
-						class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 leading-tight border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white"></a>
+						@click="page.page != 1 && get(1)"
+						:class="page.page === 1 ? 'pointer-events-none opacity-50' : ''"
+						class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+						&laquo;
+					</a>
 				</li>
-			</template>
+				<li>
+					<a
+						href="#formSearch"
+						@click="page.page != 1 && get(page.page - 1)"
+						:class="page.page === 1 ? 'pointer-events-none opacity-50' : ''"
+						class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+						&lsaquo;
+					</a>
+				</li>
 
-			<li>
-				<a
-					href="#formSearch"
-					@click="page.page != page.total_page && get(page.page+1)"
-					:class="page.page === page.total_page ? 'pointer-events-none opacity-50' : ''"
-					class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-					&rsaquo;
-				</a>
-			</li>
-			<li>
-				<a
-					href="#formSearch"
-					@click="page.page != page.total_page && get(page.total_page)"
-					:class="page.page === page.total_page ? 'pointer-events-none opacity-50' : ''"
-					class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-					&raquo;
-				</a>
-			</li>
-		</ul>
-	</nav>
+				<template x-for="(num,index) in page.buttons" :key="num">
+					<li>
+						<a
+							href="#formSearch"
+							@click="page.page != num && get(num)"
+							x-text="num"
+							:class="page.page != num ? ' text-gray-500 bg-white dark:bg-gray-800 dark:text-gray-400 ' : 'bg-gray-100 text-gray-700  dark:bg-gray-700 dark:text-white'"
+							class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 leading-tight border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white"></a>
+					</li>
+				</template>
 
-	<!-- Edit user modal -->
+				<li>
+					<a
+						href="#formSearch"
+						@click="page.page != page.total_page && get(page.page+1)"
+						:class="page.page === page.total_page ? 'pointer-events-none opacity-50' : ''"
+						class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+						&rsaquo;
+					</a>
+				</li>
+				<li>
+					<a
+						href="#formSearch"
+						@click="page.page != page.total_page && get(page.total_page)"
+						:class="page.page === page.total_page ? 'pointer-events-none opacity-50' : ''"
+						class="flex items-center justify-center px-3 md:px-3 h-8 md:h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+						&raquo;
+					</a>
+				</li>
+			</ul>
+		</nav>
+	</div>
+
+	<div class="contents" x-show="tabActive == tabKeys[1]">
+		<h2 class="text-2xl font-bold mb-4 mt-12">Management Diskon</h2>
+
+		<div x-show="isFetchingDiscountHistory" class="font-bold">Sedang memproses histori...</div>
+
+		<button id="button-add-discunt" @click="openModalDiscount" class="bg-[#62c700] hover:bg-green-600 text-white px-4 py-2 rounded mb-4">Tambah Diskon</button>
+
+		<div class="detail-product my-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+				<!-- Gambar -->
+				<div class="flex justify-center sm:justify-start">
+					<img class="w-32 h-32 rounded-md object-cover object-center border" :src="`./src/img/db/${selectedDiscount.image}`" :alt="selectedDiscount.name" />
+				</div>
+
+				<!-- Info utama -->
+				<div class="sm:col-span-2 space-y-1">
+					<h3 class="text-lg font-semibold text-gray-900" x-text="selectedDiscount.name"></h3>
+
+					<div class="flex flex-wrap items-center gap-2 text-sm">
+						<span class="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-gray-700">
+							<span x-text="selectedDiscount.category"></span>
+						</span>
+
+						<template x-if="selectedDiscount.subcategory">
+							<span class="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-gray-600">
+								<span x-text="selectedDiscount.subcategory"></span>
+							</span>
+						</template>
+					</div>
+
+					<div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm mt-2">
+						<div>
+							<span class="text-gray-500">Harga Beli</span>
+							<div class="font-medium text-gray-800" x-text="IDR.format(selectedDiscount.purchase_price)"></div>
+						</div>
+
+						<div>
+							<span class="text-gray-500">Harga Jual</span>
+							<div class="font-semibold text-gray-900" x-text="IDR.format(selectedDiscount.price)"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- <div class="detail-product my-6">
+			<p>
+				Nama Produk:
+				<span x-text="selectedDiscount.name"></span>
+			</p>
+			<p>
+				Kategori:
+				<span x-text="selectedDiscount.category"></span>
+			</p>
+			<p>
+				Harga Beli:
+				<span x-text="IDR.format(selectedDiscount.purchase_price)"></span>
+			</p>
+			<p>
+				Harga Jual:
+				<span x-text="IDR.format(selectedDiscount.price)"></span>
+			</p>
+			<p>
+				Gambar:
+				<span><img class="w-32 object-cover object-center" :src="`./src/img/db/${selectedDiscount.image}`" :alt="selectedDiscount.name" /></span>
+			</p>
+		</div> -->
+
+		<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+					<tr>
+						<th scope="col" class="px-6 py-3">No</th>
+						<th scope="col" class="px-6 py-3">Diskon</th>
+						<th scope="col" class="px-6 py-3">Masa Berlaku</th>
+						<th scope="col" class="px-6 py-3">Aksi</th>
+					</tr>
+				</thead>
+				<tbody>
+					<template x-for="(discount, index) in selectedDiscount?.discountList" :key="discount.name + discount.id">
+						<tr class="bg-white odd:bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100">
+							<!-- <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"> -->
+							<td class="td-base text-gray-400"><span x-text="index + page.start_index"></span></td>
+							<td class="td-base">
+								<div class="flex items-center gap-2" x-show="discount.type == discountTypeKeys[0]">
+									<span class="td-strong text-blue-600">
+										<span x-text="discount.value"></span>
+										%
+									</span>
+
+									<span class="text-gray-400">→</span>
+
+									<span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+										<span x-text="IDR.format(selectedDiscount.price - (selectedDiscount.price * (discount.value / 100)))"></span>
+									</span>
+								</div>
+
+								<div x-show="discount.type == discountTypeKeys[1]">
+									<span class="td-strong text-green-600" x-text="IDR.format(discount.value)"></span>
+								</div>
+							</td>
+
+							<td class="td-base">
+								<div class="space-y-1">
+									<span
+										class="block text-sm text-gray-700"
+										x-text="
+										discount.status === 'scheduled'
+											? `Mulai ${discount.start_date}`
+											: (discount.start_date && discount.end_date)
+												? `${discount.start_date} - ${discount.end_date}`
+												: (!discount.start_date && !discount.end_date)
+													? 'Selamanya'
+													: discount.start_date
+														? `Sejak ${discount.start_date}`
+														: `Hingga ${discount.end_date}`
+									"></span>
+
+									<!-- <span
+										class="block text-sm text-gray-700"
+										x-text="(discount.start_date && discount.end_date)
+											? `${discount.start_date} - ${discount.end_date}`
+											: (!discount.start_date && !discount.end_date)
+											? 'Selamanya'
+											: discount.start_date
+											? `Sejak ${discount.start_date}`
+											: `Hingga ${discount.end_date}`"></span> -->
+
+									<span
+										class="inline-flex w-fit gap-2 items-center px-2 py-0.5 rounded text-xs font-medium"
+										:class="{
+											'bg-green-100 text-green-700': discount.status === 'active',
+											'bg-yellow-100 text-yellow-700': discount.status === 'scheduled',
+											'bg-gray-200 text-gray-600': discount.status === 'expired',
+											'bg-red-100 text-red-700': discount.status === 'disabled'
+										}">
+										<span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+										<span
+											x-text="{
+											active: 'Aktif',
+											scheduled: 'Terjadwal',
+											expired: 'Selesai',
+											disabled: 'Dinonaktifkan'
+										}[discount.status] ?? 'Tidak Diketahui'"></span>
+									</span>
+								</div>
+							</td>
+
+							<!-- <td class="px-6 py-4">
+								<span
+									x-text="(discount.start_date && discount.end_date) ? `${discount.start_date} - ${discount.end_date}` : (!discount.start_date && !discount.end_date) ? 'Selamanya' : discount.start_date ? `Sejak ${discount.start_date}` : `Hingga ${discount.start_end}`"></span>
+								-
+								<span x-text="+discount.is_active ? 'Aktif' : 'Selesai'"></span>
+							</td> -->
+							<td class="td-base">
+								<div class="flex gap-3 items-center">
+									<button x-show="+discount.is_active" type="button" @click="stopDiscount(discount)" class="btn-edit text-sm font-medium hover:underline">Berhentikan</button>
+
+									<button type="button" @click="removeDiscount(discount)" class="btn-remove text-sm font-medium hover:underline">Hapus</button>
+								</div>
+							</td>
+
+							<!-- <td class="px-6 py-4">
+								<div class="flex gap-2 flex-wrap items-center">
+									<button type="button" @click="stopDiscount(discount)" class="btn-edit font-medium text-red-600 dark:text-red-500 hover:underline">Berhentikan</button>
+									<button type="button" @click="removeDiscount(discount)" class="btn-remove font-medium text-red-600 dark:text-red-500 hover:underline">Hapus</button>
+								</div>
+							</td> -->
+						</tr>
+					</template>
+					<tr x-show="!products.length">
+						<th scope="col" colspan="9" class="px-4 py-4 text-xl font-bold text-center">Tidak ada data!</th>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- Form Product modal -->
 	<div id="mainModal" x-show="isOpenModal" x-cloak="" class="bg-[rgba(0,0,0,.5)] modal-conn">
 		<div class="relative w-full max-w-2xl max-h-full" @click.outside="isOpenModal = false">
 			<!-- Modal content -->
@@ -326,64 +612,27 @@
 								</template>
 							</select>
 						</div>
-						<!-- <div class="col-span-6 sm:col-span-3">
-							<label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
-							<input
-								type="search"
-								id="category"
-								x-model="form.category"
-								list="category-list"
-								autocomplete="off"
-								class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-								required="" />
 
-							<datalist id="category-list">
-								<template x-for="(subcategory, category, all) in categories" :key="category">
-									<option x-text="category"></option>
-								</template>
-							</datalist>
-						</div> -->
-
+						<div class="col-span-6 sm:col-span-3">
+							<label for="purchase_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Beli</label>
+							<div class="flex gap-2">
+								<input
+									type="text"
+									id="purchase_price"
+									x-model="formattedPurchase_price"
+									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									required="" />
+							</div>
+						</div>
 						<div class="col-span-6 sm:col-span-3">
 							<label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Beli</label>
 							<div class="flex gap-2">
 								<input
-									type="number"
-									inputmode="numeric"
-									id="purchase_price"
-									x-model.number="form.purchase_price"
-									min="0"
-									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-1/2 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-									required="" />
-								<input
 									type="text"
-									:value="form.purchase_price && !isNaN(form.purchase_price) ? IDR.format(form.purchase_price) : ''"
-									placeholder="IDR"
-									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-1/2 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-									placeholder="RP 25.000"
-									required=""
-									disabled />
-							</div>
-						</div>
-						<div class="col-span-6 sm:col-span-3">
-							<label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Jual</label>
-							<div class="flex gap-2">
-								<input
-									type="number"
-									inputmode="numeric"
 									id="price"
-									x-model.number="form.price"
-									min="0"
-									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-1/2 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									x-model="formattedPrice"
+									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 									required="" />
-								<input
-									type="text"
-									:value="form.price && !isNaN(form.price) ? IDR.format(form.price) : ''"
-									placeholder="IDR"
-									class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-1/2 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-									placeholder="RP 25.000"
-									required=""
-									disabled />
 							</div>
 						</div>
 
@@ -449,6 +698,128 @@
 						type="submit"
 						class="text-white bg-[#62c700] hover:bg-green-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
 						x-text="form.id ? 'Ubah' : 'Tambah'"></button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Form Discount modal -->
+	<div id="modalDiscounr" x-show="isOpenModalDiscount" x-cloak="" class="bg-[rgba(0,0,0,.5)] modal-conn">
+		<div class="relative w-full max-w-2xl max-h-full" @click.outside="isOpenModalDiscount = false">
+			<!-- Modal content -->
+			<form id="form-main" class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700" @submit.prevent="addDiscount">
+				<!-- Modal header -->
+				<div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 border-gray-200">
+					<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+						<span x-text="form.id ? 'Ubah' : 'Tambah'"></span>
+						Diskon
+						<span x-text="`- Produk: ${selectedDiscount.name}`"></span>
+					</h3>
+					<h5>
+						Harga awal:
+						<span x-text="IDR.format(selectedDiscount.price)"></span>
+					</h5>
+					<button
+						@click="isOpenModalDiscount = false"
+						type="button"
+						class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+						<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+						</svg>
+						<span class="sr-only">Close modal</span>
+					</button>
+				</div>
+				<!-- Modal body -->
+				<div class="p-6 space-y-6">
+					<div class="grid grid-cols-6 gap-6">
+						<!-- <input type="hidden" name="product_id" :value="selectedDiscount.id" /> -->
+						<!-- <div class="col-span-6 sm:col-span-3">
+							<label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama</label>
+							<input
+								type="text"
+								id="name"
+								class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+								required=""
+								readonly
+								:value="selectedDiscount.name" />
+						</div> -->
+
+						<div class="col-span-6 sm:col-span-3">
+							<label for="type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Diskon Tipe</label>
+							<select
+								x-init="console.warn('discountTypeMap:', discountTypeMap)"
+								id="type"
+								x-model="formDiscount.type"
+								class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+								<!-- <option value="">Pilih Tipe Discount</option> -->
+								<template x-for="(display, type) in discountTypeMap" :key="index">
+									<option x-text="display" :value="type"></option>
+								</template>
+							</select>
+						</div>
+
+						<div class="col-span-6 sm:col-span-3">
+							<div class="contents" x-show="formDiscount.type == discountTypeKeys[0]">
+								<label for="discountTypePercent" class="grid grid-cols-2 gap-2 mb-2 text-sm font-medium text-gray-900 dark:text-white">
+									<span>Besar Diskon (%)</span>
+									<span>Harga akhir</span>
+								</label>
+								<div class="flex gap-2">
+									<input
+										type="text"
+										id="discountTypePercent"
+										x-model="formDiscount.value"
+										class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+										:required="formDiscount.type == discountTypeKeys[0]"
+										min="0"
+										max="100" />
+									<input
+										type="text"
+										id="discountTypePercentResult"
+										:value="IDR.format(selectedDiscount.price - (selectedDiscount.price * (formDiscount.value / 100)))"
+										class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+										min="0"
+										readonly />
+								</div>
+							</div>
+							<div class="contents" x-show="formDiscount.type == discountTypeKeys[1]">
+								<label for="discountTypeFix" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Diskon (harga fix)</label>
+								<div class="flex gap-2">
+									<input
+										type="text"
+										id="discountTypeFix"
+										x-model="formattedDiscountValue"
+										class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+										:required="formDiscount.type == discountTypeKeys[1]" />
+								</div>
+							</div>
+						</div>
+
+						<div class="col-span-6 sm:col-span-3">
+							<label for="start_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal Dimulai (opsional)</label>
+							<input
+								type="date"
+								id="start_date"
+								x-model="formDiscount.start_date"
+								class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+						</div>
+
+						<div class="col-span-6 sm:col-span-3">
+							<label for="end_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tanggal Berakhir (opsional)</label>
+							<input
+								type="date"
+								id="end_date"
+								x-model="formDiscount.end_date"
+								class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+						</div>
+					</div>
+					<!-- Modal footer -->
+					<div class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
+						<button
+							type="submit"
+							class="text-white bg-[#62c700] hover:bg-green-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+							x-text="form.id ? 'Ubah' : 'Tambah'"></button>
+					</div>
 				</div>
 			</form>
 		</div>

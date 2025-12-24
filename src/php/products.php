@@ -12,6 +12,7 @@ require_once 'db.php';
 toGlobal($_POST);
 
 $table = "products";
+$view_name = "view_products_with_discount";
 
 switch (M) {
     case "add": {
@@ -50,6 +51,96 @@ switch (M) {
         echo json_encode(['status' => true, 'msg' => 'Item berhasil ditamahkan.']);
         break;
     }
+
+    case 'search-v2': {
+        $page ??= false;
+        $page = (Int) ($page ?? 1);
+        $keyword ??= false;
+        $filters ??= false;
+    
+        $sql = " FROM $view_name WHERE deprecated_code = '' ";
+        
+        if ($keyword) {
+            $conditions = [];
+
+            $filters = explode(",", $filters);
+
+            foreach ($filters as $key) {
+                $conditions[] = "$key LIKE '%$keyword%'";
+            }
+
+            if (!empty($conditions))
+                $sql .= " AND (" . implode(' OR ', $conditions) . ")";
+        }
+
+        // categories dynamic
+        $categories_conditions = [];
+        foreach ($_POST as $key_name => $value) {
+            $splited_key = explode("categories_", $key_name);
+
+            if (count($splited_key) == 1 || empty($value))
+                continue;
+
+            $key = $splited_key[1];
+
+            $conditions = [];
+
+            $values = explode(",", $value);
+            foreach ($values as $val) {
+                $conditions[] = "subcategory = '$val'";
+            }
+
+            $categories_conditions[] = "category = '$key' AND (" . implode(" OR ", $conditions) . ")";
+        }
+
+        if (!empty($categories_conditions)) {
+            $sql .= " AND ( " . implode(" OR ", $categories_conditions) . ")";
+        }
+
+
+        $sql .= $_POST['sort_desc'] ?? false ? " ORDER BY ID DESC " : "";
+
+        // Pagination
+        $total_data = (Int) $db->query("SELECT COUNT(*) $sql")->fetch_assoc()["COUNT(*)"];
+        try {
+            $max_data = $config['pagination']['max_data'];
+        } catch (Exception $e) {
+            $max_data = 5;
+        }
+        $total_page = ceil($total_data / $max_data);
+
+        $page = $page < 0 ? 1 : ($page > $total_page ? $total_page : $page);
+
+        $offset = ($page - 1) * $max_data;
+        $offset = $offset < 0 ? 0 : $offset;
+
+        $start_index = $total_data == 0 ? 0 : $offset + 1;
+        $end_index = $offset + $max_data > $total_data ? $total_data : $offset + $max_data;
+
+        $pagination = [
+            'total_data' => $total_data,
+            'max_data' => $max_data,
+            'total_page' => $total_page,
+            'page' => $page,
+            'offset' => $offset,
+            'start_index' => $start_index,
+            'end_index' => $end_index,
+        ];
+
+        $sql = "SELECT * " . $sql . "LIMIT $offset, $max_data";
+
+        $res = $db->query($sql);
+
+        $data = [];
+
+        while ($row = mysqli_fetch_assoc($res)) {
+            $data[] = $row;
+        }
+
+        echo json_encode(['status' => true, 'data' => $data, 'query' => $sql, 'pagination' => $pagination, 'post' => $_POST]);
+        break;
+    }
+
     case 'search': {
 
         $page ??= false;
@@ -155,13 +246,25 @@ switch (M) {
         break;
     }
     case 'get': {
-        $res = $db->query("SELECT * FROM $table WHERE deprecated_code = ''");
+        $data = $db->query("SELECT * FROM $table")->fetch_all(MYSQLI_ASSOC);
 
-        $data = [];
+        // $data = [];
 
-        while ($row = mysqli_fetch_assoc($res)) {
-            $data[] = $row;
-        }
+        // while ($row = mysqli_fetch_assoc($res)) {
+        //     $data[] = $row;
+        // }
+
+        echo json_encode(['status' => true, 'data' => $data]);
+        break;
+    }
+    case 'get-views': {
+        $data = $db->query("SELECT * FROM $view_name WHERE deprecated_code = ''")->fetch_all(MYSQLI_ASSOC);
+
+        // $data = [];
+
+        // while ($row = mysqli_fetch_assoc($res)) {
+        //     $data[] = $row;
+        // }
 
         echo json_encode(['status' => true, 'data' => $data]);
         break;
@@ -236,7 +339,7 @@ switch (M) {
         // $id ??= false;
         // $origin_id ??= false;
 
-        $validated = validateEmptyVar("id|origin_id");
+        $validated = validateEmptyVar("id|origin_id", true);
 
         if ($validated !== true) {
             echo json_encode(['status' => false, 'msg' => "Missing requied value: $validated"]);

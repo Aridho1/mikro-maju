@@ -5,19 +5,55 @@ import Pagination from "../libs/pagination.js";
 import rewriteUrl from "../libs/rewriteUrl.js";
 import { url_param } from "../libs/urlParam.js";
 import { deafultConfirmProps, defaultErrorProps, defaultSuccessProps } from "../libs/swal2props.js";
+import { IDR } from "../libs/utils.js";
+import { TaskQueue } from "../libs/TaskQueue.js";
+
+const q = new TaskQueue();
+
+const defaultWarningNotif = {
+	variant: "warning",
+	title: "Warning",
+	message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!",
+};
+
+const defaultSuccessNotif = {
+	variant: "success",
+	title: "Selamat",
+	message: "Mohon tunggu dan coba beberapa saat lagi. Sedang memproses aksi sebelumnya!",
+};
 
 export default function () {
-	const db_path = "./src/php/products.php?m=";
+	const dbPath = "./src/php/products.php?m=";
+	const dbDiscountPath = "./src/php/product_discounts.php?m=";
+
+	const discountTypeMap = {
+		percent: "Persen (%)",
+		fixed: "Angka Fix",
+	};
+	const discountTypeKeys = Object.keys(discountTypeMap);
+	const discountTypeList = discountTypeKeys.map((key) => discountTypeMap[key]);
+
+	const tabMap = {
+		product: "Produk",
+		discount: "Diskon",
+	};
+	const tabKeys = Object.keys(tabMap);
+	const tabList = tabKeys.map((key) => tabMap[key]);
+
 	const form = document.querySelector("#form-main");
 	const inputFileEl = document.querySelector("#dropzone-file");
 
-	let is_wait = {
-		get: false,
-		add: false,
-		edit: false,
-	};
+	// let is_wait = {
+	// 	get: false,
+	// 	add: false,
+	// 	edit: false,
+	// };
 
 	return {
+		tabMap,
+		tabKeys,
+		tabList,
+		tabActive: tabKeys[0],
 		categories: {},
 		categories_keys: [],
 		items: [],
@@ -33,6 +69,9 @@ export default function () {
 			subcategory: null,
 			prevImage: null,
 		},
+		formattedPurchase_price: "",
+		formattedPrice: "",
+
 		editedProduct: {},
 		isOpenModal: false,
 		isOpenImageModal: false,
@@ -46,23 +85,189 @@ export default function () {
 		},
 		page: new Pagination(),
 
-		async init() {
-			this.$watch("form.price", (curr, prev) => {
-				if (isNaN(curr) || isNaN(prev)) return;
+		// discount props
+		productDiscounts: [],
+		formDiscount: {
+			id: null,
+			product_id: null,
+			type: discountTypeKeys[0],
+			value: null,
+			start_date: null,
+			end_date: null,
+		},
+		formattedDiscountValue: "",
+		discountTypeMap,
+		discountTypeKeys,
+		discountTypeList,
+		isOpenModalDiscount: false,
+		selectedDiscount: {
+			discountList: [],
+		},
+		isFetchingDiscountHistory: false,
 
-				console.log({ curr, prev });
+		async getDiscountHistory(productId) {
+			if (!this.products.some(({ id }) => productId == id)) return console.warn(`Product with id ${productId} is not found!`);
+			if (!this.selectedDiscount) return console.warn(`selected discount is not found!`);
 
-				if (prev - 1 == curr) this.form.price = prev - 1000;
-				else if (prev - 0 + 1 == curr) this.form.price = prev - 0 + 1000;
+			this.isFetchingDiscountHistory = true;
+
+			q.add("get-history-discount", async () => {
+				const formData = new FormData();
+				formData.append("id", productId);
+
+				encodeFetchedJson(await (await fetch(dbDiscountPath + "get-discounts-by-product-id", { method: "POST", body: formData })).text(), "Fetching History Diskon Produk", ({ data }) => {
+					if (!this.selectedDiscount?.discountList) return console.warn(`selected discount is gone!`);
+					this.selectedDiscount.discountList = data;
+				});
 			});
 
-			this.$watch("form.purchase_price", (curr, prev) => {
-				if (isNaN(curr) || isNaN(prev)) return;
+			this.isFetchingDiscountHistory = false;
+		},
 
-				console.log({ curr, prev });
+		selectDiscountProduct(product) {
+			this.selectedDiscount = { ...product, discountList: [] };
 
-				if (prev - 1 == curr) this.form.purchase_price = prev - 1000;
-				else if (prev - 0 + 1 == curr) this.form.purchase_price = prev - 0 + 1000;
+			this.getDiscountHistory(product.id);
+			this.tabActive = tabKeys[1];
+
+			console.log(this.selectedDiscount);
+		},
+
+		openModalDiscount() {
+			// if (this.selectedDiscount.discount_id) return this.$dispatch("notify", { ...defaultWarningNotif, title: "(Warning) Gagal membuka form", message: "Produk ini masih memiliki discount yang aktif!" });
+
+			this.formDiscount = {
+				...this.formDiscount,
+				id: null,
+				product_id: null,
+				value: null,
+				start_date: null,
+				end_date: null,
+			};
+
+			this.isOpenModalDiscount = true;
+		},
+
+		async addDiscount() {
+			q.add(
+				"add-discount",
+				async () => {
+					const formData = new FormData();
+					bindAndFillFormData(formData, this.formDiscount);
+					formData.append("product_id", this.selectedDiscount.id);
+
+					encodeFetchedJson(
+						await (await fetch(dbDiscountPath + "add", { method: "POST", body: formData })).text(),
+						"Tambah Diskon",
+						async ({ msg: message } = {}) => {
+							if (message) this.$dispatch("notify", { ...defaultSuccessNotif, message });
+
+							await this.getDiscountHistory(this.selectedDiscount.id);
+						},
+						{
+							swalSuccess: false,
+						}
+					);
+
+					this.isOpenModalDiscount = false;
+				},
+				{ cancelIfAlreadyInQueue: true, callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif) }
+			);
+		},
+		async editDiscount() {},
+
+		async removeDiscount({ id } = {}) {
+			if (!id) return;
+
+			q.add(
+				"remove-discount",
+				async () => {
+					const { isConfirmed } = await Swal.fire({
+						...deafultConfirmProps,
+						title: "Yakin ingin hapus Diskon ini?",
+						text: "Diskon yang dihapus tidak bisa di kembalikan!",
+						icon: "warning",
+						confirmButtonText: "Ya, saya yakin!",
+					});
+
+					if (!isConfirmed) return;
+
+					const formData = new FormData();
+					formData.append("id", id);
+
+					encodeFetchedJson(
+						await (await fetch(dbDiscountPath + "remove", { method: "POST", body: formData })).text(),
+						"Hapus Diskon",
+						async ({ msg: message } = {}) => {
+							await this.getDiscountHistory(this.selectedDiscount.id);
+
+							if (message) this.$dispatch("notify", { ...defaultSuccessNotif, message });
+						},
+						{ swalSuccess: false }
+					);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif),
+				}
+			);
+		},
+		async stopDiscount({ id, is_active } = {}) {
+			if (!id) return;
+
+			console.log({ id, is_active });
+
+			q.add(
+				"stop-discount",
+				async () => {
+					const { isConfirmed } = await Swal.fire({
+						...deafultConfirmProps,
+						title: "Yakin ingin stop Diskon ini?",
+						text: "Diskon yang distop tidak bisa di kembalikan!",
+						icon: "warning",
+						confirmButtonText: "Ya, saya yakin!",
+					});
+
+					if (!isConfirmed) return;
+
+					const formData = new FormData();
+					formData.append("id", id);
+
+					encodeFetchedJson(
+						await (await fetch(dbDiscountPath + "stop-discount", { method: "POST", body: formData })).text(),
+						"Stop Diskon",
+						async ({ msg: message } = {}) => {
+							await this.getDiscountHistory(this.selectedDiscount.id);
+
+							if (message) this.$dispatch("notify", { ...defaultSuccessNotif, message });
+						},
+						{ swalSuccess: false }
+					);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif),
+				}
+			);
+		},
+
+		async init() {
+			this.$watch("formattedDiscountValue", (value) => {
+				const _value = value.replace(/\D/g, "");
+				this.formattedDiscountValue = IDR.format(_value);
+				this.formDiscount.value = _value;
+			});
+
+			this.$watch("formattedPrice", (value) => {
+				const _value = value.replace(/\D/g, "");
+				this.formattedPrice = IDR.format(_value);
+				this.form.price = _value;
+			});
+
+			this.$watch("formattedPurchase_price", (value) => {
+				const _value = value.replace(/\D/g, "");
+				this.formattedPurchase_price = IDR.format(_value);
+				this.form.purchase_price = _value;
 			});
 
 			await this.getCategories();
@@ -87,7 +292,7 @@ export default function () {
 		},
 
 		async getCategories() {
-			encodeFetchedJson(await (await fetch(db_path + "get-categories")).text(), null, (json) => {
+			encodeFetchedJson(await (await fetch(dbPath + "get-categories")).text(), null, (json) => {
 				const { categories } = json;
 
 				console.log({ json });
@@ -105,6 +310,36 @@ export default function () {
 		},
 
 		async get(page, is_init = false) {
+			q.add(
+				"get",
+				async () => {
+					if (!this.formSearch.filters.length) return Swal.fire({ ...defaultErrorProps, text: "Isi minimal 1 filter! (kecuali sorting terbalik)!" });
+
+					const formData = new FormData();
+					formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
+
+					// Asign x-model to post body | formdata
+					bindAndFillFormData(formData, this.formSearch);
+
+					if (!is_init) formData.append("page", page && !isNaN(page) ? page : this.page.page || 1);
+
+					// Handle rewrtie
+					const isRewriteUrl = rewriteUrl(formData, url_param);
+
+					if (!isRewriteUrl && !is_init) return console.warn("Reject get method cause same param!");
+
+					const apiMethod = "search-v2";
+
+					encodeFetchedJson(await (await fetch(dbPath + apiMethod, { method: "POST", body: formData })).text(), "Fetching List Produk", ({ data, pagination }) => {
+						//
+						this.products = data;
+						Object.assign(this.page, pagination);
+					});
+				},
+				{ cancelIfAlreadyInQueue: true, callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif) }
+			);
+
+			return;
 			if (is_wait.get) return console.warn("Reject get method cause spam!");
 
 			is_wait.get = true;
@@ -121,7 +356,7 @@ export default function () {
 			const isSame = rewriteUrl(formData, url_param);
 			if (!isSame && !is_init) return (is_wait.get = false), console.warn("Reject get method cause same param!");
 
-			encodeFetchedJson(await (await fetch(db_path + "search", { method: "POST", body: formData })).text(), null, ({ data, pagination, query } = json) => {
+			encodeFetchedJson(await (await fetch(dbPath + "search", { method: "POST", body: formData })).text(), null, ({ data, pagination, query } = json) => {
 				this.products = data;
 				console.log(query);
 
@@ -136,13 +371,53 @@ export default function () {
 			// if (typeof page == "undefined") this.getCategories();
 		},
 		async add() {
+			q.add(
+				"add-product",
+				async () => {
+					const formData = new FormData(form);
+					bindAndFillFormData(formData, this.form);
+
+					encodeFetchedJson(
+						await (await fetch(dbPath + "add", { method: "POST", body: formData })).text(),
+						"Tambah Produk",
+						async ({ msg: message }) => {
+							// looking 4 new categories
+							if (!this.categories_keys.includes(this.form.category)) {
+								await this.getCategories();
+							}
+							// if (
+							// 	!this.categories_keys.includes(this.form.category) ||
+							// 	!this.categories_keys
+							// 		.map((key) => this.categories[key])
+							// 		.flat()
+							// 		.includes(this.form.subcategory)
+							// ) {
+							// 	await this.getCategories();
+							// }
+							if (message) this.$dispatch("notify", { ...defaultSuccessNotif, message });
+						},
+						{
+							swalSuccess: false,
+						}
+					);
+
+					await this.get(null, true);
+					this.isOpenModal = false;
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif),
+				}
+			);
+
+			return;
 			if (is_wait.add) return console.warn("Reject add method cause spam!");
 			is_wait.add = true;
 
 			const formData = new FormData(form);
 			bindAndFillFormData(formData, this.form);
 
-			encodeFetchedJson(await (await fetch(db_path + "add", { method: "POST", body: formData })).text(), "add", async () => {
+			encodeFetchedJson(await (await fetch(dbPath + "add", { method: "POST", body: formData })).text(), "add", async () => {
 				// looking 4 new categories
 				if (
 					!this.categories_keys.includes(this.form.category) ||
@@ -161,6 +436,42 @@ export default function () {
 			await this.get(null, true);
 		},
 		async edit() {
+			q.add(
+				"edit-product",
+				async () => {
+					const formData = new FormData(form);
+					bindAndFillFormData(formData, this.form);
+					bindAndFillFormData(formData, this.editedProduct, "prev");
+
+					// Handle prev data
+					const prevProduct = this.products.find(({ id }) => this.form.id == id);
+
+					if (!prevProduct) return Swal.fire({ ...defaultErrorProps, text: "Product tidak ditemukan!" });
+
+					formData.append("prevPrice", prevProduct.price);
+					formData.append("prevPurchasePrice", prevProduct.purchase_price);
+
+					encodeFetchedJson(
+						await (await fetch(dbPath + "edit", { method: "POST", body: formData })).text(),
+						"Edit Produk",
+						({ msg: message } = {}) => {
+							this.get(null, true);
+
+							if (message) this.$dispatch("notify", { variant: "success", title: "Selamat", message });
+						},
+						{
+							swalSuccess: false,
+						}
+					);
+
+					this.isOpenModal = false;
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif),
+				}
+			);
+			return;
 			const formData = new FormData(form);
 			bindAndFillFormData(formData, this.form);
 			bindAndFillFormData(formData, this.editedProduct, "prev");
@@ -173,9 +484,9 @@ export default function () {
 			formData.append("prevPrice", prevProduct.price);
 			formData.append("prevPurchasePrice", prevProduct.purchase_price);
 
-			encodeFetchedJson(await (await fetch(db_path + "edit", { method: "POST", body: formData })).text(), "edit");
+			encodeFetchedJson(await (await fetch(dbPath + "edit", { method: "POST", body: formData })).text(), "edit");
 
-			// const res = await fetch(db_path + "edit", {
+			// const res = await fetch(dbPath + "edit", {
 			//     method: "POST",
 			//     body: formData,
 			// });
@@ -211,6 +522,43 @@ export default function () {
 			await this.get(null, true);
 		},
 		async remove({ id, origin_id } = {}) {
+			if (!id || !origin_id) return console.warn("missing props");
+
+			q.add(
+				"remove",
+				async () => {
+					const { isConfirmed } = await Swal.fire({
+						...deafultConfirmProps,
+						title: "Yakin ingin hapus Product ini?",
+						text: "Produk yang dihapus tidak bisa di kembalikan!",
+						icon: "warning",
+						confirmButtonText: "Ya, saya yakin!",
+					});
+
+					if (!isConfirmed) return;
+
+					const formData = new FormData();
+					formData.append("id", id);
+					formData.append("origin_id", origin_id);
+
+					encodeFetchedJson(
+						await (await fetch(dbPath + "remove", { method: "POST", body: formData })).text(),
+						"Hapus Produk",
+						({ msg: message } = {}) => {
+							this.get(null, true);
+
+							if (message) this.$dispatch("notify", { ...defaultSuccessNotif, message });
+						},
+						{ swalSuccess: false }
+					);
+				},
+				{
+					cancelIfAlreadyInQueue: true,
+					callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif),
+				}
+			);
+
+			return;
 			if (!id || !origin_id) return;
 
 			const { isConfirmed } = await Swal.fire({
@@ -227,14 +575,14 @@ export default function () {
 			formData.append("id", id);
 			formData.append("origin_id", origin_id);
 
-			encodeFetchedJson(await (await fetch(db_path + "remove", { method: "POST", body: formData })).text(), "Hapus Produk");
+			encodeFetchedJson(await (await fetch(dbPath + "remove", { method: "POST", body: formData })).text(), "Hapus Produk");
 
 			// .then(async (result) => {
 			//     if (result.isConfirmed) {
 			//         const body = new FormData();
 			//         body.append("id", id);
 
-			//         await fetch(db_path + "remove", { method: "POST", body })
+			//         await fetch(dbPath + "remove", { method: "POST", body })
 			//             .then((res) => res.text())
 			//             .then((res) => {
 			//                 const { status, msg } = JSON.parse(res);

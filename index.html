@@ -37,15 +37,6 @@
 					.catch((e) => console.warn("ERROR SERVICE WORKER:", e));
 			}
 		</script>
-		<script>
-			const printRawBT = (text) => {
-				const encoded = encodeURIComponent(text);
-
-				const url = "intent://print/#Intent;" + "scheme=rawbt;" + "package=ru.a402d.rawbtprinter;" + "S.text=" + encoded + ";" + "end";
-
-				window.location.href = url;
-			};
-		</script>
 	</head>
 	<body class="!scroll-smooth"></body>
 </html>

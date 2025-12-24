@@ -476,34 +476,6 @@
 					<!-- Daftar Item Transaksi -->
 					<div>
 						<h4 class="font-semibold text-lg mb-2">List Produk</h4>
-						<template x-if="false">
-							<div class="overflow-x-auto">
-								<table class="min-w-full text-sm text-left text-gray-700 border">
-									<thead class="bg-gray-100">
-										<tr>
-											<th class="px-2 py-1 border">#</th>
-											<th class="px-2 py-1 border">Produk</th>
-											<th class="px-2 py-1 border">Harga</th>
-											<th class="px-2 py-1 border">Qty</th>
-											<th class="px-2 py-1 border">Subtotal</th>
-											<th class="px-2 py-1 border">Laba</th>
-										</tr>
-									</thead>
-									<tbody>
-										<template x-for="(item, index) in detail.transaction_details" :key="index">
-											<tr class="border-t">
-												<td class="px-2 py-1" x-text="index + 1"></td>
-												<td class="px-2 py-1" x-text="item.name"></td>
-												<td class="px-2 py-1" x-text="IDR.format(item.price)"></td>
-												<td class="px-2 py-1" x-text="item.quantity"></td>
-												<td class="px-2 py-1" x-text="IDR.format(item.sub_total)"></td>
-												<td class="px-2 py-1" x-text="IDR.format(item.profit)"></td>
-											</tr>
-										</template>
-									</tbody>
-								</table>
-							</div>
-						</template>
 						<!-- Product Details Table -->
 						<div class="overflow-x-auto mt-6">
 							<table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -517,43 +489,82 @@
 									</tr>
 								</thead>
 								<tbody class="divide-y divide-gray-200">
-									<template x-for="item in detail.transaction_details" :key="item.name">
-										<tr
-											:class="{
-                                  'text-gray-800': !item.product?.deprecated_code,
-                                  'bg-yellow-50 text-yellow-900': item.product?.deprecated_code == 1,
-                                  'bg-red-50 text-red-800 italic': item.product?.deprecated_code == 2
-                                }">
-											<td class="px-4 py-3">
-												<div class="flex items-center gap-3">
-													<img :src="`./src/img/db/${item.product.image}`" class="w-10 h-10 rounded object-cover border" alt="" />
-													<div>
-														<div class="font-medium">
-															<a
-																x-show="item.deprecated_code != 2"
-																x-text="item.name"
-																:href="`?c=products&filters=name&keyword=${ item.name }`"
-																class="hover:text-blue-600 hover:underline"></a>
-															<span x-show="item.deprecated_code == 2" x-text="item.name"></span>
+									<template x-if="true">
+										<template x-for="item in detail.transaction_details" :key="item.product_name">
+											<tr
+												:class="{
+													'text-gray-800': !item?.deprecated_code,
+													'bg-yellow-50 text-yellow-900': item?.deprecated_code == 1,
+													'bg-red-50 text-red-800 italic': item?.deprecated_code == 2
+												}">
+												<td class="px-4 py-3">
+													<div class="flex items-center gap-3">
+														<img :src="`./src/img/db/${item.image}`" class="w-10 h-10 rounded object-cover border" alt="" />
+														<div>
+															<div class="font-medium">
+																<a
+																	x-show="item.deprecated_code != 2"
+																	x-text="item.product_name"
+																	:href="`?c=products&filters=name&keyword=${ item.product_name }`"
+																	class="hover:text-blue-600 hover:underline"></a>
+																<span x-show="item.deprecated_code == 2" x-text="item.product_name"></span>
+															</div>
+															<div class="text-xs text-gray-500" x-text="item.category"></div>
+															<template x-if="item.deprecated_code == 1">
+																<span class="text-xs text-yellow-700 bg-yellow-100 rounded px-2 py-0.5 mt-1 inline-block">Harga Berubah</span>
+															</template>
+															<template x-if="item.deprecated_code == 2">
+																<span class="text-xs text-red-700 bg-red-100 rounded px-2 py-0.5 mt-1 inline-block">Telah Dihapus</span>
+															</template>
 														</div>
-														<template x-if="false">
-															<div class="text-xs text-gray-500" x-text="`${item.product.category} › ${item.product.subcategory}`"></div>
-														</template>
-														<div class="text-xs text-gray-500" x-text="item.product.category"></div>
-														<template x-if="item.product.deprecated_code == 1">
-															<span class="text-xs text-yellow-700 bg-yellow-100 rounded px-2 py-0.5 mt-1 inline-block">Harga Berubah</span>
-														</template>
-														<template x-if="item.product.deprecated_code == 2">
-															<span class="text-xs text-red-700 bg-red-100 rounded px-2 py-0.5 mt-1 inline-block">Telah Dihapus</span>
-														</template>
 													</div>
-												</div>
-											</td>
-											<td class="px-4 py-3 text-right" x-text="IDR.format(item.price)"></td>
-											<td class="px-4 py-3 text-right" x-text="item.quantity"></td>
-											<td class="px-4 py-3 text-right" x-text="IDR.format(item.sub_total)"></td>
-											<td class="px-4 py-3 text-right text-green-600" x-text="IDR.format(item.profit)"></td>
-										</tr>
+												</td>
+												<td class="px-4 py-3 text-right" x-text="IDR.format(item.sub_total / item.quantity)"></td>
+												<td class="px-4 py-3 text-right" x-text="item.quantity"></td>
+												<td class="px-4 py-3 text-right" x-text="IDR.format(item.sub_total)"></td>
+												<td class="px-4 py-3 text-right text-green-600" x-text="IDR.format(item.sub_profit)"></td>
+											</tr>
+										</template>
+									</template>
+									<template x-if="false">
+										<template x-for="item in detail.transaction_details" :key="item.name">
+											<tr
+												:class="{
+													'text-gray-800': !item.product?.deprecated_code,
+													'bg-yellow-50 text-yellow-900': item.product?.deprecated_code == 1,
+													'bg-red-50 text-red-800 italic': item.product?.deprecated_code == 2
+												}">
+												<td class="px-4 py-3">
+													<div class="flex items-center gap-3">
+														<img :src="`./src/img/db/${item.product.image}`" class="w-10 h-10 rounded object-cover border" alt="" />
+														<div>
+															<div class="font-medium">
+																<a
+																	x-show="item.deprecated_code != 2"
+																	x-text="item.name"
+																	:href="`?c=products&filters=name&keyword=${ item.name }`"
+																	class="hover:text-blue-600 hover:underline"></a>
+																<span x-show="item.deprecated_code == 2" x-text="item.name"></span>
+															</div>
+															<template x-if="false">
+																<div class="text-xs text-gray-500" x-text="`${item.product.category} › ${item.product.subcategory}`"></div>
+															</template>
+															<div class="text-xs text-gray-500" x-text="item.product.category"></div>
+															<template x-if="item.product.deprecated_code == 1">
+																<span class="text-xs text-yellow-700 bg-yellow-100 rounded px-2 py-0.5 mt-1 inline-block">Harga Berubah</span>
+															</template>
+															<template x-if="item.product.deprecated_code == 2">
+																<span class="text-xs text-red-700 bg-red-100 rounded px-2 py-0.5 mt-1 inline-block">Telah Dihapus</span>
+															</template>
+														</div>
+													</div>
+												</td>
+												<td class="px-4 py-3 text-right" x-text="IDR.format(item.price)"></td>
+												<td class="px-4 py-3 text-right" x-text="item.quantity"></td>
+												<td class="px-4 py-3 text-right" x-text="IDR.format(item.sub_total)"></td>
+												<td class="px-4 py-3 text-right text-green-600" x-text="IDR.format(item.profit)"></td>
+											</tr>
+										</template>
 									</template>
 								</tbody>
 							</table>

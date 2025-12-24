@@ -33,7 +33,9 @@ if (IS_PRODUCTION && ($config['is_force_debug'] ?? false)) {
 }
 
 // db
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $db = new mysqli(HOST_NAME, USER_NAME, PASSWORD, DB_NAME);
+$db->set_charset('utf8mb4');
 
 // const
 Define('SECRET_KEY', 'MY_SUPER_SECRET_KEY_!@!@#$$123');
@@ -104,14 +106,14 @@ function uploadFile(string $name, string $tmpPath): array
 
 }
 
-function toGlobal(array $data): void
+function toGlobal(array $data, bool $isFilterByHtmlSpecialChar = true): void
 {
 
     if (array_keys($data) == range(0, count($data) - 1))
         throw new InvalidArgumentException("Args must be array associative");
 
     foreach ($data as $key => $val) {
-        $GLOBALS[$key] = $val;
+        $GLOBALS[$key] = $isFilterByHtmlSpecialChar ? htmlspecialchars($val) : $val;
     }
 }
 
@@ -130,7 +132,7 @@ function datePickerToDate(string|bool $date): bool|string
     return $arr[1] . '-' . $arr[0] . '-' . $arr[2];
 }
 
-function validateEmptyVar(string $str, bool $is_with_message = false): bool|string
+function validateEmptyVar(string $str, bool $is_with_message = false, bool $thowIfInvalid = false): bool|string
 {
     $arr = explode("|", $str);
 
@@ -140,21 +142,19 @@ function validateEmptyVar(string $str, bool $is_with_message = false): bool|stri
         if (($GLOBALS[$key] ?? null) === null || $GLOBALS[$key] == "") {
             $unpass[] = $key;
         }
-        // try {
-        //     $context = $GLOBALS[$key];
-        //     echo "$key \ $context<br>";
-        // } catch (Throwable $e) {
-        //     $unpass[] = "$key (" . $e->getMessage() . ")";
-        // }
     }
 
-    // if (!empty($unpass)) {
+    $is_empty = empty($unpass);
 
-    //     return "RES: " . implode(",", $unpass);
-    // }
+    if ($is_empty) return true;
+    if (!$is_with_message) return false;
 
-    // return true;
-    return empty($unpass) ? true : ($is_with_message ? "Missing Required Value: " : "") . implode(", ", $unpass);
+    $error_message = "Missing Required Value: " . implode(", ", $unpass);
+
+    if ($thowIfInvalid) throw new Exception($error_message);
+    return $error_message;
+
+    // return empty($unpass) ? true : ($is_with_message ? "Missing Required Value: " : "") . implode(", ", $unpass);
 }
 
 function putSSE(string $fileName, array $item) {
@@ -171,4 +171,21 @@ function putSSE(string $fileName, array $item) {
         $eventFile,
         json_encode($eventObj, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
     );
+}
+
+function isDiscountActiveNow($start_date, $end_date, $is_active = 1)
+{
+    if (!$is_active) return false;
+
+    $now = time();
+
+    if ($start_date && strtotime($start_date) > $now) {
+        return false;
+    }
+
+    if ($end_date && strtotime($end_date) < $now) {
+        return false;
+    }
+
+    return true;
 }

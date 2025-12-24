@@ -91,6 +91,17 @@ tr {
 		@apply bg-green-100;
 	}
 }
+.td-base {
+	@apply px-6 py-4 align-middle whitespace-nowrap;
+}
+
+.td-muted {
+	@apply text-gray-500 text-xs;
+}
+
+.td-strong {
+	@apply text-gray-900 font-semibold;
+}
 
 .modal-conn {
 	@apply fixed inset-0 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto z-[150];

@@ -132,6 +132,10 @@ const IDR = new Intl.NumberFormat("id-ID", {
 	minimumFractionDigits: 0,
 });
 
+const cleanFloat = (num) => {
+	return Number(num).toString();
+};
+
 // Alpine init
 const alpineInitCallback = async () => {
 	console.log("ALPINE");
@@ -142,6 +146,7 @@ const alpineInitCallback = async () => {
 	Alpine.data("conn", function () {
 		return {
 			IDR,
+			cleanFloat,
 			numberFormat(x) {
 				return IDR.format(x)?.replace(/^Rp/i, "");
 			},
