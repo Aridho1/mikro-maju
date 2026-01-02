@@ -302,9 +302,11 @@ try {
             if ($isEditAnyway)
                 $db->query("UPDATE $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', category = '$category', image = '$image' WHERE id = '$id'");
 
+            $affected_rows = $db->affected_rows;
+
             $db->commit();
             
-            die(json_encode(['status' => true, 'msg' => "$db->affected_rows Data $appName berhasil diubah,", 'post' => $_POST, 'isEditAnyway' => $isEditAnyway, 'total_data' => $total_data]));
+            die(json_encode(['status' => true, 'msg' => "$affected_rows Data $appName berhasil diubah,", 'post' => $_POST, 'isEditAnyway' => $isEditAnyway, 'total_data' => $total_data]));
         }
         case 'remove': {
             validateEmptyVar("id|origin_id", true, true);
