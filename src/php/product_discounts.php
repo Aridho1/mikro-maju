@@ -118,14 +118,6 @@ try {
             ]));
         }
     
-        // case "get": {
-        //     break;
-        // }
-    
-        // case "edit": {
-        //     break;
-        // }
-    
         case "remove": {
             validateEmptyVar("id", true, true);
             $query = "DELETE FROM $table WHERE id=$id";
@@ -206,6 +198,7 @@ WHERE product_id = ?
 ORDER BY id DESC;
 
 */
+
         case "get-discounts-by-product-id": {
             validateEmptyVar("id", true, true);
 

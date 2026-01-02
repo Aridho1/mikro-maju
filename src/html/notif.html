@@ -71,30 +71,11 @@
 					this.playSound()
 				}
 			},
-
-			// addNotification({ variant = 'info', sender = null, title = null, message = null }) {
-			// 	const id = Date.now()
-			// 	const notification = { id, variant, sender, title, message }
-
-			// 	console.log('Get new notification', notification)
-
-			// 	if (this.notifications.length >= 20) {
-			// 		this.notifications.splice(0, this.notifications.length - 19)
-			// 	}
-
-			// 	this.notifications.push(notification)
-
-			// 	if (this.soundEffect) {
-			// 		this.playSound()
-			// 	}
-			// },
-
 			removeNotification(id) {
 				setTimeout(() => {
 					this.notifications = this.notifications.filter(n => n.id !== id)
 				}, 400)
 			},
-
 			playSound() {
 				const audio = this.baseAudio.cloneNode(true)
 
@@ -107,7 +88,6 @@
 					}
 				})
 			},
-
 			// AUTO FIX jika lost permission atau listener hilang
 			setupInteractionUnlock(force = false) {
 				if (this.interactionBound && !force) return
@@ -127,7 +107,6 @@
 				this.interactionBound = true
 				window.addEventListener('click', unlock)
 			},
-
 			init() {
 				return;
 				this.baseAudio = new Audio('./src/sounds/ding (3).mp3')

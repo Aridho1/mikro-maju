@@ -19,7 +19,7 @@ header("Content-Type: application/json");
 try {
     switch (M) {
         case "add": {
-            validateEmptyVar("name|purchase_pricse|price|category", true, true);
+            validateEmptyVar("name|purchase_price|price|category", true, true);
 
             $uplodedFile = uploadFile('image', './../img/db/');
 
@@ -30,16 +30,24 @@ try {
             } else
                 $image = $uplodedFile['data'];
 
-            $stmt = $db->prepare("INSERT INTO $table (name, purchase_price, price, image, category, subcategory, deprecated_code, origin_id) VALUES (?, ?, ?, ?, ?, NULL, 0, 0)");
+            $db->begin_transaction();
+
+            $stmt = $db->prepare("
+            INSERT INTO $table
+            (name, purchase_price, price, image, category, subcategory, deprecated_code, origin_id)
+            VALUES (?, ?, ?, ?, ?, NULL, 0, 0)
+            ");
             $stmt->bind_param("sddss", $name, $purchase_price, $price, $image, $category);
             $stmt->execute();
-            // $query = "INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', image = '$image', category = '$category', subcategory = '', deprecated_code = 0, origin_id = 0";
 
-            // // die($query);
+            $affected_rows = $stmt->affected_rows;
 
-            // $db->query($query);
+            $inserted_id = $db->insert_id;
+            $db->query("UPDATE $table SET origin_id = $inserted_id WHERE id = $inserted_id");
 
-            die(json_encode(['status' => true, 'msg' => "$db->affected_rows Data $appName berhasil ditamahkan."]));
+            $db->commit();
+
+            die(json_encode(['status' => true, 'msg' => "$affected_rows Data $appName berhasil ditamahkan."]));
         }
 
         case 'search-v2': {
@@ -268,6 +276,7 @@ try {
             } else
                 $image = $uplodedFile['data'];
 
+            $db->begin_transaction();
 
             // Handle edit calc price & purchase price
             $isEditAnyway = true;
@@ -286,13 +295,15 @@ try {
                     $db->query("UPDATE $table SET deprecated_code = 1, origin_id = CASE WHEN origin_id = 0 THEN $prev_id ELSE origin_id END WHERE id = $prev_id");
 
                     // Add edited product as new product
-                    $db->query("INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', category = '$category', image = '$image', origin_id = $curr_origin_id");
+                    $db->query("INSERT INTO $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', category = '$category', image = '$image', origin_id = $curr_origin_id, deprecated_code = 0");
                 }
             }
 
             if ($isEditAnyway)
                 $db->query("UPDATE $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', category = '$category', image = '$image' WHERE id = '$id'");
 
+            $db->commit();
+            
             die(json_encode(['status' => true, 'msg' => "$db->affected_rows Data $appName berhasil diubah,", 'post' => $_POST, 'isEditAnyway' => $isEditAnyway, 'total_data' => $total_data]));
         }
         case 'remove': {
