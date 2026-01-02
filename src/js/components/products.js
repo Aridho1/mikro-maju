@@ -439,6 +439,18 @@ export default function () {
 			q.add(
 				"edit-product",
 				async () => {
+					if (this.editedProduct.discountList?.length) {
+						const { isConfirmed } = await Swal.fire({
+							...deafultConfirmProps,
+							title: "Yakin ingin edit Product ini?",
+							text: "Jika harganya diubah, diskon lama akan hilang!",
+							icon: "warning",
+							confirmButtonText: "Ya, saya yakin!",
+						});
+
+						if (!isConfirmed) return;
+					}
+
 					const formData = new FormData(form);
 					bindAndFillFormData(formData, this.form);
 					bindAndFillFormData(formData, this.editedProduct, "prev");
@@ -642,6 +654,8 @@ export default function () {
 				this.form = { ...this.form, ...item, prevImage: item.image || "" };
 				this.editedProduct = {};
 				this.editedProduct = { ...item };
+
+				console.log("item:", item);
 			}
 
 			this.resetUploadedImage();
