@@ -615,7 +615,7 @@ switch (M) {
         break;
     }
 
-    case 'search-view': {
+    case 'search-viewv4': {
 
         /* ===============================
         BASIC PARAM
@@ -762,6 +762,158 @@ switch (M) {
         break;
     }
 
+    case 'search-view': {
+
+        $page  = max(1, (int)($_POST['page'] ?? 1));
+        $limit = max(1, (int)($_POST['limit'] ?? 10));
+        $offset = ($page - 1) * $limit;
+
+        $keyword   = trim($_POST['keyword'] ?? '');
+        $methods   = $_POST['payment_method'] ?? [];
+        $statuses  = $_POST['payment_status'] ?? [];
+        $dateStart = $_POST['date_start'] ?? null;
+        $dateEnd   = $_POST['date_end'] ?? null;
+
+        /* ===============================
+        BUILD WHERE (REUSABLE)
+        =============================== */
+        $where   = [];
+        $params  = [];
+        $types   = '';
+
+        if ($keyword !== '') {
+            $where[] = "(t.name LIKE ? OR t.payment_method LIKE ?)";
+            $params[] = "%$keyword%";
+            $params[] = "%$keyword%";
+            $types .= 'ss';
+        }
+
+        if (!empty($methods)) {
+            $in = implode(',', array_fill(0, count($methods), '?'));
+            $where[] = "t.payment_method IN ($in)";
+            foreach ($methods as $m) {
+                $params[] = $m;
+                $types .= 's';
+            }
+        }
+
+        if (!empty($statuses)) {
+            $in = implode(',', array_fill(0, count($statuses), '?'));
+            $where[] = "t.payment_status IN ($in)";
+            foreach ($statuses as $s) {
+                $params[] = $s;
+                $types .= 's';
+            }
+        }
+
+        if ($dateStart && $dateEnd) {
+            $where[] = "t.date BETWEEN ? AND ?";
+            $params[] = $dateStart;
+            $params[] = $dateEnd;
+            $types .= 'ss';
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        /* ===============================
+        MAIN QUERY (DATA)
+        =============================== */
+        $sql = "
+            SELECT
+                t.*
+            FROM transactions t
+            $whereSql
+            ORDER BY t.id DESC
+            LIMIT ?, ?
+        ";
+
+        $stmt = $db->prepare($sql);
+
+        $paramsData = $params;
+        $typesData  = $types . 'ii';
+
+        $paramsData[] = $offset;
+        $paramsData[] = $limit;
+
+        $stmt->bind_param($typesData, ...$paramsData);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $data = [];
+
+        /* ===============================
+        DETAIL QUERY (REUSABLE)
+        =============================== */
+        $detailStmt = $db->prepare("
+            SELECT *
+            FROM view_transaction_details
+            WHERE transaction_id = ?
+        ");
+
+        while ($row = $result->fetch_assoc()) {
+
+            $detailStmt->bind_param('i', $row['id']);
+            $detailStmt->execute();
+
+            $row['transaction_details'] = $detailStmt
+                ->get_result()
+                ->fetch_all(MYSQLI_ASSOC);
+
+            $data[] = $row;
+        }
+
+        /* ===============================
+        COUNT QUERY (ANTI BUG PAGINATION)
+        =============================== */
+        $countSql = "
+            SELECT COUNT(*) AS total_data
+            FROM (
+                SELECT t.id
+                FROM transactions t
+                $whereSql
+                GROUP BY t.id
+            ) x
+        ";
+
+        $countStmt = $db->prepare($countSql);
+        if ($types !== '') {
+            $countStmt->bind_param($types, ...$params);
+        }
+        $countStmt->execute();
+        $total_data = (int)$countStmt->get_result()->fetch_assoc()['total_data'];
+
+        /* ===============================
+        PAGINATION (FORMAT TIDAK DIUBAH)
+        =============================== */
+        try {
+            $max_data = $config['pagination']['max_data'];
+        } catch (Exception $e) {
+            $max_data = 10;
+        }
+
+        $total_page = ceil($total_data / $max_data);
+
+        $start_index = $total_data == 0 ? 0 : $offset + 1;
+        $end_index = min($offset + $max_data, $total_data);
+
+        $pagination = [
+            'total_data' => $total_data,
+            'max_data'   => $max_data,
+            'total_page' => $total_page,
+            'page'       => $page,
+            'offset'     => $offset,
+            'start_index'=> $start_index,
+            'end_index'  => $end_index,
+        ];
+
+        echo json_encode([
+            'status'     => true,
+            'data'       => $data,
+            'pagination' => $pagination,
+        ]);
+
+        break;
+    }
     
     case 'search': {
 
