@@ -190,10 +190,12 @@
 							<span x-text="transaction.payment_status"></span>
 						</td>
 						<td class="px-6 py-4">
-							<span x-show="transaction.table_name" class="contents">
+							<!-- <span x-show="transaction.table_name" class="contents">
 								<span x-text="transaction.table_name || '-'"></span>
 								>>
-							</span>
+							</span> -->
+							<span x-text="transaction.table_name || '-'"></span>
+							|
 							<span x-text="transaction.name || '-'"></span>
 						</td>
 						<!-- <td class="px-6 py-4" x-text="transaction.payment_status"></td> -->
