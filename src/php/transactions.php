@@ -316,17 +316,17 @@ switch (M) {
         break;
     }
 
-    case 'search-view': {
+    case 'search-view2': {
 
-    $page      = max(1, (int)($_GET['page'] ?? 1));
-    $limit     = max(1, (int)($_GET['limit'] ?? 10));
+    $page      = max(1, (int)($_POST['page'] ?? 1));
+    $limit     = max(1, (int)($_POST['limit'] ?? 10));
     $offset    = ($page - 1) * $limit;
 
-    $keyword   = trim($_GET['keyword'] ?? '');
-    $methods   = $_GET['payment_method'] ?? [];
-    $statuses  = $_GET['payment_status'] ?? [];
-    $dateStart = $_GET['date_start'] ?? null;
-    $dateEnd   = $_GET['date_end'] ?? null;
+    $keyword   = trim($_POST['keyword'] ?? '');
+    $methods   = $_POST['payment_method'] ?? [];
+    $statuses  = $_POST['payment_status'] ?? [];
+    $dateStart = $_POST['date_start'] ?? null;
+    $dateEnd   = $_POST['date_end'] ?? null;
 
     /* ===============================
        BUILD WHERE
@@ -417,18 +417,351 @@ switch (M) {
        TOTAL ROWS
     =============================== */
     $totalRes = $db->query("SELECT FOUND_ROWS() total");
-    $total    = $totalRes->fetch_assoc()['total'];
+    $total_data = (int)$totalRes->fetch_assoc()['total'];
+
+    try {
+        $max_data = $config['pagination']['max_data'];
+    } catch (Exception $e) {
+        $max_data = 5;
+    }
+
+    $total_page = ceil($total_data / $max_data);
+
+    $start_index = $total_data == 0 ? 0 : $offset + 1;
+    $end_index = $offset + $max_data > $total_data ? $total_data : $offset + $max_data;
+
+    $pagination = [
+        'total_data' => $total_data,
+        'max_data' => $max_data,
+        'total_page' => $total_page,
+        'page' => $page,
+        'offset' => $offset,
+        'start_index' => $start_index,
+        'end_index' => $end_index,
+    ];
 
     echo json_encode([
         'status' => true,
         'page'    => $page,
         'limit'   => $limit,
-        'total'   => (int)$total,
-        'data'    => $data
+        'data'    => $data,
+        "pagination" => $pagination,
     ]);
     // exit;
     break;
     }
+
+    case 'search-view3': {
+
+        /* ===============================
+        INPUT
+        =============================== */
+        $page      = max(1, (int)($page ?? 1));
+        $keyword   = htmlspecialchars(trim($keyword ?? ''));
+
+        $methods   = $payment_method ?? [];
+        $statuses  = $_POST['payment_status'] ?? [];
+        $dateStart = $date_start ?? null;
+        $dateEnd   = $date_end ?? null;
+
+        try {
+            $max_data = $config['pagination']['max_data'];
+        } catch (Exception $e) {
+            $max_data = 5;
+        }
+
+        $offset = ($page - 1) * $max_data;
+
+        /* ===============================
+        WHERE BUILDER
+        =============================== */
+        $where  = [];
+        $params = [];
+        $types  = '';
+
+        if ($keyword !== '') {
+            $where[] = "(vt.code LIKE ? OR vt.payment_method LIKE ?)";
+            $params[] = "%$keyword%";
+            $params[] = "%$keyword%";
+            $types .= 'ss';
+        }
+
+        if (!empty($methods)) {
+            $in = implode(',', array_fill(0, count($methods), '?'));
+            $where[] = "vt.payment_method IN ($in)";
+            foreach ($methods as $m) {
+                $params[] = $m;
+                $types .= 's';
+            }
+        }
+
+        if (!empty($statuses)) {
+            $in = implode(',', array_fill(0, count($statuses), '?'));
+            $where[] = "vt.payment_status IN ($in)";
+            foreach ($statuses as $s) {
+                $params[] = $s;
+                $types .= 's';
+            }
+        }
+
+        if ($dateStart && $dateEnd) {
+            $where[] = "vt.date BETWEEN ? AND ?";
+            $params[] = $dateStart;
+            $params[] = $dateEnd;
+            $types .= 'ss';
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        /* ===============================
+        TOTAL DATA
+        =============================== */
+        $countSql = "
+            SELECT COUNT(*) AS total_data
+            FROM view_transactions vt
+            $whereSql
+        ";
+
+        $countStmt = $db->prepare($countSql);
+        if ($params) {
+            $countStmt->bind_param($types, ...$params);
+        }
+        $countStmt->execute();
+        $total_data = (int) $countStmt->get_result()->fetch_assoc()['total_data'];
+
+        /* ===============================
+        MAIN DATA
+        =============================== */
+        $sql = "
+            SELECT *
+            FROM view_transactions vt
+            $whereSql
+            ORDER BY vt.id DESC
+            LIMIT ?, ?
+        ";
+
+        $stmt = $db->prepare($sql);
+
+        $execParams = $params;
+        $execTypes  = "{$types}ii";
+        // $execTypes  = $types . 'ii';
+
+        $execParams[] = $offset;
+        $execParams[] = $max_data;
+
+        $stmt->bind_param($execTypes, ...$execParams);
+        $stmt->execute();
+
+        $res = $stmt->get_result();
+
+        /* ===============================
+        DETAIL QUERY (REUSE)
+        =============================== */
+        $detailStmt = $db->prepare("
+            SELECT *
+            FROM view_transaction_details
+            WHERE transaction_id = ?
+        ");
+
+        $data = [];
+
+        while ($row = $res->fetch_assoc()) {
+
+            $detailStmt->bind_param('i', $row['id']);
+            $detailStmt->execute();
+
+            $row['transaction_details'] = $detailStmt
+                ->get_result()
+                ->fetch_all(MYSQLI_ASSOC);
+
+            // optional: sama kayak case search
+            if (!empty($row['payment_key'])) {
+                $row['data_url'] = encodeKey2($row['id']);
+            }
+
+            $data[] = $row;
+        }
+
+        /* ===============================
+        PAGINATION (SAMA PERSIS)
+        =============================== */
+        $total_page = ceil($total_data / $max_data);
+
+        $start_index = $total_data == 0 ? 0 : $offset + 1;
+        $end_index   = $offset + $max_data > $total_data
+            ? $total_data
+            : $offset + $max_data;
+
+        $pagination = [
+            'total_data'  => $total_data,
+            'max_data'    => $max_data,
+            'total_page'  => $total_page,
+            'page'        => $page,
+            'offset'      => $offset,
+            'start_index' => $start_index,
+            'end_index'   => $end_index,
+        ];
+
+        /* ===============================
+        OUTPUT (IDENTIK)
+        =============================== */
+        echo json_encode([
+            'status'     => true,
+            'data'       => $data,
+            'pagination' => $pagination,
+            'post' => $_POST,
+        ]);
+
+        break;
+    }
+
+    case 'search-view': {
+
+        /* ===============================
+        BASIC PARAM
+        =============================== */
+        $page  = max(1, (int)($_POST['page'] ?? 1));
+        $keyword = trim($_POST['keyword'] ?? '');
+
+        $payment_methods  = $_POST['payment_method'] ?? [];
+        $payment_statuses = $_POST['payment_status'] ?? [];
+
+        $date_start = $_POST['date_start'] ?? null;
+        $date_end   = $_POST['date_end'] ?? null;
+
+        try {
+            $max_data = $config['pagination']['max_data'];
+        } catch (Exception $e) {
+            $max_data = 5;
+        }
+
+        $offset = ($page - 1) * $max_data;
+        $offset = max(0, $offset);
+
+        /* ===============================
+        BUILD WHERE (SAFE)
+        =============================== */
+        $where  = [];
+        $params = [];
+        $types  = '';
+
+        if ($keyword !== '') {
+            $where[] = "(t.name LIKE ? OR t.payment_status LIKE ?)";
+            $params[] = "%$keyword%";
+            $params[] = "%$keyword%";
+            $types   .= 'ss';
+        }
+
+        if (!empty($payment_methods)) {
+            $in = implode(',', array_fill(0, count($payment_methods), '?'));
+            $where[] = "t.payment_method IN ($in)";
+            foreach ($payment_methods as $pm) {
+                $params[] = $pm;
+                $types   .= 's';
+            }
+        }
+
+        if (!empty($payment_statuses)) {
+            $in = implode(',', array_fill(0, count($payment_statuses), '?'));
+            $where[] = "t.payment_status IN ($in)";
+            foreach ($payment_statuses as $ps) {
+                $params[] = $ps;
+                $types   .= 's';
+            }
+        }
+
+        if ($date_start && $date_end) {
+            $where[] = "t.date BETWEEN ? AND ?";
+            $params[] = $date_start;
+            $params[] = $date_end;
+            $types   .= 'ss';
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        /* ===============================
+        MAIN QUERY (TRANSACTIONS ONLY)
+        =============================== */
+        $sql = "
+            SELECT SQL_CALC_FOUND_ROWS
+                t.*
+            FROM transactions t
+            $whereSql
+            ORDER BY t.id DESC
+            LIMIT ?, ?
+        ";
+
+        $params[] = $offset;
+        $params[] = $max_data;
+        $types   .= 'ii';
+
+        $stmt = $db->prepare($sql);
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $res = $stmt->get_result();
+
+        $data = [];
+
+        /* ===============================
+        PREPARE DETAIL QUERY (VIEW)
+        =============================== */
+        $detailStmt = $db->prepare("
+            SELECT *
+            FROM view_transaction_details
+            WHERE transaction_id = ?
+        ");
+
+        while ($row = $res->fetch_assoc()) {
+
+            // fetch details
+            $detailStmt->bind_param('i', $row['id']);
+            $detailStmt->execute();
+
+            $details = $detailStmt
+                ->get_result()
+                ->fetch_all(MYSQLI_ASSOC);
+
+            $row['transaction_details'] = $details;
+
+            // optional (samakan dengan case search lama)
+            if (!empty($row['payment_key'])) {
+                $row['data_url'] = encodeKey2($row['id']);
+            }
+
+            $data[] = $row;
+        }
+
+        /* ===============================
+        PAGINATION (SAMA PERSIS)
+        =============================== */
+        $total_data = (int) $db
+            ->query("SELECT FOUND_ROWS() AS total_data")
+            ->fetch_assoc()['total_data'];
+
+        $total_page = ceil($total_data / $max_data);
+
+        $start_index = $total_data == 0 ? 0 : $offset + 1;
+        $end_index   = min($offset + $max_data, $total_data);
+
+        $pagination = [
+            'total_data'  => $total_data,
+            'max_data'    => $max_data,
+            'total_page'  => $total_page,
+            'page'        => $page,
+            'offset'      => $offset,
+            'start_index' => $start_index,
+            'end_index'   => $end_index,
+        ];
+
+        echo json_encode([
+            'status'     => true,
+            'data'       => $data,
+            'pagination' => $pagination,
+        ]);
+
+        break;
+    }
+
     
     case 'search': {
 

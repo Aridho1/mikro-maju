@@ -249,6 +249,7 @@ export default function () {
 							const { status, msg: message, data, pagination, query_page, query } = json;
 
 							console.log(query);
+							console.log("json:", JSON.stringify(json));
 							this.transactions = data;
 							Object.assign(this.page, pagination);
 						},
