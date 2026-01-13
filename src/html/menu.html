@@ -1,26 +1,26 @@
 <div
-	class="py-4 px-2 md:px-6 flex flex-col gap-12 bg-gray-200"
-	x-data
-	x-init="() => {
+    class="py-4 px-2 md:px-6 flex flex-col gap-12 bg-gray-200"
+    x-data
+    x-init="() => {
     console.log('childOfConn:', $refs.childOfConn)
     $refs.childOfConn.classList.add('bg-gray-200')
 }">
-	<section id="head-section" class="py-2 sm:py-4 px-4 sm:px-6 flex bg-white shadow-md">
-		<div class="bg-[rgb(212,237,218)] p-3 w-full rounded-sm">
-			<h2 class="flex gap-2 font-bold text-sm sm:text-lg md:text-xl text-green-700" x-text="`Halo selamat datang ${auth?.username}`"></h2>
+    <section id="head-section" class="py-2 sm:py-4 px-4 sm:px-6 flex bg-white shadow-md">
+        <div class="bg-[rgb(212,237,218)] p-3 w-full rounded-sm">
+            <h2 class="flex gap-2 font-bold text-sm sm:text-lg md:text-xl text-green-700" x-text="`Halo selamat datang ${auth?.username}`"></h2>
 
-			<p class="text-xs sm:text-sm text-green-700">Banyak diskon hari ini, silahkan buka lihat menu ready stock barang ya.</p>
-		</div>
+            <p class="text-xs sm:text-sm text-green-700">Banyak diskon hari ini, silahkan buka lihat menu ready stock barang ya.</p>
+        </div>
 
-		<button
-			x-show="false"
-			class="fixed top-5 right-5 sm:top-6 sm:right-6 self-end bg-red-500 text-white text-xs sm:text-sm px-3 py-1 rounded hover:bg-red-600 transition"
-			@click="menuOpen = false">
-			✖ Tutup Menu
-		</button>
-	</section>
+        <button
+            x-show="false"
+            class="fixed top-5 right-5 sm:top-6 sm:right-6 self-end bg-red-500 text-white text-xs sm:text-sm px-3 py-1 rounded hover:bg-red-600 transition"
+            @click="menuOpen = false">
+            ✖ Tutup Menu
+        </button>
+    </section>
 
-	<!-- <section id="list-menu" class="flex flex-wrap w-full gap-8 md:gap-12">
+    <!-- <section id="list-menu" class="flex flex-wrap w-full gap-8 md:gap-12">
         <div class="flex-1">
             <a href="?c=dashboard">
                 <img src="./src/img/app/dashboard.png" alt="Dashboard" class="w-44 object-cover object-center" />
@@ -43,46 +43,46 @@
         </div>
     </section> -->
 
-	<section id="list-menu" class="flex flex-wrap justify-between gap-8 sm:gap-12 md:gap-16">
-		<div class="p-3">
-			<a href="?c=dashboard">
-				<img src="./src/img/app/dashboard.png" alt="Dashboard" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
-			</a>
-		</div>
-		<div class="p-3">
-			<a href="?c=attandances" class="">
-				<img src="./src/img/app/absen.png" alt="Absen" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
-			</a>
-		</div>
-		<div class="p-3">
-			<a href="?c=products">
-				<img src="./src/img/app/barangstok.png" alt="Product" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
-			</a>
-		</div>
-		<div class="p-3">
-			<a href="?c=transaction-add">
-				<img src="./src/img/app/transaksi.png" alt="Tambah Transaksi" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
-			</a>
-		</div>
-		<div class="p-3">
-			<a href="?c=transactions">
-				<img src="./src/img/app/history.png" alt="Riwayat Transaksi" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
-			</a>
-		</div>
-		<!-- <div class=" p-3">
+    <section id="list-menu" class="flex flex-wrap justify-between gap-8 sm:gap-12 md:gap-16">
+        <div class="p-3">
+            <a href="?c=dashboard">
+                <img src="./src/img/app/dashboard.png" alt="Dashboard" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
+            </a>
+        </div>
+        <div class="p-3">
+            <a href="?c=attandances" class="">
+                <img src="./src/img/app/absen.png" alt="Absen" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
+            </a>
+        </div>
+        <div class="p-3">
+            <a href="?c=products">
+                <img src="./src/img/app/barangstok.png" alt="Product" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
+            </a>
+        </div>
+        <div class="p-3">
+            <a href="?c=transaction-add">
+                <img src="./src/img/app/transaksi.png" alt="Tambah Transaksi" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
+            </a>
+        </div>
+        <div class="p-3">
+            <a href="?c=transactions">
+                <img src="./src/img/app/history.png" alt="Riwayat Transaksi" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
+            </a>
+        </div>
+        <!-- <div class=" p-3">
             <a href="?c=transaction-add">
                 <img src="./src/img/app/menu.png" alt="Pembelian" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
             </a>
         </div> -->
-		<!-- <div class="p-3">
-			<a href="?c=tables">
-				<img src="./src/img/app/pengeluaran.png" alt="Tables" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
-			</a>
-		</div> -->
-		<div class="p-3">
-			<a href="?c=costs">
-				<img src="./src/img/app/pengeluaran.png" alt="Pengeluaran" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
-			</a>
-		</div>
-	</section>
+        <div class="p-3">
+            <a href="?c=tables">
+                <img src="./src/img/app/pengeluaran.png" alt="Tables" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
+            </a>
+        </div>
+        <div class="p-3">
+            <a href="?c=costs">
+                <img src="./src/img/app/pengeluaran.png" alt="Pengeluaran" class="aspect-square w-[clamp(6rem,30vw,10rem)] object-cover object-center" />
+            </a>
+        </div>
+    </section>
 </div>
