@@ -1,112 +1,112 @@
 <div id="conn" x-data="conn" class="min-h-[100dvh] flex flex-col pt-10">
-	<template x-if="true">
-		<nav
-			class="fixed top-0 z-[120] w-full !bg-[rgb(245,245,245)] shadow-lg border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700"
-			style="will-change: transform; transform: translateZ(0)">
-			<div class="px-3 py-3 lg:px-5 lg:pl-3">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center justify-start rtl:justify-end">
-						<button
-							x-show="false"
-							aria-controls="logo-sidebar"
-							type="button"
-							class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
-							<span class="sr-only">Open sidebar</span>
-							<svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path
-									clip-rule="evenodd"
-									fill-rule="evenodd"
-									d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
-							</svg>
-						</button>
-						<a href="" class="flex gap-2" style="font-family: 'Nunito Sans', 'Roboto', 'Helvetica Neue', Arial, sans-serif">
-							<img src="./src/img/app/logo-kedai-2.png" class="h-12" alt="Mikro Maju Logo" />
-							<!-- <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">MO-KASIR</span> -->
-							<template x-if="false">
-								<img src="./src/img/app/icon.jpeg" class="h-8" alt="Mikro Maju Logo" />
-								<span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">MikroMaju</span>
-							</template>
-						</a>
-					</div>
-					<div class="flex items-center gap-2 sm:gap-4 font-semibold">
-						<a :href="url_param['c'] != 'menu' ? '?c=menu': ''" class="text-xs sm:text-base order-2 bg-[#62c700] rounded-lg px-3 py-1 text-white" x-show="url_param['c'] != 'menu'">
-							Return
-						</a>
-						<div>
-							<div class="flex gap-2 items-center">
-								<div class="dropdown relative" x-data="Dropdown({ trigger: 'click' })" @click.outside="trigger == 'click' && deActivated">
-									<button type="button" x-ref="button" class="flex items-center gap-2 text-sm group">
-										<span class="sr-only">Open user menu</span>
+    <template x-if="true">
+        <nav
+            class="fixed top-0 z-[120] w-full !bg-[rgb(245,245,245)] shadow-lg border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+            style="will-change: transform; transform: translateZ(0)">
+            <div class="px-3 py-3 lg:px-5 lg:pl-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-start rtl:justify-end">
+                        <button
+                            x-show="false"
+                            aria-controls="logo-sidebar"
+                            type="button"
+                            class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+                            <span class="sr-only">Open sidebar</span>
+                            <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    clip-rule="evenodd"
+                                    fill-rule="evenodd"
+                                    d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+                            </svg>
+                        </button>
+                        <a href="" class="flex gap-2" style="font-family: 'Nunito Sans', 'Roboto', 'Helvetica Neue', Arial, sans-serif">
+                            <img src="./src/img/app/una-milk-tea-logo.png" class="h-12" alt="Mikro Maju Logo" />
+                            <!-- <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">MO-KASIR</span> -->
+                            <template x-if="false">
+                                <img src="./src/img/app/icon.jpeg" class="h-8" alt="Mikro Maju Logo" />
+                                <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">MikroMaju</span>
+                            </template>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-4 font-semibold">
+                        <a :href="url_param['c'] != 'menu' ? '?c=menu': ''" class="text-xs sm:text-base order-2 bg-[#62c700] rounded-lg px-3 py-1 text-white" x-show="url_param['c'] != 'menu'">
+                            Return
+                        </a>
+                        <div>
+                            <div class="flex gap-2 items-center">
+                                <div class="dropdown relative" x-data="Dropdown({ trigger: 'click' })" @click.outside="trigger == 'click' && deActivated">
+                                    <button type="button" x-ref="button" class="flex items-center gap-2 text-sm group">
+                                        <span class="sr-only">Open user menu</span>
 
-										<div class="flex items-center gap-2">
-											<div class="aspect-square w-8">
-												<img x-show="auth.username" class="w-full aspect-square" src="./src/img/app/avatar-01.jpg" alt="user photo" />
-												<svg x-show="!auth.username" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-													<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-													<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-													<g id="SVGRepo_iconCarrier">
-														<path
-															d="M3 21C3 21.5523 3.44772 22 4 22C4.55228 22 5 21.5523 5 21H3ZM11.8584 15.0608C12.4051 15.139 12.9117 14.7592 12.9899 14.2125C13.0681 13.6658 12.6883 13.1592 12.1416 13.081L11.8584 15.0608ZM17.29 17.2929C16.8994 17.6834 16.8994 18.3166 17.29 18.7071C17.6805 19.0976 18.3137 19.0976 18.7042 18.7071L17.29 17.2929ZM15.0916 14.7507C14.954 15.2856 15.2759 15.8308 15.8108 15.9684C16.3457 16.1061 16.8908 15.7841 17.0285 15.2493L15.0916 14.7507ZM17.9971 20C17.4448 20 16.9971 20.4477 16.9971 21C16.9971 21.5523 17.4448 22 17.9971 22V20ZM18.0071 22C18.5594 22 19.0071 21.5523 19.0071 21C19.0071 20.4477 18.5594 20 18.0071 20V22ZM14 7C14 8.65685 12.6569 10 11 10V12C13.7614 12 16 9.76142 16 7H14ZM11 10C9.34315 10 8 8.65685 8 7H6C6 9.76142 8.23858 12 11 12V10ZM8 7C8 5.34315 9.34315 4 11 4V2C8.23858 2 6 4.23858 6 7H8ZM11 4C12.6569 4 14 5.34315 14 7H16C16 4.23858 13.7614 2 11 2V4ZM5 21C5 17.6863 7.68629 15 11 15V13C6.58172 13 3 16.5817 3 21H5ZM11 15C11.292 15 11.5786 15.0208 11.8584 15.0608L12.1416 13.081C11.7682 13.0276 11.387 13 11 13V15ZM18.997 15.5C18.997 15.6732 18.9516 15.8053 18.6776 16.0697C18.5239 16.218 18.3429 16.3653 18.0919 16.574C17.8536 16.7723 17.5741 17.0087 17.29 17.2929L18.7042 18.7071C18.92 18.4913 19.1405 18.3033 19.3709 18.1116C19.5887 17.9305 19.8452 17.7223 20.0665 17.5087C20.5426 17.0493 20.997 16.4314 20.997 15.5H18.997ZM17.997 14.5C18.5493 14.5 18.997 14.9477 18.997 15.5H20.997C20.997 13.8431 19.6539 12.5 17.997 12.5V14.5ZM17.0285 15.2493C17.1396 14.8177 17.5325 14.5 17.997 14.5V12.5C16.5978 12.5 15.4246 13.457 15.0916 14.7507L17.0285 15.2493ZM17.9971 22H18.0071V20H17.9971V22Z"
-															fill="curentColor"></path>
-													</g>
-												</svg>
-											</div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="aspect-square w-8">
+                                                <img x-show="auth.username" class="w-full aspect-square" src="./src/img/app/avatar-01.jpg" alt="user photo" />
+                                                <svg x-show="!auth.username" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                                    <g id="SVGRepo_iconCarrier">
+                                                        <path
+                                                            d="M3 21C3 21.5523 3.44772 22 4 22C4.55228 22 5 21.5523 5 21H3ZM11.8584 15.0608C12.4051 15.139 12.9117 14.7592 12.9899 14.2125C13.0681 13.6658 12.6883 13.1592 12.1416 13.081L11.8584 15.0608ZM17.29 17.2929C16.8994 17.6834 16.8994 18.3166 17.29 18.7071C17.6805 19.0976 18.3137 19.0976 18.7042 18.7071L17.29 17.2929ZM15.0916 14.7507C14.954 15.2856 15.2759 15.8308 15.8108 15.9684C16.3457 16.1061 16.8908 15.7841 17.0285 15.2493L15.0916 14.7507ZM17.9971 20C17.4448 20 16.9971 20.4477 16.9971 21C16.9971 21.5523 17.4448 22 17.9971 22V20ZM18.0071 22C18.5594 22 19.0071 21.5523 19.0071 21C19.0071 20.4477 18.5594 20 18.0071 20V22ZM14 7C14 8.65685 12.6569 10 11 10V12C13.7614 12 16 9.76142 16 7H14ZM11 10C9.34315 10 8 8.65685 8 7H6C6 9.76142 8.23858 12 11 12V10ZM8 7C8 5.34315 9.34315 4 11 4V2C8.23858 2 6 4.23858 6 7H8ZM11 4C12.6569 4 14 5.34315 14 7H16C16 4.23858 13.7614 2 11 2V4ZM5 21C5 17.6863 7.68629 15 11 15V13C6.58172 13 3 16.5817 3 21H5ZM11 15C11.292 15 11.5786 15.0208 11.8584 15.0608L12.1416 13.081C11.7682 13.0276 11.387 13 11 13V15ZM18.997 15.5C18.997 15.6732 18.9516 15.8053 18.6776 16.0697C18.5239 16.218 18.3429 16.3653 18.0919 16.574C17.8536 16.7723 17.5741 17.0087 17.29 17.2929L18.7042 18.7071C18.92 18.4913 19.1405 18.3033 19.3709 18.1116C19.5887 17.9305 19.8452 17.7223 20.0665 17.5087C20.5426 17.0493 20.997 16.4314 20.997 15.5H18.997ZM17.997 14.5C18.5493 14.5 18.997 14.9477 18.997 15.5H20.997C20.997 13.8431 19.6539 12.5 17.997 12.5V14.5ZM17.0285 15.2493C17.1396 14.8177 17.5325 14.5 17.997 14.5V12.5C16.5978 12.5 15.4246 13.457 15.0916 14.7507L17.0285 15.2493ZM17.9971 22H18.0071V20H17.9971V22Z"
+                                                            fill="curentColor"></path>
+                                                    </g>
+                                                </svg>
+                                            </div>
 
-											<div class="flex items-center gap-1 group-hover:opacity-75 transition-all duration-100">
-												<span x-text="auth.username || 'Anonymous'"></span>
-												<span class="rotate-90 text-xs self-center aspect-square font-bold">&gt;</span>
-											</div>
-										</div>
-									</button>
+                                            <div class="flex items-center gap-1 group-hover:opacity-75 transition-all duration-100">
+                                                <span x-text="auth.username || 'Anonymous'"></span>
+                                                <span class="rotate-90 text-xs self-center aspect-square font-bold">&gt;</span>
+                                            </div>
+                                        </div>
+                                    </button>
 
-									<div
-										x-show="isOpen"
-										x-cloak
-										class="dropdownMenu top-full right-0 absolute my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600 origin-top-right transition-all duration-[0.3s] ease-in-out"
-										x-transition:enter-start="scale-0"
-										x-transition:enter-end="scale-100"
-										x-transition:leave-end="scale-0">
-										<div class="px-4 py-3" role="none">
-											<!-- <p class="text-sm text-gray-900 dark:text-white" role="none" x-text="auth.username || 'Anonymous'"></p> -->
-											<p class="text-sm text-gray-900 dark:text-white" role="none">Help</p>
-											<p class="flex text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
-												<!-- <span x-text="auth.username || 'Anonymous'"></span>
+                                    <div
+                                        x-show="isOpen"
+                                        x-cloak
+                                        class="dropdownMenu top-full right-0 absolute my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600 origin-top-right transition-all duration-[0.3s] ease-in-out"
+                                        x-transition:enter-start="scale-0"
+                                        x-transition:enter-end="scale-100"
+                                        x-transition:leave-end="scale-0">
+                                        <div class="px-4 py-3" role="none">
+                                            <!-- <p class="text-sm text-gray-900 dark:text-white" role="none" x-text="auth.username || 'Anonymous'"></p> -->
+                                            <p class="text-sm text-gray-900 dark:text-white" role="none">Help</p>
+                                            <p class="flex text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
+                                                <!-- <span x-text="auth.username || 'Anonymous'"></span>
                                                 @mikro.maju.co.id -->
-												<a href="https://wa.me/+6285762226137" target="_blank" class="text-blue-500 hover:text-blue-800 underline">Hubungi CS</a>
-											</p>
-										</div>
-										<ul class="py-1" role="none">
-											<li>
-												<a
-													href="#"
-													@click.prevent="logout"
-													class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-													role="menuitem">
-													Log out
-												</a>
-											</li>
-										</ul>
-									</div>
-								</div>
+                                                <a href="https://wa.me/+6285762226137" target="_blank" class="text-blue-500 hover:text-blue-800 underline">Hubungi CS</a>
+                                            </p>
+                                        </div>
+                                        <ul class="py-1" role="none">
+                                            <li>
+                                                <a
+                                                    href="#"
+                                                    @click.prevent="logout"
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                    role="menuitem">
+                                                    Log out
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
 
-								<template x-if="false">
-									<button type="button" class="flex items-center gap-2 text-sm group" aria-expanded="false" data-dropdown-toggle="dropdown-user">
-										<span class="sr-only">Open user menu</span>
-										<!-- <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" /> -->
-										<div class="flex items-center gap-2">
-											<div class="aspect-square w-8">
-												<img x-show="auth.username" class="w-full aspect-square" src="./src/img/app/avatar-01.jpg" alt="user photo" />
-												<svg x-show="!auth.username" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-													<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-													<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-													<g id="SVGRepo_iconCarrier">
-														<path
-															d="M3 21C3 21.5523 3.44772 22 4 22C4.55228 22 5 21.5523 5 21H3ZM11.8584 15.0608C12.4051 15.139 12.9117 14.7592 12.9899 14.2125C13.0681 13.6658 12.6883 13.1592 12.1416 13.081L11.8584 15.0608ZM17.29 17.2929C16.8994 17.6834 16.8994 18.3166 17.29 18.7071C17.6805 19.0976 18.3137 19.0976 18.7042 18.7071L17.29 17.2929ZM15.0916 14.7507C14.954 15.2856 15.2759 15.8308 15.8108 15.9684C16.3457 16.1061 16.8908 15.7841 17.0285 15.2493L15.0916 14.7507ZM17.9971 20C17.4448 20 16.9971 20.4477 16.9971 21C16.9971 21.5523 17.4448 22 17.9971 22V20ZM18.0071 22C18.5594 22 19.0071 21.5523 19.0071 21C19.0071 20.4477 18.5594 20 18.0071 20V22ZM14 7C14 8.65685 12.6569 10 11 10V12C13.7614 12 16 9.76142 16 7H14ZM11 10C9.34315 10 8 8.65685 8 7H6C6 9.76142 8.23858 12 11 12V10ZM8 7C8 5.34315 9.34315 4 11 4V2C8.23858 2 6 4.23858 6 7H8ZM11 4C12.6569 4 14 5.34315 14 7H16C16 4.23858 13.7614 2 11 2V4ZM5 21C5 17.6863 7.68629 15 11 15V13C6.58172 13 3 16.5817 3 21H5ZM11 15C11.292 15 11.5786 15.0208 11.8584 15.0608L12.1416 13.081C11.7682 13.0276 11.387 13 11 13V15ZM18.997 15.5C18.997 15.6732 18.9516 15.8053 18.6776 16.0697C18.5239 16.218 18.3429 16.3653 18.0919 16.574C17.8536 16.7723 17.5741 17.0087 17.29 17.2929L18.7042 18.7071C18.92 18.4913 19.1405 18.3033 19.3709 18.1116C19.5887 17.9305 19.8452 17.7223 20.0665 17.5087C20.5426 17.0493 20.997 16.4314 20.997 15.5H18.997ZM17.997 14.5C18.5493 14.5 18.997 14.9477 18.997 15.5H20.997C20.997 13.8431 19.6539 12.5 17.997 12.5V14.5ZM17.0285 15.2493C17.1396 14.8177 17.5325 14.5 17.997 14.5V12.5C16.5978 12.5 15.4246 13.457 15.0916 14.7507L17.0285 15.2493ZM17.9971 22H18.0071V20H17.9971V22Z"
-															fill="curentColor"></path>
-													</g>
-												</svg>
+                                <template x-if="false">
+                                    <button type="button" class="flex items-center gap-2 text-sm group" aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                                        <span class="sr-only">Open user menu</span>
+                                        <!-- <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" /> -->
+                                        <div class="flex items-center gap-2">
+                                            <div class="aspect-square w-8">
+                                                <img x-show="auth.username" class="w-full aspect-square" src="./src/img/app/avatar-01.jpg" alt="user photo" />
+                                                <svg x-show="!auth.username" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                                    <g id="SVGRepo_iconCarrier">
+                                                        <path
+                                                            d="M3 21C3 21.5523 3.44772 22 4 22C4.55228 22 5 21.5523 5 21H3ZM11.8584 15.0608C12.4051 15.139 12.9117 14.7592 12.9899 14.2125C13.0681 13.6658 12.6883 13.1592 12.1416 13.081L11.8584 15.0608ZM17.29 17.2929C16.8994 17.6834 16.8994 18.3166 17.29 18.7071C17.6805 19.0976 18.3137 19.0976 18.7042 18.7071L17.29 17.2929ZM15.0916 14.7507C14.954 15.2856 15.2759 15.8308 15.8108 15.9684C16.3457 16.1061 16.8908 15.7841 17.0285 15.2493L15.0916 14.7507ZM17.9971 20C17.4448 20 16.9971 20.4477 16.9971 21C16.9971 21.5523 17.4448 22 17.9971 22V20ZM18.0071 22C18.5594 22 19.0071 21.5523 19.0071 21C19.0071 20.4477 18.5594 20 18.0071 20V22ZM14 7C14 8.65685 12.6569 10 11 10V12C13.7614 12 16 9.76142 16 7H14ZM11 10C9.34315 10 8 8.65685 8 7H6C6 9.76142 8.23858 12 11 12V10ZM8 7C8 5.34315 9.34315 4 11 4V2C8.23858 2 6 4.23858 6 7H8ZM11 4C12.6569 4 14 5.34315 14 7H16C16 4.23858 13.7614 2 11 2V4ZM5 21C5 17.6863 7.68629 15 11 15V13C6.58172 13 3 16.5817 3 21H5ZM11 15C11.292 15 11.5786 15.0208 11.8584 15.0608L12.1416 13.081C11.7682 13.0276 11.387 13 11 13V15ZM18.997 15.5C18.997 15.6732 18.9516 15.8053 18.6776 16.0697C18.5239 16.218 18.3429 16.3653 18.0919 16.574C17.8536 16.7723 17.5741 17.0087 17.29 17.2929L18.7042 18.7071C18.92 18.4913 19.1405 18.3033 19.3709 18.1116C19.5887 17.9305 19.8452 17.7223 20.0665 17.5087C20.5426 17.0493 20.997 16.4314 20.997 15.5H18.997ZM17.997 14.5C18.5493 14.5 18.997 14.9477 18.997 15.5H20.997C20.997 13.8431 19.6539 12.5 17.997 12.5V14.5ZM17.0285 15.2493C17.1396 14.8177 17.5325 14.5 17.997 14.5V12.5C16.5978 12.5 15.4246 13.457 15.0916 14.7507L17.0285 15.2493ZM17.9971 22H18.0071V20H17.9971V22Z"
+                                                            fill="curentColor"></path>
+                                                    </g>
+                                                </svg>
 
-												<!-- <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <!-- <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                                                     <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                                                     <g id="SVGRepo_iconCarrier">
@@ -118,31 +118,31 @@
                                                             stroke-linejoin="round"></path>
                                                     </g>
                                                 </svg> -->
-											</div>
+                                            </div>
 
-											<div class="flex items-center gap-1 group-hover:opacity-75 transition-all duration-100">
-												<span x-text="auth.username || 'Anonymous'"></span>
-												<span class="rotate-90 text-xs self-center aspect-square font-bold">&gt;</span>
-											</div>
+                                            <div class="flex items-center gap-1 group-hover:opacity-75 transition-all duration-100">
+                                                <span x-text="auth.username || 'Anonymous'"></span>
+                                                <span class="rotate-90 text-xs self-center aspect-square font-bold">&gt;</span>
+                                            </div>
 
-											<!-- <div class="flex items-center gap-1"><div>
+                                            <!-- <div class="flex items-center gap-1"><div>
                                                 <span x-text="auth.username" class="text-xs sm:text-sm"></span>
                                                 <svg class="w-2 aspect-square text-black transform !rotate-90 font-bold" fill="currentColor" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M 13.8320 43.5625 C 14.4883 43.5625 14.9336 43.3516 15.4258 43.1172 L 41.7695 31.2813 C 43.1055 30.6484 44.1602 29.6172 44.1602 28.1172 C 44.1602 26.6406 43.1289 25.5625 41.7461 24.9532 L 15.4258 12.8359 C 14.9570 12.6016 14.5351 12.4375 13.9258 12.4375 C 12.7070 12.4375 11.8398 13.2813 11.8398 14.5235 C 11.8398 15.6016 12.4023 16.2110 13.3867 16.6797 L 38.6055 27.8125 L 38.6055 28.0703 L 13.3867 39.2969 C 12.4023 39.7656 11.8398 40.3750 11.8398 41.4531 C 11.8398 42.7422 12.6836 43.5625 13.8320 43.5625 Z"></path></g></svg>
                                             </div> -->
-										</div>
-									</button>
-								</template>
-							</div>
-							<div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600" id="dropdown-user">
-								<div class="px-4 py-3" role="none">
-									<p class="text-sm text-gray-900 dark:text-white" role="none" x-text="auth.username || 'Anonymous'"></p>
-									<p class="flex text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
-										<span x-text="auth.username || 'Anonymous'"></span>
-										@mikro.maju.co.id
-									</p>
-								</div>
-								<ul class="py-1" role="none">
-									<!-- <li>
+                                        </div>
+                                    </button>
+                                </template>
+                            </div>
+                            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600" id="dropdown-user">
+                                <div class="px-4 py-3" role="none">
+                                    <p class="text-sm text-gray-900 dark:text-white" role="none" x-text="auth.username || 'Anonymous'"></p>
+                                    <p class="flex text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
+                                        <span x-text="auth.username || 'Anonymous'"></span>
+                                        @mikro.maju.co.id
+                                    </p>
+                                </div>
+                                <ul class="py-1" role="none">
+                                    <!-- <li>
                                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">
                                             Dashboard
                                         </a>
@@ -157,25 +157,25 @@
                                             Earnings
                                         </a>
                                     </li> -->
-									<li>
-										<a
-											href="#"
-											@click.prevent="logout"
-											class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-											role="menuitem">
-											Log out
-										</a>
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</nav>
-	</template>
+                                    <li>
+                                        <a
+                                            href="#"
+                                            @click.prevent="logout"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                            role="menuitem">
+                                            Log out
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </template>
 
-	<div class="p-2 sm:p-4 flex-1 flex flex-col" x-ref="childOfConn" x-init="console.log('childOfConn:', $refs.childOfConn)">
-		<div class="p-3 pt-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 min-h-full" :class="{ 'mt-16': url_param['c'] != 'menu' }" id="app"></div>
-	</div>
+    <div class="p-2 sm:p-4 flex-1 flex flex-col" x-ref="childOfConn" x-init="console.log('childOfConn:', $refs.childOfConn)">
+        <div class="p-3 pt-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 min-h-full" :class="{ 'mt-16': url_param['c'] != 'menu' }" id="app"></div>
+    </div>
 </div>
