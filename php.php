@@ -1,6 +1,8 @@
 <?php
 
-echo json_encode($_GET);
+phpinfo();
+
+// echo json_encode($_GET);
 
 // function toGlobal(array $data): void
 // {
