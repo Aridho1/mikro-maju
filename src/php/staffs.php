@@ -20,6 +20,9 @@ $appName = 'Auth';
 
 header('Content-Type: application/json');
 
+$cookieName = 'auth_token';
+$cookieExpire = time() + 86400; // 1 hari
+
 try {
     switch (M) {
         case 'login':
