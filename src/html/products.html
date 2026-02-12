@@ -904,8 +904,8 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <div x-show="true || formStock.reason == stockReasonKeys[0] || formStock.reason == stockReasonKeys[1]" class="contents">
-                                <div x-data="{ currentVal: 1, minVal: -9999, maxVal: 9999, decimalPoints: 0, incrementAmount: 1 }" class="flex flex-col gap-1">
+                            <div x-show="false || formStock.reason == stockReasonKeys[0] || formStock.reason == stockReasonKeys[1]" class="contents">
+                                <div x-data="{ formStock.quantity: 1, minVal: -9999, maxVal: 9999, decimalPoints: 0, incrementAmount: 1 }" class="flex flex-col gap-1">
                                     <label for="counterInput" class="pl-1 text-sm text-neutral-600 dark:text-zinc-200">Items(s)</label>
                                     <div x-on:dblclick.prevent class="flex items-center">
                                         <button
@@ -948,6 +948,47 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                             </svg>
                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div x-show="true" class="contens">
+                                <div
+                                    x-data="{
+                                        minVal: 0,
+                                        maxVal: 9999,
+                                        decimalPoints: 0,
+                                        incrementAmount: 1,
+
+                                        updateValue(val) {
+                                            let number = parseFloat(val)
+
+                                            if (isNaN(number)) number = this.minVal
+
+                                            number = Math.max(this.minVal, Math.min(this.maxVal, number))
+
+                                            this.formStock.quantity = number
+                                        }
+                                    }"
+                                    class="flex flex-col gap-1">
+                                    <label class="pl-1 text-sm text-neutral-600">Items(s)</label>
+
+                                    <div class="flex items-center">
+                                        <!-- MINUS -->
+                                        <button type="button" @click="updateValue(formStock.quantity - incrementAmount)" class="px-4 h-10 border">-</button>
+
+                                        <!-- INPUT -->
+                                        <input
+                                            x-model="formStock.quantity"
+                                            @input="updateValue($event.target.value)"
+                                            type="number"
+                                            :step="incrementAmount"
+                                            :min="minVal"
+                                            :max="maxVal"
+                                            class="h-10 w-24 text-center border-y" />
+
+                                        <!-- PLUS -->
+                                        <button type="button" @click="updateValue(formStock.quantity + incrementAmount)" class="px-4 h-10 border">+</button>
                                     </div>
                                 </div>
                             </div>

@@ -82,7 +82,7 @@ try {
 
         // A-G-E-R METHOD | ADD GET EDIT REMOVE
         case 'add':
-            validateEmptyVar('product_id|quantity|reason|note', true, true);
+            validateEmptyVar('product_id|quantity|reason', true, true);
 
             $db->begin_transaction();
 
