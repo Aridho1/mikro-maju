@@ -37,10 +37,10 @@ try {
             $db->begin_transaction();
 
             $stmt = $db->prepare("
-                INSERT INTO $table (name, purchase_price, price, image, category, subcategory, is_stockable, deprecated_code, origin_id)
+                INSERT INTO $table (name, purchase_price, price, image, category, is_stockable, deprecated_code, origin_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
             ");
-            $stmt->bind_param('sddsssi', $name, $purchase_price, $price, $image, $category, $subcategory, $is_stockable);
+            $stmt->bind_param('sddssi', $name, $purchase_price, $price, $image, $category, $is_stockable);
             $stmt->execute();
 
             $affected_rows = $stmt->affected_rows;
