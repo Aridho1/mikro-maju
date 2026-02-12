@@ -38,7 +38,7 @@ try {
 
             $stmt = $db->prepare("
                 INSERT INTO $table (name, purchase_price, price, image, category, is_stockable, deprecated_code, origin_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
+                VALUES (?, ?, ?, ?, ?, ?, 0, 0)
             ");
             $stmt->bind_param('sddssi', $name, $purchase_price, $price, $image, $category, $is_stockable);
             $stmt->execute();
