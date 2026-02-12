@@ -1,24 +1,24 @@
 <?php
 
-define("M", $_GET['m']);
+define('M', $_GET['m']);
 
 if (!M ?? false) {
-    die;
+    die();
 }
 
 require_once 'db.php';
 
 toGlobal($_POST);
 
-$table = "costs";
-$appName = "Pengeluaran";
+$table = 'costs';
+$appName = 'Pengeluaran';
 
-header("Content-Type: application/json");
+header('Content-Type: application/json');
 
 try {
     switch (M) {
-        case "add": {
-            validateEmptyVar("amount|category|description", true, true);
+        case 'add':
+            validateEmptyVar('amount|category|description', true, true);
 
             $date ??= date('Y-m-d');
 
@@ -29,32 +29,34 @@ try {
             // $db->query("INSERT INTO $table SET date = '$date', amount = '$amount', category = '$category', description = '$description'");
 
             die(json_encode(['status' => true, 'msg' => "$db->affected_rows Data $appName berhasil ditamahkan."]));
-        }
-        case 'search': {
-
+        case 'search':
             $page ??= false;
-            $page = (Int) ($page ?? 1);
+            $page = (int) ($page ?? 1);
             $sql = " FROM $table WHERE 1 ";
             $conditions = [];
 
             if ($keyword ?? false) {
                 // filters
                 if ($filters ?? false) {
-                    $keys = explode(",", $filters);
-                    foreach ($keys as $key)
+                    $keys = explode(',', $filters);
+                    foreach ($keys as $key) {
                         $conditions[] = "$key LIKE '%$keyword%'";
+                    }
                 }
-                if (!empty($conditions))
-                    $sql .= " AND (" . implode(' OR ', $conditions) . ")";
+                if (!empty($conditions)) {
+                    $sql .= ' AND (' . implode(' OR ', $conditions) . ')';
+                }
             }
 
             if ($categories ?? false) {
-                $arr = explode(",", $categories);
+                $arr = explode(',', $categories);
                 $conditions = [];
-                foreach ($arr as $cty)
+                foreach ($arr as $cty) {
                     $conditions[] = "category = '$cty'";
-                if (!empty($conditions))
-                    $sql .= " AND (" . implode(' OR ', $conditions) . ")";
+                }
+                if (!empty($conditions)) {
+                    $sql .= ' AND (' . implode(' OR ', $conditions) . ')';
+                }
             }
 
             // filter date
@@ -65,7 +67,7 @@ try {
                 $sql .= " AND (date >= '$date_start' AND date <= '$date_end') ";
             }
 
-            $sql .= $_POST['sort_desc'] ?? false ? " ORDER BY ID DESC " : "";
+            $sql .= $_POST['sort_desc'] ?? false ? ' ORDER BY ID DESC ' : '';
 
             try {
                 $max_data = $config['pagination']['max_data'];
@@ -81,7 +83,7 @@ try {
             $data = $db->query($sql)->fetch_all(MYSQLI_ASSOC);
 
             // Calc paginate
-            $total_data = $db->query("SELECT FOUND_ROWS() AS total_data")->fetch_assoc()['total_data'];
+            $total_data = $db->query('SELECT FOUND_ROWS() AS total_data')->fetch_assoc()['total_data'];
             $total_page = ceil($total_data / $max_data);
 
             $offset = ($page - 1) * $max_data;
@@ -101,29 +103,24 @@ try {
             ];
 
             die(json_encode(['status' => true, 'data' => $data, 'query' => $sql, 'pagination' => $pagination, 'post' => $_POST, 'cty' => $categories ?? false ? $categories : '']));
-        }
-        case 'get': {
+        case 'get':
             $data = $db->query("SELECT * FROM $table")->fetch_all(MYSQLI_ASSOC);
             die(json_encode(['status' => true, 'data' => $data]));
-        }
-        case 'edit': {
-            validateEmptyVar("id|amount|category|description", true, true);
+        case 'edit':
+            validateEmptyVar('id|amount|category|description', true, true);
 
             $stmt = $db->prepare("UPDATE $table (amount, category, description) VALUES (?, ?, ?) WHERE id = ?");
-            $stmt->bind_param("dssi", $amount, $category, $description, $id);
+            $stmt->bind_param('dssi', $amount, $category, $description, $id);
             $stmt->execute();
             // $db->query("UPDATE $table SET amount = '$amount', category = '$category', description = '$description' WHERE id = $id");
 
             die(json_encode(['status' => true, 'msg' => 'Data Pengeluaran berhasil diubah.', 'post' => $_POST]));
-        }
-        case 'remove': {
-            
+        case 'remove':
             validateEmptyVar('id', true, true);
             $db->query("DELETE FROM $table WHERE id='$id'");
 
             die(json_encode(['status' => true, 'msg' => "$db->affected_rows Data $appName berhasil dihapus."]));
-        }
-        case 'get-categories': {
+        case 'get-categories':
             $query = "SELECT category FROM $table WHERE category IS NOT NULL AND category <> '' GROUP BY category";
 
             $data = $db->query($query)->fetch_all(MYSQLI_ASSOC);
@@ -134,14 +131,15 @@ try {
             }
 
             die(json_encode(['status' => true, 'data' => $data, 'categories' => $categories]));
-        }
     }
 } catch (Exception $e) {
     $err = $e->getMessage();
 
-    die(json_encode([
-        "status" => false,
-        "msg" => $err,
-        "post" => $_POST
-    ]));
+    die(
+        json_encode([
+            'status' => false,
+            'msg' => $err,
+            'post' => $_POST,
+        ])
+    );
 }
