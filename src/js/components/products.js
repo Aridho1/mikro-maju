@@ -25,6 +25,7 @@ const defaultSuccessNotif = {
 export default function () {
     const dbPath = "./src/php/products.php?m=";
     const dbDiscountPath = "./src/php/product_discounts.php?m=";
+    const dbStockPath = "./src/php/stock_adjustments.php?m=";
 
     const discountTypeMap = {
         percent: "Persen (%)",
@@ -36,9 +37,19 @@ export default function () {
     const tabMap = {
         product: "Produk",
         discount: "Diskon",
+        stock: "Stok",
     };
     const tabKeys = Object.keys(tabMap);
     const tabList = tabKeys.map((key) => tabMap[key]);
+
+    const stockReasonMap = {
+        EXPIRED: "Kadaluarsa",
+        DAMAGED: "Rusak",
+        OPNAME: "Sinkron Data Fisik | OPNAME",
+        MANUAL: "Manual / Yang Lainnya",
+    };
+    const stockReasonKeys = Object.keys(stockReasonMap);
+    const stockReasonList = tabKeys.map((key) => tabMap[key]);
 
     const form = document.querySelector("#form-main");
     const inputFileEl = document.querySelector("#dropzone-file");
@@ -53,7 +64,9 @@ export default function () {
         tabMap,
         tabKeys,
         tabList,
+
         tabActive: tabKeys[0],
+
         categories: {},
         categories_keys: [],
         items: [],
@@ -64,6 +77,9 @@ export default function () {
             // description: null,
             purchase_price: null,
             price: null,
+
+            is_stockable: false,
+            stock: null,
 
             category: null,
             subcategory: null,
@@ -78,12 +94,14 @@ export default function () {
         imageModal: null,
         srcUploadedImage: null,
         formSearch: {
-            filters: ["name", "purchase_price", "price", "category", "subcategory"],
+            filters: ["name", "purchase_price", "price", "category", "subcategory", "is_stockable"],
             categories: {},
             sort_desc: true,
             keyword: null,
         },
         page: new Pagination(),
+
+        selectedProduct: {},
 
         // discount props
         productDiscounts: [],
@@ -103,11 +121,67 @@ export default function () {
         selectedDiscount: {
             discountList: [],
         },
+        discountList: [],
         isFetchingDiscountHistory: false,
 
-        async getDiscountHistory(productId) {
-            if (!this.products.some(({ id }) => productId == id)) return console.warn(`Product with id ${productId} is not found!`);
+        stocks: [],
+        formStock: {
+            id: null,
+            product_id: null,
+            quantity: 0,
+            reason: stockReasonKeys.at(-1),
+            note: null,
+        },
+        stockNote: null,
+        stockQuantityManual: null,
+        isProductsShouldbeResfrefhed: false,
+        stockReasonMap,
+        stockReasonKeys,
+        stockReasonList,
+
+        isOpenModalStock: false,
+        selectedStock: {},
+        stockList: [],
+        isFetchingStockHistory: false,
+
+        selectProduct(product) {
+            const _product = this.products.find(({ id }) => id == product?.id);
+            if (!_product) return console.warn(`Product with id ${product?.id} is not found!`);
+
+            return (this.selectedProduct = { ..._product });
+            // return (this.selectedProduct = structuredClone(_product));
+        },
+
+        async getDiscountHistory() {
+            if (isNaN(this.selectedProduct?.id)) return console.warn(`selected product is not found!`);
+
+            q.add(
+                "get-history-discount",
+                async () => {
+                    this.isFetchingDiscountHistory = true;
+
+                    const formData = new FormData();
+                    formData.append("id", this.selectedProduct.id);
+
+                    encodeFetchedJson(await (await fetch(dbDiscountPath + "get-discounts-by-product-id", { method: "POST", body: formData })).text(), "Fetching Riwayat Diskon Produk", ({ data }) => {
+                        if (data) this.discountList = data;
+                    });
+
+                    this.isFetchingDiscountHistory = false;
+                },
+                { cancelIfAlreadyInQueue: true, callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif) },
+            );
+
+            return;
+
+            // if (!this.products.some(({ id }) => productId == id)) return console.warn(`Product with id ${productId} is not found!`);
+            const product = this.products.find(({ id }) => id == productId);
+            if (!product) return console.warn(`Product with id ${productId} is not found!`);
+
+            return;
             if (!this.selectedDiscount) return console.warn(`selected discount is not found!`);
+
+            Object.assign(this.selectedDiscount, product);
 
             this.isFetchingDiscountHistory = true;
 
@@ -115,7 +189,7 @@ export default function () {
                 const formData = new FormData();
                 formData.append("id", productId);
 
-                encodeFetchedJson(await (await fetch(dbDiscountPath + "get-discounts-by-product-id", { method: "POST", body: formData })).text(), "Fetching History Diskon Produk", ({ data }) => {
+                encodeFetchedJson(await (await fetch(dbStockPath + "get-discounts-by-product-id", { method: "POST", body: formData })).text(), "Fetching History Diskon Produk", ({ data }) => {
                     if (!this.selectedDiscount?.discountList) return console.warn(`selected discount is gone!`);
                     this.selectedDiscount.discountList = data;
                 });
@@ -124,13 +198,54 @@ export default function () {
             this.isFetchingDiscountHistory = false;
         },
 
+        async getStockHistory(productId) {
+            if (isNaN(this.selectedProduct?.id)) return console.warn(`selected product is not found!`);
+
+            q.add(
+                "get-history-stock",
+                async () => {
+                    this.isFetchingStockHistory = true;
+
+                    const formData = new FormData();
+                    formData.append("id", this.selectedProduct.id);
+
+                    encodeFetchedJson(await (await fetch(dbStockPath + "get-stocks-by-product-id", { method: "POST", body: formData })).text(), "Fetching Riwayat Stok Produk", ({ data }) => {
+                        if (data) this.stockList = data;
+                    });
+
+                    this.isFetchingStockHistory = false;
+                },
+                { cancelIfAlreadyInQueue: true, callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif) },
+            );
+        },
+
         selectDiscountProduct(product) {
-            this.selectedDiscount = { ...product, discountList: [] };
+            const selected = this.selectProduct(product);
+            if (!selected) return console.warn(`selected product is not found!`);
+
+            this.getDiscountHistory();
+            this.tabActive = tabKeys[1];
+            return;
+
+            this.selectedDiscount = { ...selected, discountList: [] };
 
             this.getDiscountHistory(product.id);
             this.tabActive = tabKeys[1];
 
             console.log(this.selectedDiscount);
+        },
+
+        selectStockProduct(product, isJustSelect = false) {
+            const selected = this.selectProduct(product);
+            if (!selected) return console.warn(`selected product is not found!`);
+
+            this.stockQuantityManual = null;
+
+            if (isJustSelect) return;
+
+            this.getStockHistory();
+            this.tabActive = tabKeys[2];
+            return;
         },
 
         openModalDiscount() {
@@ -148,13 +263,30 @@ export default function () {
             this.isOpenModalDiscount = true;
         },
 
+        openModalStock() {
+            // if (this.selectedDiscount.discount_id) return this.$dispatch("notify", { ...defaultWarningNotif, title: "(Warning) Gagal membuka form", message: "Produk ini masih memiliki discount yang aktif!" });
+
+            this.formStock = {
+                ...this.formStock,
+                id: null,
+                product_id: null,
+                quantity: 0,
+                // reason: stockReasonKeys.at(-1),
+                note: null,
+            };
+
+            this.isOpenModalStock = true;
+        },
+
         async addDiscount() {
+            if (isNaN(this.selectedProduct?.id)) return console.warn(`selected product is not found!`);
+
             q.add(
                 "add-discount",
                 async () => {
                     const formData = new FormData();
                     bindAndFillFormData(formData, this.formDiscount);
-                    formData.append("product_id", this.selectedDiscount.id);
+                    formData.append("product_id", this.selectedProduct.id);
 
                     encodeFetchedJson(
                         await (await fetch(dbDiscountPath + "add", { method: "POST", body: formData })).text(),
@@ -162,7 +294,7 @@ export default function () {
                         async ({ msg: message } = {}) => {
                             if (message) this.$dispatch("notify", { ...defaultSuccessNotif, message });
 
-                            await this.getDiscountHistory(this.selectedDiscount.id);
+                            await this.getDiscountHistory();
                         },
                         {
                             swalSuccess: false,
@@ -174,7 +306,35 @@ export default function () {
                 { cancelIfAlreadyInQueue: true, callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif) },
             );
         },
-        async editDiscount() {},
+
+        async addStock() {
+            if (isNaN(this.selectedProduct?.id)) return console.warn(`selected product is not found!`);
+
+            q.add(
+                "add-stock",
+                async () => {
+                    const formData = new FormData();
+                    bindAndFillFormData(formData, this.formStock);
+                    formData.append("product_id", this.selectedProduct.id);
+
+                    encodeFetchedJson(
+                        await (await fetch(dbStockPath + "add", { method: "POST", body: formData })).text(),
+                        "Tambah Stok",
+                        async ({ msg: message } = {}) => {
+                            if (message) this.$dispatch("notify", { ...defaultSuccessNotif, message });
+
+                            await this.getStockHistory();
+                        },
+                        {
+                            swalSuccess: false,
+                        },
+                    );
+
+                    this.isOpenModalDiscount = false;
+                },
+                { cancelIfAlreadyInQueue: true, callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif) },
+            );
+        },
 
         async removeDiscount({ id } = {}) {
             if (!id) return;
@@ -252,19 +412,35 @@ export default function () {
         },
 
         async init() {
+            this.$watch("tabActive", async (curr, prev) => {
+                console.log("tabActive", { curr, prev });
+
+                if (curr == tabKeys[0] && this.isProductsShouldbeResfrefhed) {
+                    await this.get(this.page.page, true);
+                    this.isProductsShouldbeResfrefhed = false;
+
+                    // handle selected product stock
+                    if (isNaN(this.selectedProduct?.id)) return;
+                    this.selectStockProduct(this.selectedProduct.id, true);
+                }
+            });
+
             this.$watch("formattedDiscountValue", (value) => {
+                value ??= "";
                 const _value = value.replace(/\D/g, "");
                 this.formattedDiscountValue = IDR.format(_value);
                 this.formDiscount.value = _value;
             });
 
             this.$watch("formattedPrice", (value) => {
+                value ??= "";
                 const _value = value.replace(/\D/g, "");
                 this.formattedPrice = IDR.format(_value);
                 this.form.price = _value;
             });
 
             this.$watch("formattedPurchase_price", (value) => {
+                value ??= "";
                 const _value = value.replace(/\D/g, "");
                 this.formattedPurchase_price = IDR.format(_value);
                 this.form.purchase_price = _value;
@@ -375,6 +551,9 @@ export default function () {
                 "add-product",
                 async () => {
                     const formData = new FormData(form);
+
+                    console.log("this.formaaa", this.form);
+
                     bindAndFillFormData(formData, this.form);
 
                     encodeFetchedJson(
@@ -627,6 +806,7 @@ export default function () {
 
         openModal() {
             this.form = {
+                ...this.form,
                 id: null,
                 name: null,
                 // description: null,
@@ -638,6 +818,9 @@ export default function () {
 
                 prevImage: null,
             };
+
+            this.formattedDiscountValue = null;
+            this.formattedPurchase_price = null;
 
             this.resetUploadedImage();
 

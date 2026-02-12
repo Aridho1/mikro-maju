@@ -1,50 +1,49 @@
 <?php
 
-define("M", $_GET['m']);
+define('M', $_GET['m']);
 
 if (!M ?? false) {
-    die;
+    die();
 }
 
 require_once 'db.php';
 
 toGlobal($_POST);
 
-$table = "transactions";
-$view_name = "view_transactions";
+$table = 'transactions';
+$view_name = 'view_transactions';
 
 switch (M) {
-    case "remake-transaction": {
-        $validated = validateEmptyVar("id|payment_key|payment_status|total|payment_method|cart", true);
+    case 'remake-transaction':
+        $validated = validateEmptyVar('id|payment_key|payment_status|total|payment_method|cart', true);
 
         if ($validated !== true) {
             echo json_encode(['status' => false, 'msg' => $validated, 'post' => $_POST]);
-            die;
+            die();
         }
 
-        if ($payment_method !== "Transfer") {
-            echo json_encode(['status' => false, 'msg' => "Methods not math!", 'post' => $_POST]);
-            die;
+        if ($payment_method !== 'Transfer') {
+            echo json_encode(['status' => false, 'msg' => 'Methods not math!', 'post' => $_POST]);
+            die();
         }
 
         $carts = json_decode($cart, true);
 
         if (!is_array($carts)) {
-            echo json_encode(['status' => false, 'msg' => "Cart kosong", 'post' => $_POST]);
-            die;
+            echo json_encode(['status' => false, 'msg' => 'Cart kosong', 'post' => $_POST]);
+            die();
         }
 
         // validate real transaaction
         if (!$db->query("SELECT id FROM $table WHERE id = '$id'")->fetch_assoc()) {
-            echo json_encode(['status' => false, 'msg' => "Transaksi tidak ditemukan!", 'post' => $_POST]);
-            die;
+            echo json_encode(['status' => false, 'msg' => 'Transaksi tidak ditemukan!', 'post' => $_POST]);
+            die();
         }
 
         $item_details = [];
         $profit = 0;
 
         foreach ($carts as $cart) {
-
             $sub_profit = ($cart['price'] - $cart['purchase_price']) * $cart['quantity'];
 
             $item_details[] = [
@@ -65,7 +64,7 @@ switch (M) {
 
         if (!$transaction_respon['status']) {
             echo json_encode([...$transaction_respon, 'post' => $_POST]);
-            die;
+            die();
         }
 
         $token = $transaction_respon['res']->token;
@@ -76,13 +75,13 @@ switch (M) {
         echo json_encode(['status' => true, 'msg' => 'Berhasil membuat ulang transaksi.', 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details]);
 
         break;
-    }
-    case "add": {
-
+    case 'add':
         // echo json_encode($_POST);
         // die;
 
-        $name = $name ? "'$name'" : "NULL";
+        $db->begin_transaction();
+
+        $name = $name ? "'$name'" : 'NULL';
         $date = Date('Y-m-d');
         $payment_status = 'pending';
         $payment_key = '';
@@ -92,14 +91,14 @@ switch (M) {
 
         if (!$total || !$payment_method) {
             echo json_encode(['staus' => false, 'msg' => 'Missing required value!', 'post' => $_POST]);
-            die;
+            die();
         }
 
         $carts = json_decode($_POST['cart'] ?? [], true);
 
         if (!$carts || !is_array($carts)) {
             echo json_encode(['status' => false, 'msg' => 'Cart kosong!', 'post' => $_POST]);
-            die;
+            die();
         }
 
         $transaction_respon = [];
@@ -108,7 +107,6 @@ switch (M) {
         $profit = 0;
 
         foreach ($carts as $cart) {
-
             $sub_profit = ($cart['price'] - $cart['purchase_price']) * $cart['quantity'];
 
             $item_details[] = [
@@ -127,19 +125,18 @@ switch (M) {
         // die;
 
         switch ($payment_method) {
-            case 'Tunai': case 'QRIS': {
+            case 'Tunai':
+            case 'QRIS':
                 $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token =''");
                 break;
-            }
-            case 'Transfer': {
-
+            case 'Transfer':
                 require_once 'midtrans.php';
                 $payment_key = rand();
                 $transaction_respon = createTransaction($total, $payment_key, $item_details);
 
                 if (!$transaction_respon['status']) {
                     echo json_encode([...$transaction_respon, 'post' => $_POST]);
-                    die;
+                    die();
                 }
 
                 $token = $transaction_respon['res']->token;
@@ -148,19 +145,14 @@ switch (M) {
                 $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Pending', payment_method='$payment_method', payment_key='$payment_key', payment_token = '$token'");
                 break;
 
-            }
-
-            default: {
+            default:
                 echo json_encode(['status' => false, 'msg' => 'Invalid payment Method']);
-                die;
-            }
+                die();
         }
 
         $transaction_id = $db->insert_id;
 
         $num = 0;
-
-        $db->begin_transaction();
 
         try {
             $stmt = $db->prepare("
@@ -169,21 +161,20 @@ switch (M) {
                 VALUES (?, ?, ?, ?, ?, ?)
             ");
 
+            $stmt_stock = $db->prepare('UPDATE products SET stock = stock - ? WHERE id = ?');
+
             foreach ($carts as $cart) {
-                $discount_id = empty($cart['discount_id']) ? null : (int)$cart['discount_id'];
+                $discount_id = empty($cart['discount_id']) ? null : (int) $cart['discount_id'];
                 $sub_profit = ($cart['price'] - $cart['purchase_price']) * $cart['quantity'];
 
-                $stmt->bind_param(
-                    "iiiidd",
-                    $transaction_id,
-                    $cart['id'],
-                    $discount_id,
-                    $cart['quantity'],
-                    $cart['sub_total'],
-                    $sub_profit
-                );
+                $stmt->bind_param('iiiidd', $transaction_id, $cart['id'], $discount_id, $cart['quantity'], $cart['sub_total'], $sub_profit);
 
                 $stmt->execute();
+
+                if ($cart['is_stockable']) {
+                    $stmt_stock->bind_param('is', $cart['quantity'], $cart['id']);
+                    $stmt_stock->execute();
+                }
             }
 
             $db->commit();
@@ -201,22 +192,20 @@ switch (M) {
         echo json_encode(['status' => true, 'msg' => 'Berhasil menambahkan transaksi.', 'affected_rows' => $affected_rows, 'transaction_id' => $transaction_id, 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details, 'urlData' => encodeKey($transaction_id)]);
 
         break;
-    }
 
-    case 'add-order': {
-
+    case 'add-order':
         $_name = $name ?: '';
-        $name = $name ? "'$name'" : "NULL";
+        $name = $name ? "'$name'" : 'NULL';
         $date = Date('Y-m-d');
         $payment_status = 'pending';
         $payment_key = '';
 
         $total ??= false;
         $t ??= false;
-        $payment_method = "Tunai";
+        $payment_method = 'Tunai';
 
         // validate param
-        if (($validate = validateEmptyVar("name|total|t", true)) !== true) {
+        if (($validate = validateEmptyVar('name|total|t', true)) !== true) {
             echo json_encode(['status' => false, 'msg' => $validate, 'post' => $_POST]);
             break;
         }
@@ -225,7 +214,7 @@ switch (M) {
 
         if (!$carts || !is_array($carts)) {
             echo json_encode(['status' => false, 'msg' => 'Cart kosong!', 'post' => $_POST]);
-            die;
+            die();
         }
 
         $transaction_respon = [];
@@ -234,7 +223,6 @@ switch (M) {
         $profit = 0;
 
         foreach ($carts as $cart) {
-
             $sub_profit = ($cart['price'] - $cart['purchase_price']) * $cart['quantity'];
 
             $item_details[] = [
@@ -253,22 +241,20 @@ switch (M) {
         // die;
 
         switch ($payment_method) {
-            case 'Tunai': {
+            case 'Tunai':
                 $db->query("INSERT INTO $table SET date='$date', name=$name, total=$total, profit = $profit, payment_status='Belum dibayar', payment_method='$payment_method', payment_key='', payment_token ='', is_req_by_user = 1, table_name = '$t'");
                 break;
-            }
 
-            default: {
+            default:
                 echo json_encode(['status' => false, 'msg' => 'Invalid payment Method']);
-                die;
-            }
+                die();
         }
 
         $transaction_id = $db->insert_id;
 
         $num = 0;
 
-        $sql = "INSERT INTO transaction_details (transaction_id, product_id, quantity, sub_total, sub_profit) VALUES ";
+        $sql = 'INSERT INTO transaction_details (transaction_id, product_id, quantity, sub_total, sub_profit) VALUES ';
 
         $queries = [];
         foreach ($carts as $cart) {
@@ -283,7 +269,7 @@ switch (M) {
         }
 
         if (!empty($queries)) {
-            $sql .= implode(", ", $queries);
+            $sql .= implode(', ', $queries);
         }
 
         $db->query($sql);
@@ -300,187 +286,40 @@ switch (M) {
         $__rand = rand(1, 100);
 
         $item = [
-            "__time" => $__time,
-            "__time__rand" => "$__time-$__rand",
-            "name" => $_name,
-            "total" => $total,
-            "payment_method" => $payment_method,
-            "category_count" => $num,
+            '__time' => $__time,
+            '__time__rand' => "$__time-$__rand",
+            'name' => $_name,
+            'total' => $total,
+            'payment_method' => $payment_method,
+            'category_count' => $num,
         ];
 
-        putSSE("sse_order.json", $item);
+        putSSE('sse_order.json', $item);
 
         echo json_encode(['status' => true, 'msg' => 'Berhasil menambahkan pesanan. Mohon tunggu, pesanan anda akan di proses.', 'affected_rows' => $affected_rows, 'queries' => $queries, 'transaction_id' => $transaction_id, 'transaction_respon' => $transaction_respon, 'post' => $_POST, 'item_details' => $item_details, 'urlData' => encodeKey($transaction_id)]);
 
-
         break;
-    }
 
-    case 'search-view2': {
+    case 'search-view2':
+        $page = max(1, (int) ($_POST['page'] ?? 1));
+        $limit = max(1, (int) ($_POST['limit'] ?? 10));
+        $offset = ($page - 1) * $limit;
 
-    $page      = max(1, (int)($_POST['page'] ?? 1));
-    $limit     = max(1, (int)($_POST['limit'] ?? 10));
-    $offset    = ($page - 1) * $limit;
+        $keyword = trim($_POST['keyword'] ?? '');
+        $methods = $_POST['payment_method'] ?? [];
+        $statuses = $_POST['payment_status'] ?? [];
+        $dateStart = $_POST['date_start'] ?? null;
+        $dateEnd = $_POST['date_end'] ?? null;
 
-    $keyword   = trim($_POST['keyword'] ?? '');
-    $methods   = $_POST['payment_method'] ?? [];
-    $statuses  = $_POST['payment_status'] ?? [];
-    $dateStart = $_POST['date_start'] ?? null;
-    $dateEnd   = $_POST['date_end'] ?? null;
-
-    /* ===============================
+        /* ===============================
        BUILD WHERE
     =============================== */
-    $where = [];
-    $params = [];
-    $types  = '';
-
-    if ($keyword !== '') {
-        $where[] = "(vt.code LIKE ? OR vt.payment_method LIKE ?)";
-        $params[] = "%$keyword%";
-        $params[] = "%$keyword%";
-        $types .= 'ss';
-    }
-
-    if (!empty($methods)) {
-        $in = implode(',', array_fill(0, count($methods), '?'));
-        $where[] = "vt.payment_method IN ($in)";
-        foreach ($methods as $m) {
-            $params[] = $m;
-            $types .= 's';
-        }
-    }
-
-    if (!empty($statuses)) {
-        $in = implode(',', array_fill(0, count($statuses), '?'));
-        $where[] = "vt.payment_status IN ($in)";
-        foreach ($statuses as $s) {
-            $params[] = $s;
-            $types .= 's';
-        }
-    }
-
-    if ($dateStart && $dateEnd) {
-        $where[] = "vt.date BETWEEN ? AND ?";
-        $params[] = $dateStart;
-        $params[] = $dateEnd;
-        $types .= 'ss';
-    }
-
-    $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
-
-    /* ===============================
-       MAIN QUERY
-    =============================== */
-    $sql = "
-        SELECT SQL_CALC_FOUND_ROWS *
-        FROM view_transactions vt
-        $whereSql
-        ORDER BY vt.id DESC
-        LIMIT ?, ?
-    ";
-
-    $stmt = $db->prepare($sql);
-
-    $params[] = $offset;
-    $params[] = $limit;
-    $types   .= 'ii';
-
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-    $data   = [];
-
-    /* ===============================
-       PREPARE DETAIL QUERY
-    =============================== */
-    $detailStmt = $db->prepare("
-        SELECT *
-        FROM view_transaction_details
-        WHERE transaction_id = ?
-    ");
-
-    while ($row = $result->fetch_assoc()) {
-
-        $detailStmt->bind_param("i", $row['id']);
-        $detailStmt->execute();
-
-        $row['transaction_details'] = $detailStmt
-            ->get_result()
-            ->fetch_all(MYSQLI_ASSOC);
-
-        $data[] = $row;
-    }
-
-    /* ===============================
-       TOTAL ROWS
-    =============================== */
-    $totalRes = $db->query("SELECT FOUND_ROWS() total");
-    $total_data = (int)$totalRes->fetch_assoc()['total'];
-
-    try {
-        $max_data = $config['pagination']['max_data'];
-    } catch (Exception $e) {
-        $max_data = 5;
-    }
-
-    $total_page = ceil($total_data / $max_data);
-
-    $start_index = $total_data == 0 ? 0 : $offset + 1;
-    $end_index = $offset + $max_data > $total_data ? $total_data : $offset + $max_data;
-
-    $pagination = [
-        'total_data' => $total_data,
-        'max_data' => $max_data,
-        'total_page' => $total_page,
-        'page' => $page,
-        'offset' => $offset,
-        'start_index' => $start_index,
-        'end_index' => $end_index,
-    ];
-
-    echo json_encode([
-        'status' => true,
-        'page'    => $page,
-        'limit'   => $limit,
-        'data'    => $data,
-        "pagination" => $pagination,
-    ]);
-    // exit;
-    break;
-    }
-
-    case 'search-view3': {
-
-        /* ===============================
-        INPUT
-        =============================== */
-        $page      = max(1, (int)($page ?? 1));
-        $keyword   = htmlspecialchars(trim($keyword ?? ''));
-
-        $methods   = $payment_method ?? [];
-        $statuses  = $_POST['payment_status'] ?? [];
-        $dateStart = $date_start ?? null;
-        $dateEnd   = $date_end ?? null;
-
-        try {
-            $max_data = $config['pagination']['max_data'];
-        } catch (Exception $e) {
-            $max_data = 5;
-        }
-
-        $offset = ($page - 1) * $max_data;
-
-        /* ===============================
-        WHERE BUILDER
-        =============================== */
-        $where  = [];
+        $where = [];
         $params = [];
-        $types  = '';
+        $types = '';
 
         if ($keyword !== '') {
-            $where[] = "(vt.code LIKE ? OR vt.payment_method LIKE ?)";
+            $where[] = '(vt.code LIKE ? OR vt.payment_method LIKE ?)';
             $params[] = "%$keyword%";
             $params[] = "%$keyword%";
             $types .= 'ss';
@@ -505,7 +344,146 @@ switch (M) {
         }
 
         if ($dateStart && $dateEnd) {
-            $where[] = "vt.date BETWEEN ? AND ?";
+            $where[] = 'vt.date BETWEEN ? AND ?';
+            $params[] = $dateStart;
+            $params[] = $dateEnd;
+            $types .= 'ss';
+        }
+
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        /* ===============================
+       MAIN QUERY
+    =============================== */
+        $sql = "
+        SELECT SQL_CALC_FOUND_ROWS *
+        FROM view_transactions vt
+        $whereSql
+        ORDER BY vt.id DESC
+        LIMIT ?, ?
+    ";
+
+        $stmt = $db->prepare($sql);
+
+        $params[] = $offset;
+        $params[] = $limit;
+        $types .= 'ii';
+
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $data = [];
+
+        /* ===============================
+       PREPARE DETAIL QUERY
+    =============================== */
+        $detailStmt = $db->prepare("
+        SELECT *
+        FROM view_transaction_details
+        WHERE transaction_id = ?
+    ");
+
+        while ($row = $result->fetch_assoc()) {
+            $detailStmt->bind_param('i', $row['id']);
+            $detailStmt->execute();
+
+            $row['transaction_details'] = $detailStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+            $data[] = $row;
+        }
+
+        /* ===============================
+       TOTAL ROWS
+    =============================== */
+        $totalRes = $db->query('SELECT FOUND_ROWS() total');
+        $total_data = (int) $totalRes->fetch_assoc()['total'];
+
+        try {
+            $max_data = $config['pagination']['max_data'];
+        } catch (Exception $e) {
+            $max_data = 5;
+        }
+
+        $total_page = ceil($total_data / $max_data);
+
+        $start_index = $total_data == 0 ? 0 : $offset + 1;
+        $end_index = $offset + $max_data > $total_data ? $total_data : $offset + $max_data;
+
+        $pagination = [
+            'total_data' => $total_data,
+            'max_data' => $max_data,
+            'total_page' => $total_page,
+            'page' => $page,
+            'offset' => $offset,
+            'start_index' => $start_index,
+            'end_index' => $end_index,
+        ];
+
+        echo json_encode([
+            'status' => true,
+            'page' => $page,
+            'limit' => $limit,
+            'data' => $data,
+            'pagination' => $pagination,
+        ]);
+        // exit;
+        break;
+
+    case 'search-view3':
+        /* ===============================
+        INPUT
+        =============================== */
+        $page = max(1, (int) ($page ?? 1));
+        $keyword = htmlspecialchars(trim($keyword ?? ''));
+
+        $methods = $payment_method ?? [];
+        $statuses = $_POST['payment_status'] ?? [];
+        $dateStart = $date_start ?? null;
+        $dateEnd = $date_end ?? null;
+
+        try {
+            $max_data = $config['pagination']['max_data'];
+        } catch (Exception $e) {
+            $max_data = 5;
+        }
+
+        $offset = ($page - 1) * $max_data;
+
+        /* ===============================
+        WHERE BUILDER
+        =============================== */
+        $where = [];
+        $params = [];
+        $types = '';
+
+        if ($keyword !== '') {
+            $where[] = '(vt.code LIKE ? OR vt.payment_method LIKE ?)';
+            $params[] = "%$keyword%";
+            $params[] = "%$keyword%";
+            $types .= 'ss';
+        }
+
+        if (!empty($methods)) {
+            $in = implode(',', array_fill(0, count($methods), '?'));
+            $where[] = "vt.payment_method IN ($in)";
+            foreach ($methods as $m) {
+                $params[] = $m;
+                $types .= 's';
+            }
+        }
+
+        if (!empty($statuses)) {
+            $in = implode(',', array_fill(0, count($statuses), '?'));
+            $where[] = "vt.payment_status IN ($in)";
+            foreach ($statuses as $s) {
+                $params[] = $s;
+                $types .= 's';
+            }
+        }
+
+        if ($dateStart && $dateEnd) {
+            $where[] = 'vt.date BETWEEN ? AND ?';
             $params[] = $dateStart;
             $params[] = $dateEnd;
             $types .= 'ss';
@@ -543,7 +521,7 @@ switch (M) {
         $stmt = $db->prepare($sql);
 
         $execParams = $params;
-        $execTypes  = "{$types}ii";
+        $execTypes = "{$types}ii";
         // $execTypes  = $types . 'ii';
 
         $execParams[] = $offset;
@@ -566,13 +544,10 @@ switch (M) {
         $data = [];
 
         while ($row = $res->fetch_assoc()) {
-
             $detailStmt->bind_param('i', $row['id']);
             $detailStmt->execute();
 
-            $row['transaction_details'] = $detailStmt
-                ->get_result()
-                ->fetch_all(MYSQLI_ASSOC);
+            $row['transaction_details'] = $detailStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
             // optional: sama kayak case search
             if (!empty($row['payment_key'])) {
@@ -588,46 +563,42 @@ switch (M) {
         $total_page = ceil($total_data / $max_data);
 
         $start_index = $total_data == 0 ? 0 : $offset + 1;
-        $end_index   = $offset + $max_data > $total_data
-            ? $total_data
-            : $offset + $max_data;
+        $end_index = $offset + $max_data > $total_data ? $total_data : $offset + $max_data;
 
         $pagination = [
-            'total_data'  => $total_data,
-            'max_data'    => $max_data,
-            'total_page'  => $total_page,
-            'page'        => $page,
-            'offset'      => $offset,
+            'total_data' => $total_data,
+            'max_data' => $max_data,
+            'total_page' => $total_page,
+            'page' => $page,
+            'offset' => $offset,
             'start_index' => $start_index,
-            'end_index'   => $end_index,
+            'end_index' => $end_index,
         ];
 
         /* ===============================
         OUTPUT (IDENTIK)
         =============================== */
         echo json_encode([
-            'status'     => true,
-            'data'       => $data,
+            'status' => true,
+            'data' => $data,
             'pagination' => $pagination,
             'post' => $_POST,
         ]);
 
         break;
-    }
 
-    case 'search-viewv4': {
-
+    case 'search-viewv4':
         /* ===============================
         BASIC PARAM
         =============================== */
-        $page  = max(1, (int)($_POST['page'] ?? 1));
+        $page = max(1, (int) ($_POST['page'] ?? 1));
         $keyword = trim($_POST['keyword'] ?? '');
 
-        $payment_methods  = $_POST['payment_method'] ?? [];
+        $payment_methods = $_POST['payment_method'] ?? [];
         $payment_statuses = $_POST['payment_status'] ?? [];
 
         $date_start = $_POST['date_start'] ?? null;
-        $date_end   = $_POST['date_end'] ?? null;
+        $date_end = $_POST['date_end'] ?? null;
 
         try {
             $max_data = $config['pagination']['max_data'];
@@ -641,15 +612,15 @@ switch (M) {
         /* ===============================
         BUILD WHERE (SAFE)
         =============================== */
-        $where  = [];
+        $where = [];
         $params = [];
-        $types  = '';
+        $types = '';
 
         if ($keyword !== '') {
-            $where[] = "(t.name LIKE ? OR t.payment_status LIKE ?)";
+            $where[] = '(t.name LIKE ? OR t.payment_status LIKE ?)';
             $params[] = "%$keyword%";
             $params[] = "%$keyword%";
-            $types   .= 'ss';
+            $types .= 'ss';
         }
 
         if (!empty($payment_methods)) {
@@ -657,7 +628,7 @@ switch (M) {
             $where[] = "t.payment_method IN ($in)";
             foreach ($payment_methods as $pm) {
                 $params[] = $pm;
-                $types   .= 's';
+                $types .= 's';
             }
         }
 
@@ -666,15 +637,15 @@ switch (M) {
             $where[] = "t.payment_status IN ($in)";
             foreach ($payment_statuses as $ps) {
                 $params[] = $ps;
-                $types   .= 's';
+                $types .= 's';
             }
         }
 
         if ($date_start && $date_end) {
-            $where[] = "t.date BETWEEN ? AND ?";
+            $where[] = 't.date BETWEEN ? AND ?';
             $params[] = $date_start;
             $params[] = $date_end;
-            $types   .= 'ss';
+            $types .= 'ss';
         }
 
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -693,7 +664,7 @@ switch (M) {
 
         $params[] = $offset;
         $params[] = $max_data;
-        $types   .= 'ii';
+        $types .= 'ii';
 
         $stmt = $db->prepare($sql);
         $stmt->bind_param($types, ...$params);
@@ -712,14 +683,11 @@ switch (M) {
         ");
 
         while ($row = $res->fetch_assoc()) {
-
             // fetch details
             $detailStmt->bind_param('i', $row['id']);
             $detailStmt->execute();
 
-            $details = $detailStmt
-                ->get_result()
-                ->fetch_all(MYSQLI_ASSOC);
+            $details = $detailStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
             $row['transaction_details'] = $details;
 
@@ -734,55 +702,51 @@ switch (M) {
         /* ===============================
         PAGINATION (SAMA PERSIS)
         =============================== */
-        $total_data = (int) $db
-            ->query("SELECT FOUND_ROWS() AS total_data")
-            ->fetch_assoc()['total_data'];
+        $total_data = (int) $db->query('SELECT FOUND_ROWS() AS total_data')->fetch_assoc()['total_data'];
 
         $total_page = ceil($total_data / $max_data);
 
         $start_index = $total_data == 0 ? 0 : $offset + 1;
-        $end_index   = min($offset + $max_data, $total_data);
+        $end_index = min($offset + $max_data, $total_data);
 
         $pagination = [
-            'total_data'  => $total_data,
-            'max_data'    => $max_data,
-            'total_page'  => $total_page,
-            'page'        => $page,
-            'offset'      => $offset,
+            'total_data' => $total_data,
+            'max_data' => $max_data,
+            'total_page' => $total_page,
+            'page' => $page,
+            'offset' => $offset,
             'start_index' => $start_index,
-            'end_index'   => $end_index,
+            'end_index' => $end_index,
         ];
 
         echo json_encode([
-            'status'     => true,
-            'data'       => $data,
+            'status' => true,
+            'data' => $data,
             'pagination' => $pagination,
         ]);
 
         break;
-    }
 
-    case 'search-view': {
-
-        $page  = max(1, (int)($_POST['page'] ?? 1));
-        $limit = max(1, (int)($_POST['limit'] ?? 10));
+    case 'search-view':
+        $page = max(1, (int) ($_POST['page'] ?? 1));
+        $limit = max(1, (int) ($_POST['limit'] ?? 10));
         $offset = ($page - 1) * $limit;
 
-        $keyword   = trim($_POST['keyword'] ?? '');
-        $methods   = $_POST['payment_method'] ?? [];
-        $statuses  = $_POST['payment_status'] ?? [];
+        $keyword = trim($_POST['keyword'] ?? '');
+        $methods = $_POST['payment_method'] ?? [];
+        $statuses = $_POST['payment_status'] ?? [];
         $dateStart = $_POST['date_start'] ?? null;
-        $dateEnd   = $_POST['date_end'] ?? null;
+        $dateEnd = $_POST['date_end'] ?? null;
 
         /* ===============================
         BUILD WHERE (REUSABLE)
         =============================== */
-        $where   = [];
-        $params  = [];
-        $types   = '';
+        $where = [];
+        $params = [];
+        $types = '';
 
         if ($keyword !== '') {
-            $where[] = "(t.name LIKE ? OR t.payment_method LIKE ?)";
+            $where[] = '(t.name LIKE ? OR t.payment_method LIKE ?)';
             $params[] = "%$keyword%";
             $params[] = "%$keyword%";
             $types .= 'ss';
@@ -807,7 +771,7 @@ switch (M) {
         }
 
         if ($dateStart && $dateEnd) {
-            $where[] = "t.date BETWEEN ? AND ?";
+            $where[] = 't.date BETWEEN ? AND ?';
             $params[] = $dateStart;
             $params[] = $dateEnd;
             $types .= 'ss';
@@ -830,7 +794,7 @@ switch (M) {
         $stmt = $db->prepare($sql);
 
         $paramsData = $params;
-        $typesData  = $types . 'ii';
+        $typesData = $types . 'ii';
 
         $paramsData[] = $offset;
         $paramsData[] = $limit;
@@ -851,13 +815,10 @@ switch (M) {
         ");
 
         while ($row = $result->fetch_assoc()) {
-
             $detailStmt->bind_param('i', $row['id']);
             $detailStmt->execute();
 
-            $row['transaction_details'] = $detailStmt
-                ->get_result()
-                ->fetch_all(MYSQLI_ASSOC);
+            $row['transaction_details'] = $detailStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
             $data[] = $row;
         }
@@ -880,7 +841,7 @@ switch (M) {
             $countStmt->bind_param($types, ...$params);
         }
         $countStmt->execute();
-        $total_data = (int)$countStmt->get_result()->fetch_assoc()['total_data'];
+        $total_data = (int) $countStmt->get_result()->fetch_assoc()['total_data'];
 
         /* ===============================
         PAGINATION (FORMAT TIDAK DIUBAH)
@@ -898,25 +859,23 @@ switch (M) {
 
         $pagination = [
             'total_data' => $total_data,
-            'max_data'   => $max_data,
+            'max_data' => $max_data,
             'total_page' => $total_page,
-            'page'       => $page,
-            'offset'     => $offset,
-            'start_index'=> $start_index,
-            'end_index'  => $end_index,
+            'page' => $page,
+            'offset' => $offset,
+            'start_index' => $start_index,
+            'end_index' => $end_index,
         ];
 
         echo json_encode([
-            'status'     => true,
-            'data'       => $data,
+            'status' => true,
+            'data' => $data,
             'pagination' => $pagination,
         ]);
 
         break;
-    }
-    
-    case 'search': {
 
+    case 'search':
         $page ??= false;
         $page = (int) ($page ?? 1);
         $keyword ??= false;
@@ -928,7 +887,6 @@ switch (M) {
         $sql_is_req_by_user = $is_req_by_user == 'null' ? '' : "AND is_req_by_user = $is_req_by_user";
 
         $sort_desc ??= false;
-
 
         $sql = " FROM $table t JOIN transaction_details td ON t.id = td.transaction_id JOIN products p ON td.product_id = p.id WHERE 1=1 $sql_is_req_by_user";
         // die($sql);
@@ -942,13 +900,11 @@ switch (M) {
             if ($payment_status ?? false) {
                 $conditions[] = "t.payment_status LIKE '%$keyword%'";
             }
-
         }
 
         if (!empty($conditions)) {
-            $sql .= " AND (" . implode(' OR ', $conditions) . ")";
+            $sql .= ' AND (' . implode(' OR ', $conditions) . ')';
         }
-
 
         // Filter paymet_methods
         $payment_method_conditions = [];
@@ -960,7 +916,7 @@ switch (M) {
             }
 
             if (!empty($payment_method_conditions)) {
-                $sql .= " AND (" . implode(' OR ', $payment_method_conditions) . ")";
+                $sql .= ' AND (' . implode(' OR ', $payment_method_conditions) . ')';
             }
         }
 
@@ -974,10 +930,9 @@ switch (M) {
             }
 
             if (!empty($payment_status_conditions)) {
-                $sql .= " AND (" . implode(' OR ', $payment_status_conditions) . ")";
+                $sql .= ' AND (' . implode(' OR ', $payment_status_conditions) . ')';
             }
         }
-
 
         // Filter date
         $date_start ??= false;
@@ -1011,15 +966,16 @@ switch (M) {
         $offset = ($page - 1) * $max_data;
         $offset = $offset < 0 ? 0 : $offset;
 
-        $sql = "SELECT SQL_CALC_FOUND_ROWS t.*, GROUP_CONCAT(
-		    CONCAT(
-			    '{',
-				    '\"name\": \"', p.name, '\", ',
+        $sql =
+            "SELECT SQL_CALC_FOUND_ROWS t.*, GROUP_CONCAT(
+  CONCAT(
+   '{',
+    '\"name\": \"', p.name, '\", ',
                     '\"id\": ', td.id, ', ',
-					'\"price\": ', p.price, ', ',
-					'\"purchase_price\": ', p.purchase_price, ', ',
-					'\"quantity\": ', td.quantity, ', ',
-					'\"sub_total\": ', td.sub_total, ', ',
+     '\"price\": ', p.price, ', ',
+     '\"purchase_price\": ', p.purchase_price, ', ',
+     '\"quantity\": ', td.quantity, ', ',
+     '\"sub_total\": ', td.sub_total, ', ',
                     '\"profit\": ', ((p.price - p.purchase_price) * td.quantity), ', ',
                     '\"product\": {',
                         '\"id\": ', p.id, ', ',
@@ -1031,12 +987,16 @@ switch (M) {
                         '\"subcategory\": \"', p.subcategory, '\", ',
                         '\"deprecated_code\": \"', p.deprecated_code, '\"',
                     '}',
-				'}'
-			)
-		) AS transaction_details, 
+    '}'
+   )
+  ) AS transaction_details,
         SUM((p.price - p.purchase_price) * td.quantity) AS profit
         
-        " . $sql . " GROUP BY t.id " . ($sort_desc ?? false ? 'ORDER BY id DESC' : '') . " LIMIT $offset, $max_data";
+        " .
+            $sql .
+            ' GROUP BY t.id ' .
+            ($sort_desc ?? false ? 'ORDER BY id DESC' : '') .
+            " LIMIT $offset, $max_data";
         // $sql = "SELECT SQL_CALC_FOUND_ROWS t.*, GROUP_CONCAT(
         //     CONCAT(
         // 	    '{',
@@ -1066,7 +1026,6 @@ switch (M) {
         // echo $sql;
         // die;
 
-
         $res = $db->query($sql);
 
         $data = [];
@@ -1080,12 +1039,10 @@ switch (M) {
             }
 
             $data[] = $row;
-
         }
 
-
         // Calc paginate
-        $total_data = $db->query("SELECT FOUND_ROWS() AS total_data")->fetch_assoc()['total_data'];
+        $total_data = $db->query('SELECT FOUND_ROWS() AS total_data')->fetch_assoc()['total_data'];
         $total_page = ceil($total_data / $max_data);
 
         // $page = $page < 0 ? 1 : ($page > $total_page ? $total_page : $page);
@@ -1109,8 +1066,7 @@ switch (M) {
         echo json_encode(['status' => true, 'data' => $data, 'query' => $sql, 'pagination' => $pagination, 'post' => $_POST]);
 
         break;
-    }
-    case 'get': {
+    case 'get':
         $raw = $db->query("SELECT * FROM $table");
 
         $data = [];
@@ -1121,9 +1077,7 @@ switch (M) {
         echo json_encode(['status' => true, 'data' => $data]);
 
         break;
-    }
-    case 'edit': {
-
+    case 'edit':
         $id = $_POST['id'] ?? false;
         $payment_method = $_POST['payment_method'] ?? false;
         $payment_status = $_POST['payment_status'] ?? false;
@@ -1133,24 +1087,23 @@ switch (M) {
 
         if (!$id || !$payment_method || !$payment_status || !$prev_payment_method || !$prev_payment_status) {
             echo json_encode(['staus' => false, 'msg' => 'Missing required value!', 'post' => $_POST]);
-            die;
+            die();
         }
 
         $db->query("UPDATE $table SET payment_method='$payment_method', payment_status='$payment_status' WHERE id = $id");
 
         echo json_encode([
             'status' => true,
-            'msg' => 'Transaksi berhasil diubah.'
+            'msg' => 'Transaksi berhasil diubah.',
         ]);
 
         break;
-    }
-    case 'remove': {
+    case 'remove':
         $id = $_POST['id'] ?? false;
 
         if (!$id) {
             echo json_encode(['status' => false, 'msg' => 'Kekurangan data required!']);
-            die;
+            die();
         }
 
         $db->query("DELETE FROM $table WHERE id='$id'");
@@ -1158,39 +1111,37 @@ switch (M) {
         echo json_encode(['status' => true, 'msg' => 'Transaksi berhasil dihapus.']);
 
         break;
-    }
-    case 'pay': {
-
+    case 'pay':
         // Hapus method ini nanti atau khusus admin
         $encode = $_GET['data'] ?? false;
 
         if (!$encode) {
-            die("Invalid data!");
+            die('Invalid data!');
         }
 
         $decoded = decodeKey2($encode);
 
         if (!$decoded) {
-            die("Invalid data!");
+            die('Invalid data!');
         }
 
         $raw = $db->query("
-		    SELECT IDR(t.total) AS total, GROUP_CONCAT(
-			    CONCAT(
-				    '{', 
-					    '\"name\": \"', p.name,
-						'\", \"price\": \"', IDR(p.price),
-						'\", \"quantity\": \"', td.quantity,
-						'\", \"sub_total\": \"', IDR(td.sub_total), '\"',
-					'}'
-				)
-			) AS transaction_details
-			FROM transactions t
-			JOIN transaction_details td ON t.id = td.transaction_id
-			JOIN products p ON td.product_id = p.id
-			WHERE t.id = '$decoded'
-			GROUP BY t.id
-		");
+  SELECT IDR(t.total) AS total, GROUP_CONCAT(
+   CONCAT(
+    '{',
+     '\"name\": \"', p.name,
+      '\", \"price\": \"', IDR(p.price),
+      '\", \"quantity\": \"', td.quantity,
+      '\", \"sub_total\": \"', IDR(td.sub_total), '\"',
+     '}'
+    )
+   ) AS transaction_details
+   FROM transactions t
+   JOIN transaction_details td ON t.id = td.transaction_id
+   JOIN products p ON td.product_id = p.id
+   WHERE t.id = '$decoded'
+   GROUP BY t.id
+  ");
 
         $res = [];
 
@@ -1200,25 +1151,21 @@ switch (M) {
             break;
         }
 
-
         // echo json_encode(['res' => $res]);
 
         if (empty($res)) {
-            die;
+            die();
         }
 
         require_once 'midtrans.php';
 
-
-
         break;
-    }
-    case 'check-status': {
+    case 'check-status':
         $validated = validateEmptyVar('payment_key', true);
 
         if ($validated !== true) {
             echo json_encode(['status' => false, 'msg' => $validated, 'post' => $_POST]);
-            die;
+            die();
         }
 
         $key = $payment_key;
@@ -1226,8 +1173,8 @@ switch (M) {
         $res = $db->query("SELECT * FROM $table WHERE payment_key='$key' LIMIT 1")->fetch_assoc();
 
         if (empty($res)) {
-            echo json_encode(['status' => false, 'msg' => "MISING DATA!", 'post' => $_POST, 'res' => $res]);
-            die;
+            echo json_encode(['status' => false, 'msg' => 'MISING DATA!', 'post' => $_POST, 'res' => $res]);
+            die();
         }
 
         // case: where payment_status is not sync or delay to current data
@@ -1236,7 +1183,7 @@ switch (M) {
 
         if ($payment_status && $payment_status != $curr_payment_status) {
             echo json_encode(['status' => true, 'msg' => "Transaksi berhasil di sinkron dari '$payment_status' ke '$curr_payment_status'", 'post' => $_POST, 'res' => $res]);
-            die;
+            die();
         }
 
         // echo json_encode(['status' => false, 'msg' => "CUKUP DATA", 'post' => $_POST, 'res' => $res]);
@@ -1247,8 +1194,8 @@ switch (M) {
         $rawStatus = getTransactionStatus($key);
 
         if (!$rawStatus['status']) {
-            echo json_encode(['status' => false, 'msg' => "status atau transaksi tidak ditemukan atau metode transaksi belum dipilih!", 'post' => $_POST, 'raw_status' => $rawStatus]);
-            die;
+            echo json_encode(['status' => false, 'msg' => 'status atau transaksi tidak ditemukan atau metode transaksi belum dipilih!', 'post' => $_POST, 'raw_status' => $rawStatus]);
+            die();
         }
 
         $prev_status = $res['payment_status'];
@@ -1256,17 +1203,16 @@ switch (M) {
         $id = $res['id'];
 
         if ($prev_status == $status) {
-            echo json_encode(['status' => false, 'msg' => "Tidak ada perubahan status.", 'post' => $_POST,"payment_status" => $payment_status, "curr_payment_status" => $curr_payment_status ]);
-            die;
+            echo json_encode(['status' => false, 'msg' => 'Tidak ada perubahan status.', 'post' => $_POST, 'payment_status' => $payment_status, 'curr_payment_status' => $curr_payment_status]);
+            die();
         }
 
         $db->query("UPDATE $table SET payment_status='$status' WHERE id='$id'");
 
-        echo json_encode(['status' => true, 'msg' => "Transaksi berhasil di ubah dari '$prev_status' ke '$status'", "payment_status" => $payment_status, "curr_payment_status" => $curr_payment_status]);
+        echo json_encode(['status' => true, 'msg' => "Transaksi berhasil di ubah dari '$prev_status' ke '$status'", 'payment_status' => $payment_status, 'curr_payment_status' => $curr_payment_status]);
 
         break;
-    }
-    case 'get-payment-methods': {
+    case 'get-payment-methods':
         $query = "SELECT payment_method, GROUP_CONCAT(DISTINCT payment_status SEPARATOR ',') AS payment_statuses FROM $table WHERE payment_method IS NOT NULL AND payment_method <> '' GROUP BY payment_method";
 
         $raw = $db->query($query);
@@ -1284,15 +1230,13 @@ switch (M) {
 
         echo json_encode(['status' => true, 'data' => $res, 'payment_methods' => $payment_methods]);
         break;
-    }
 
-    case 'transaction-status-to-bayar': {
-
+    case 'transaction-status-to-bayar':
         $id ??= false;
 
         if (!$id) {
             echo json_encode(['status' => false, 'msg' => 'Missing required value!']);
-            die;
+            die();
         }
 
         $query = "UPDATE $table SET payment_status = 'Sudah dibayar' WHERE id = $id";
@@ -1304,7 +1248,4 @@ switch (M) {
         $affected_rows = $db->affected_rows;
         echo json_encode(['status' => true, 'msg' => 'Berhail mengubah status transaksi menjadi Sudah dibayar.']);
         break;
-
-    }
-
 }

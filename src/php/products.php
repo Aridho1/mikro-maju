@@ -1,43 +1,46 @@
 <?php
 
-define("M", $_GET['m']);
+define('M', $_GET['m']);
 
 if (!M ?? false) {
-    die;
+    die();
 }
 
 require_once 'db.php';
 
 toGlobal($_POST);
 
-$table = "products";
-$appName = "Produk";
-$view_name = "view_products_with_discount";
+$table = 'products';
+$appName = 'Produk';
+$view_name = 'view_products_with_discount';
 
-header("Content-Type: application/json");
+header('Content-Type: application/json');
 
 try {
     switch (M) {
-        case "add": {
-            validateEmptyVar("name|purchase_price|price|category", true, true);
+        case 'add':
+            validateEmptyVar('name|purchase_price|price|category', true, true);
 
-            $uplodedFile = uploadFile('image', './../img/db/');
+            // $is_stockable ??= 0;
+            validateCheckboxInputByKeyName('is_stockable');
+
+            $uplodedFile = uploadFile('image', './../img/db/', "{$name}-");
 
             if ($_FILES['image']['error'] ?? false == 4) {
                 $image = 'default.jpg';
-            } else if (!$uplodedFile['status']) {
-                throw new Exception($uplodedFile['msg'] ?? "Gambar error atau tidak ditemukan!");
-            } else
+            } elseif (!$uplodedFile['status']) {
+                throw new Exception($uplodedFile['msg'] ?? 'Gambar error atau tidak ditemukan!');
+            } else {
                 $image = $uplodedFile['data'];
+            }
 
             $db->begin_transaction();
 
             $stmt = $db->prepare("
-            INSERT INTO $table
-            (name, purchase_price, price, image, category, subcategory, deprecated_code, origin_id)
-            VALUES (?, ?, ?, ?, ?, NULL, 0, 0)
+                INSERT INTO $table (name, purchase_price, price, image, category, subcategory, is_stockable, deprecated_code, origin_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
             ");
-            $stmt->bind_param("sddss", $name, $purchase_price, $price, $image, $category);
+            $stmt->bind_param('sddsssi', $name, $purchase_price, $price, $image, $category, $subcategory, $is_stockable);
             $stmt->execute();
 
             $affected_rows = $stmt->affected_rows;
@@ -47,59 +50,59 @@ try {
 
             $db->commit();
 
-            die(json_encode(['status' => true, 'msg' => "$affected_rows Data $appName berhasil ditamahkan."]));
-        }
+            die(json_encode(['status' => true, 'msg' => "$affected_rows Data $appName berhasil ditamahkan.", 'post' => $_POST]));
 
-        case 'search-v2': {
+        case 'search-v2':
             $page ??= false;
-            $page = (Int) ($page ?? 1);
+            $page = (int) ($page ?? 1);
             $keyword ??= false;
             $filters ??= false;
-        
+
             $sql = " FROM $view_name WHERE deprecated_code = '' ";
-            
+
             if ($keyword) {
                 $conditions = [];
 
-                $filters = explode(",", $filters);
+                $filters = explode(',', $filters);
 
                 foreach ($filters as $key) {
                     $conditions[] = "$key LIKE '%$keyword%'";
                 }
 
-                if (!empty($conditions))
-                    $sql .= " AND (" . implode(' OR ', $conditions) . ")";
+                if (!empty($conditions)) {
+                    $sql .= ' AND (' . implode(' OR ', $conditions) . ')';
+                }
             }
 
             // categories dynamic
             $categories_conditions = [];
             foreach ($_POST as $key_name => $value) {
-                $splited_key = explode("categories_", $key_name);
+                $splited_key = explode('categories_', $key_name);
 
-                if (count($splited_key) == 1 || empty($value))
+                if (count($splited_key) == 1 || empty($value)) {
                     continue;
+                }
 
                 $key = $splited_key[1];
 
                 $conditions = [];
 
-                $values = explode(",", $value);
+                $values = explode(',', $value);
                 foreach ($values as $val) {
                     $conditions[] = "subcategory = '$val'";
                 }
 
-                $categories_conditions[] = "category = '$key' AND (" . implode(" OR ", $conditions) . ")";
+                $categories_conditions[] = "category = '$key' AND (" . implode(' OR ', $conditions) . ')';
             }
 
             if (!empty($categories_conditions)) {
-                $sql .= " AND ( " . implode(" OR ", $categories_conditions) . ")";
+                $sql .= ' AND ( ' . implode(' OR ', $categories_conditions) . ')';
             }
 
-
-            $sql .= $_POST['sort_desc'] ?? false ? " ORDER BY ID DESC " : "";
+            $sql .= $_POST['sort_desc'] ?? false ? ' ORDER BY ID DESC ' : '';
 
             // Pagination
-            $total_data = (Int) $db->query("SELECT COUNT(*) $sql")->fetch_assoc()["COUNT(*)"];
+            $total_data = (int) $db->query("SELECT COUNT(*) $sql")->fetch_assoc()['COUNT(*)'];
             try {
                 $max_data = $config['pagination']['max_data'];
             } catch (Exception $e) {
@@ -125,16 +128,15 @@ try {
                 'end_index' => $end_index,
             ];
 
-            $sql = "SELECT * " . $sql . "LIMIT $offset, $max_data";
+            $sql = 'SELECT * ' . $sql . "LIMIT $offset, $max_data";
 
             $data = $db->query($sql)->fetch_all(MYSQLI_ASSOC);
 
             die(json_encode(['status' => true, 'data' => $data, 'query' => $sql, 'pagination' => $pagination, 'post' => $_POST]));
-        }
 
-        case 'search': {
+        case 'search':
             $page ??= false;
-            $page = (Int) ($page ?? 1);
+            $page = (int) ($page ?? 1);
             $keyword ??= false;
             $filters ??= false;
 
@@ -143,7 +145,7 @@ try {
             if ($keyword) {
                 $conditions = [];
 
-                $filters = explode(",", $filters);
+                $filters = explode(',', $filters);
 
                 foreach ($filters as $key) {
                     $conditions[] = "$key LIKE '%$keyword%'";
@@ -164,39 +166,40 @@ try {
                 // if ($subcategory ?? false)
                 //     $conditions[] = "subcategory LIKE '%$keyword%'";
 
-                if (!empty($conditions))
-                    $sql .= " AND (" . implode(' OR ', $conditions) . ")";
+                if (!empty($conditions)) {
+                    $sql .= ' AND (' . implode(' OR ', $conditions) . ')';
+                }
             }
 
             // categories dynamic
             $categories_conditions = [];
             foreach ($_POST as $key_name => $value) {
-                $splited_key = explode("categories_", $key_name);
+                $splited_key = explode('categories_', $key_name);
 
-                if (count($splited_key) == 1 || empty($value))
+                if (count($splited_key) == 1 || empty($value)) {
                     continue;
+                }
 
                 $key = $splited_key[1];
 
                 $conditions = [];
 
-                $values = explode(",", $value);
+                $values = explode(',', $value);
                 foreach ($values as $val) {
                     $conditions[] = "subcategory = '$val'";
                 }
 
-                $categories_conditions[] = "category = '$key' AND (" . implode(" OR ", $conditions) . ")";
+                $categories_conditions[] = "category = '$key' AND (" . implode(' OR ', $conditions) . ')';
             }
 
             if (!empty($categories_conditions)) {
-                $sql .= " AND ( " . implode(" OR ", $categories_conditions) . ")";
+                $sql .= ' AND ( ' . implode(' OR ', $categories_conditions) . ')';
             }
 
-
-            $sql .= $_POST['sort_desc'] ?? false ? " ORDER BY ID DESC " : "";
+            $sql .= $_POST['sort_desc'] ?? false ? ' ORDER BY ID DESC ' : '';
 
             // Pagination
-            $total_data = (Int) $db->query("SELECT COUNT(*) $sql")->fetch_assoc()["COUNT(*)"];
+            $total_data = (int) $db->query("SELECT COUNT(*) $sql")->fetch_assoc()['COUNT(*)'];
             try {
                 $max_data = $config['pagination']['max_data'];
             } catch (Exception $e) {
@@ -222,21 +225,18 @@ try {
                 'end_index' => $end_index,
             ];
 
-            $sql = "SELECT * " . $sql . "LIMIT $offset, $max_data";
+            $sql = 'SELECT * ' . $sql . "LIMIT $offset, $max_data";
 
             $data = $db->query($sql)->fetch_all(MYSQLI_ASSOC);
 
             die(json_encode(['status' => true, 'data' => $data, 'query' => $sql, 'pagination' => $pagination, 'post' => $_POST]));
-        }
-        case 'get': {
+        case 'get':
             $data = $db->query("SELECT * FROM $table")->fetch_all(MYSQLI_ASSOC);
             die(json_encode(['status' => true, 'data' => $data]));
-        }
-        case 'get-views': {
+        case 'get-views':
             $data = $db->query("SELECT * FROM $view_name WHERE deprecated_code = ''")->fetch_all(MYSQLI_ASSOC);
             die(json_encode(['status' => true, 'data' => $data]));
-        }
-        case 'edit': {
+        case 'edit':
             // $id ??= false;
             // $name ??= false;
             // // $description ??= false;
@@ -260,21 +260,25 @@ try {
             //     die;
             // }
 
-            validateEmptyVar("id|name|category|purchase_price|price|prevImage|prevPrice|prevPurchasePrice|prev_id|prev_origin_id", true, true);
+            validateEmptyVar('id|name|category|purchase_price|price|prevImage|prevPrice|prevPurchasePrice|prev_id|prev_origin_id', true, true);
 
-            $uplodedFile = uploadFile('image', './../img/db/');
+            // $is_stockable ??= 0;
+            validateCheckboxInputByKeyName('is_stockable');
+
+            $uplodedFile = uploadFile('image', './../img/db/', "{$name}-");
 
             // didn edit image
             if ($_FILES['image']['error'] == 4) {
                 $image = $prevImage;
 
-                // filter 
-            } else if (!$uplodedFile['status']) {
-                throw new Exception($uplodedFile['msg'] ?? "Gambar error atau tidak ditemukan!");
+                // filter
+            } elseif (!$uplodedFile['status']) {
+                throw new Exception($uplodedFile['msg'] ?? 'Gambar error atau tidak ditemukan!');
                 // echo json_encode($uplodedFile);
                 // die;
-            } else
+            } else {
                 $image = $uplodedFile['data'];
+            }
 
             $db->begin_transaction();
 
@@ -283,13 +287,12 @@ try {
             $total_data = false;
 
             if ($prevPrice != $price || $prevPurchasePrice != $purchase_price) {
-
                 $total_data = $db->query("SELECT COUNT(*) AS total_data FROM transaction_details WHERE product_id = $id")->fetch_assoc()['total_data'];
 
                 // Handle deprecated | legacy
                 if ($total_data) {
                     $isEditAnyway = false;
-                    $curr_origin_id = $prev_origin_id == "0" ? $prev_id : $prev_origin_id;
+                    $curr_origin_id = $prev_origin_id == '0' ? $prev_id : $prev_origin_id;
 
                     // Edit prev data to deprecated
                     $db->query("UPDATE $table SET deprecated_code = 1, origin_id = CASE WHEN origin_id = 0 THEN $prev_id ELSE origin_id END WHERE id = $prev_id");
@@ -299,32 +302,29 @@ try {
                 }
             }
 
-            if ($isEditAnyway)
+            if ($isEditAnyway) {
                 $db->query("UPDATE $table SET name = '$name', purchase_price = '$purchase_price', price = '$price', category = '$category', image = '$image' WHERE id = '$id'");
+            }
 
             $affected_rows = $db->affected_rows;
 
             $db->commit();
-            
+
             die(json_encode(['status' => true, 'msg' => "$affected_rows Data $appName berhasil diubah,", 'post' => $_POST, 'isEditAnyway' => $isEditAnyway, 'total_data' => $total_data]));
-        }
-        case 'remove': {
-            validateEmptyVar("id|origin_id", true, true);
+        case 'remove':
+            validateEmptyVar('id|origin_id', true, true);
 
             // Handle deprecated | legacy
-            if ($db->query("SELECT COUNT(*) AS total_data FROM transaction_details WHERE product_id = $id")->fetch_assoc()['total_data'] == 0)
+            if ($db->query("SELECT COUNT(*) AS total_data FROM transaction_details WHERE product_id = $id")->fetch_assoc()['total_data'] == 0) {
                 $db->query("DELETE FROM $table WHERE id='$id' ");
-
-            else {
+            } else {
                 $query = "UPDATE $table SET deprecated_code = 2 WHERE (origin_id = 0 AND id = $id) OR (origin_id != 0 AND origin_id = $origin_id)";
                 // die($query);
                 $db->query($query);
             }
 
             die(json_encode(['status' => true, 'msg' => 'Item berhasil dihapus.']));
-        }
-        case 'get-categories': {
-
+        case 'get-categories':
             $query = "SELECT category, GROUP_CONCAT(DISTINCT subcategory SEPARATOR ',') AS subcategory FROM $table WHERE category IS NOT NULL AND category <> '' AND deprecated_code = '' GROUP BY category";
 
             $raw = $db->query($query);
@@ -343,14 +343,15 @@ try {
             echo json_encode(['status' => true, 'data' => $res, 'categories' => $categories]);
 
             break;
-        }
     }
 } catch (Exception $e) {
     $err = $e->getMessage();
 
-    die(json_encode([
-        "status" => false,
-        "msg" => $err,
-        "post" => $_POST
-    ]));
+    die(
+        json_encode([
+            'status' => false,
+            'msg' => $err,
+            'post' => $_POST,
+        ])
+    );
 }

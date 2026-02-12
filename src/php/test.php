@@ -52,10 +52,6 @@
 
 // var_dump(explode('-', 'abcd'));
 
-
-
-
-
 // toGlobal($_GET);
 
 // $name ??= '';
@@ -72,11 +68,6 @@
 
 // echo json_encode(['res' => $res, 'rows' => $rows]);
 
-
-
-
-
-
 // $object = [
 //     "nama" => "Zunn",
 //     "umur" => 20
@@ -91,11 +82,9 @@
 // $txt3 = "hello world3";
 // $txt4 = "hello world4";
 
-
 // echo ucfirst($txt);
 
 // echo validateEmptyVar("txt|txtoo|txt3");
-
 
 // echo json_encode($_ENV ?? []);
 // echo json_encode($config ?? []);
@@ -111,8 +100,29 @@
 
 // echo "item = $item";
 
-header("Content-Type: application/json");
+header('Content-Type: application/json');
+
+// echo json_encode([
+//     'test' => empty('0a'),
+// ]);
+
+$my = 'in my';
+$my_null = null;
+
+$my_zero = '0';
+$key = 'my_zero';
+$unpass = [];
+
+if (($GLOBALS[$key] ?? null) === null || $GLOBALS[$key] === '') {
+    $unpass[] = $key;
+}
 
 echo json_encode([
     'test' => empty('0a'),
+    'global_string' => $GLOBALS['my'],
+    'global_null' => $GLOBALS['my_null'],
+    'global_' => $GLOBALS['eaeaeaeaeaeaeaea'] ?? null,
+    'unpass' => $unpass,
+    'zero_str' => '0' ?? 'yah zero',
+    'zero' => 0,
 ]);
