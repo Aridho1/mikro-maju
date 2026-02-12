@@ -146,7 +146,7 @@ export default function () {
 
         selectProduct(product) {
             const _product = this.products.find(({ id }) => id == product?.id);
-            if (!_product) return console.warn(`Product with id ${product?.id} is not found!`);
+            if (!_product) return console.warn(`Product with id ${product?.id} is not found!`, this.products);
 
             return (this.selectedProduct = { ..._product });
             // return (this.selectedProduct = structuredClone(_product));
@@ -245,6 +245,12 @@ export default function () {
 
             this.getStockHistory();
             this.tabActive = tabKeys[2];
+
+            const formData = new FormData();
+            formData.append("pid", this.selectedProduct.id);
+
+            rewriteUrl(formData, url_param);
+
             return;
         },
 
@@ -320,8 +326,19 @@ export default function () {
                     encodeFetchedJson(
                         await (await fetch(dbStockPath + "add", { method: "POST", body: formData })).text(),
                         "Tambah Stok",
-                        async ({ msg: message } = {}) => {
+                        async (res) => {
+                            const { msg: message, current_stock: currentStock } = res;
                             if (message) this.$dispatch("notify", { ...defaultSuccessNotif, message });
+
+                            console.warn(res);
+
+                            if (!isNaN(currentStock) && this.selectedProduct.stock != currentStock) {
+                                this.isProductsShouldbeResfrefhed = true;
+                                // console.log(this.selectedProduct);
+                                this.selectedProduct.stock = +currentStock;
+                                // console.warn({ currentStock });
+                                // console.log(this.selectedProduct);
+                            }
 
                             await this.getStockHistory();
                         },
@@ -330,7 +347,7 @@ export default function () {
                         },
                     );
 
-                    this.isOpenModalDiscount = false;
+                    this.isOpenModalStock = false;
                 },
                 { cancelIfAlreadyInQueue: true, callbackForCancelled: () => this.$dispatch("notify", defaultWarningNotif) },
             );
@@ -423,6 +440,13 @@ export default function () {
                     if (isNaN(this.selectedProduct?.id)) return;
                     this.selectStockProduct(this.selectedProduct.id, true);
                 }
+
+                if (curr !== prev) {
+                    const formData = new FormData();
+                    formData.append("tab", curr);
+
+                    rewriteUrl(formData, url_param);
+                }
             });
 
             this.$watch("formattedDiscountValue", (value) => {
@@ -465,6 +489,19 @@ export default function () {
             // console.log("FORMSEARCH after", this.formSearch);
 
             await this.get(null, true);
+
+            setTimeout(() => {
+                const tab = url_param["tab"];
+                const pid = url_param["pid"];
+
+                if (pid && isNaN(this.selectedProduct?.id)) {
+                    console.error("set selected produk in init", { pid });
+                    this.selectStockProduct({ id: pid }, tab != tabKeys[2]);
+                    console.error("selected produ", this.selectedProduct);
+                } else console.error("not set selected produk in init");
+
+                if (this.tabActive != tab) this.tabActive = tab;
+            }, 200);
         },
 
         async getCategories() {
