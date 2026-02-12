@@ -500,7 +500,7 @@ export default function () {
                     console.error("selected produ", this.selectedProduct);
                 } else console.error("not set selected produk in init");
 
-                if (this.tabActive != tab) this.tabActive = tab;
+                if (tab && tabKeys.includes(tab) && this.tabActive != tab) this.tabActive = tab;
             }, 200);
         },
 
