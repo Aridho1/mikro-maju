@@ -1550,6 +1550,10 @@ input:checked + .toggle-bg {
   position: relative;
 }
 
+.sticky {
+  position: sticky;
+}
+
 .inset-0 {
   top: 0px;
   right: 0px;
@@ -2118,6 +2122,10 @@ input:checked + .toggle-bg {
   width: 0.25rem;
 }
 
+.w-10 {
+  width: 2.5rem;
+}
+
 .w-11 {
   width: 2.75rem;
 }
@@ -2128,10 +2136,6 @@ input:checked + .toggle-bg {
 
 .w-\[min\(100\%\2c auto\)\] {
   width: min(100%,auto);
-}
-
-.w-10 {
-  width: 2.5rem;
 }
 
 .w-\[30ch\] {
@@ -2198,6 +2202,10 @@ input:checked + .toggle-bg {
 .max-w-fit {
   max-width: -moz-fit-content;
   max-width: fit-content;
+}
+
+.max-w-\[60ch\] {
+  max-width: 60ch;
 }
 
 .max-w-xs {
@@ -2393,6 +2401,12 @@ input:checked + .toggle-bg {
 
 .cursor-default {
   cursor: default;
+}
+
+.select-none {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 
 .resize {
@@ -2738,11 +2752,6 @@ input:checked + .toggle-bg {
 
 .border-0 {
   border-width: 0px;
-}
-
-.border-y {
-  border-top-width: 1px;
-  border-bottom-width: 1px;
 }
 
 .border-b {
@@ -3985,6 +3994,16 @@ tr {
   content: var(--tw-content);
 }
 
+.first\:rounded-l-md:first-child {
+  border-top-left-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+}
+
+.last\:rounded-r-md:last-child {
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+
 .odd\:bg-gray-50:nth-child(odd) {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
@@ -4175,10 +4194,6 @@ tr {
 .focus\:ring-gray-200:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(229 231 235 / var(--tw-ring-opacity));
-}
-
-.focus-visible\:z-10:focus-visible {
-  z-index: 10;
 }
 
 .focus-visible\:outline-2:focus-visible {
