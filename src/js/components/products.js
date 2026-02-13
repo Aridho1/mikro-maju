@@ -131,6 +131,8 @@ export default function () {
             quantity: 0,
             reason: stockReasonKeys.at(-1),
             note: null,
+
+            total: 0,
         },
         stockNote: null,
         stockQuantityManual: null,
@@ -142,6 +144,19 @@ export default function () {
         isOpenModalStock: false,
         selectedStock: {},
         stockList: [],
+        get groupedStocks() {
+            return this.stockList.reduce((acc, stock) => {
+                const splited = stock.timestamp.split(" ");
+                const date = splited[0]; // ambil YYYY-MM-DD
+                stock.date = date;
+                stock.time = splited[1]; // ambil HH:MM:SS
+
+                if (!acc[date]) acc[date] = [];
+                acc[date].push(stock);
+
+                return acc;
+            }, {});
+        },
         isFetchingStockHistory: false,
 
         selectProduct(product) {
@@ -209,8 +224,12 @@ export default function () {
                     const formData = new FormData();
                     formData.append("id", this.selectedProduct.id);
 
-                    encodeFetchedJson(await (await fetch(dbStockPath + "get-stocks-by-product-id", { method: "POST", body: formData })).text(), "Fetching Riwayat Stok Produk", ({ data }) => {
-                        if (data) this.stockList = data;
+                    encodeFetchedJson(await (await fetch(dbStockPath + "get-stocks-by-product-id", { method: "POST", body: formData })).text(), "Fetching Riwayat Stok Produk", async ({ data }) => {
+                        if (data) {
+                            this.stockList = data;
+
+                            console.warn("groupedStocks", this.groupedStocks);
+                        }
                     });
 
                     this.isFetchingStockHistory = false;
@@ -242,6 +261,8 @@ export default function () {
             this.stockQuantityManual = null;
 
             if (isJustSelect) return;
+
+            this.formStock.total = this.selectedProduct.stock;
 
             this.getStockHistory();
             this.tabActive = tabKeys[2];
@@ -429,6 +450,19 @@ export default function () {
         },
 
         async init() {
+            this.$watch("formStock.total", (curr, prev) => {
+                if (curr == prev || isNaN(this.selectedProduct?.stock) || this.formStock.quantity + this.selectedProduct.stock == curr) return;
+
+                this.formStock.quantity = curr - this.selectedProduct.stock;
+                console.warn("formStock total", { curr, prev });
+            });
+
+            this.$watch("formStock.quantity", (curr, prev) => {
+                if (curr == prev || isNaN(this.selectedProduct?.stock) || this.formStock.total - this.selectedProduct.stock == curr) return;
+
+                this.formStock.total = +curr + +this.selectedProduct.stock;
+            });
+
             this.$watch("tabActive", async (curr, prev) => {
                 console.log("tabActive", { curr, prev });
 
@@ -490,7 +524,15 @@ export default function () {
 
             await this.get(null, true);
 
-            setTimeout(() => {
+            let waitAble = false;
+
+            const timer = setInterval(() => {
+                if (!this.products.length || waitAble) return;
+
+                waitAble = true;
+
+                console.error("sudah di wait");
+
                 const tab = url_param["tab"];
                 const pid = url_param["pid"];
 
@@ -501,6 +543,8 @@ export default function () {
                 } else console.error("not set selected produk in init");
 
                 if (tab && tabKeys.includes(tab) && this.tabActive != tab) this.tabActive = tab;
+
+                clearInterval(timer);
             }, 200);
         },
 
