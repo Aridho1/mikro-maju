@@ -609,7 +609,7 @@ export default function () {
                     encodeFetchedJson(await (await fetch(dbPath + apiMethod, { method: "POST", body: formData })).text(), "Fetching List Produk", ({ data, pagination }) => {
                         //
                         this.products = data.map((p) => {
-                            p.is_stockable = p.is_stockable == "0";
+                            p.is_stockable = p.is_stockable != "0";
 
                             return p;
                         });
