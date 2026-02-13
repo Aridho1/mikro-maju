@@ -10,7 +10,7 @@
                         tabActive === tabKeys[index]
                             ? 'bg-blue-600 text-white shadow'
                             : 'text-gray-600 hover:bg-gray-100',
-                        !!index && !selectedProduct.id
+                        !!index && !selectedProduct.id || (tab == tabList[2] && !selectedProduct?.is_stockable)
                             ? 'opacity-50 cursor-not-allowed hover:bg-transparent'
                             : ''
                     ]"
@@ -281,7 +281,7 @@
                                 <div class="flex gap-3 flex-wrap items-center text-sm">
                                     <button type="button" @click="selectDiscountProduct(product)" class="btn-detail font-medium hover:underline">Kelola Diskon</button>
 
-                                    <button type="button" @click="selectStockProduct(product)" class="btn-struk font-medium hover:underline">Kelola Stok</button>
+                                    <button x-show="product.is_stockable" type="button" @click="selectStockProduct(product)" class="btn-struk font-medium hover:underline">Kelola Stok</button>
 
                                     <button type="button" @click="selectEditItem(product)" class="btn-edit font-medium hover:underline">Ubah</button>
 
@@ -629,12 +629,12 @@
                                 <td class="px-3 py-2 text-gray-600 text-xs max-w-[60ch]">
                                     <span
                                         x-text="
-                                stock.note.length <= 50
-                                    ? stock.note
-                                    : stock.note.slice(0, 50).trim() + '... '
-                            "></span>
+                                            (stock.note?.length >= 50
+                                                ? stock.note?.slice(0, 50).trim() + '... '
+                                                : stock.note) || '-'
+                                        "></span>
 
-                                    <span x-show="stock.note.length > 50" @click="stockNote = stock.note" class="text-blue-700 font-medium cursor-pointer">Baca selengkapnya</span>
+                                    <span x-show="stock.note?.length > 50" @click="stockNote = stock.note" class="text-blue-700 font-medium cursor-pointer">Baca selengkapnya</span>
                                 </td>
                             </tr>
                         </template>

@@ -466,6 +466,8 @@ export default function () {
             this.$watch("tabActive", async (curr, prev) => {
                 console.log("tabActive", { curr, prev });
 
+                if (curr == prev) return;
+
                 if (curr == tabKeys[0] && this.isProductsShouldbeResfrefhed) {
                     await this.get(this.page.page, true);
                     this.isProductsShouldbeResfrefhed = false;
@@ -475,12 +477,14 @@ export default function () {
                     this.selectStockProduct(this.selectedProduct.id, true);
                 }
 
-                if (curr !== prev) {
-                    const formData = new FormData();
-                    formData.append("tab", curr);
+                // console.error("tabActive changed", { curr, prev, tabKeys, "curr == tabKeys[2]": curr == tabKeys[2], "isNaN(this.selectedProduct?.id": isNaN(this.selectedProduct?.id), "!this.selectedProduct.is_stockable": !this.selectedProduct.is_stockable });
+                // check is stockble
+                if (curr == tabKeys[2] && (isNaN(this.selectedProduct?.id) || !this.selectedProduct.is_stockable)) return ((this.tabActive = prev), console.error(`not stockable product`, this.selectedProduct));
 
-                    rewriteUrl(formData, url_param);
-                }
+                const formData = new FormData();
+                formData.append("tab", curr);
+
+                rewriteUrl(formData, url_param);
             });
 
             this.$watch("formattedDiscountValue", (value) => {
@@ -589,7 +593,11 @@ export default function () {
 
                     encodeFetchedJson(await (await fetch(dbPath + apiMethod, { method: "POST", body: formData })).text(), "Fetching List Produk", ({ data, pagination }) => {
                         //
-                        this.products = data;
+                        this.products = data.map((p) => {
+                            p.is_stockable = p.is_stockable == "0";
+
+                            return p;
+                        });
                         Object.assign(this.page, pagination);
                     });
                 },
