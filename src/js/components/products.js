@@ -473,8 +473,8 @@ export default function () {
                     this.isProductsShouldbeResfrefhed = false;
 
                     // handle selected product stock
-                    if (isNaN(this.selectedProduct?.id)) return;
-                    this.selectStockProduct(this.selectedProduct.id, true);
+                    // if (isNaN(this.selectedProduct?.id)) return;
+                    // this.selectStockProduct(this.selectedProduct.id, true);
                 }
 
                 // console.error("tabActive changed", { curr, prev, tabKeys, "curr == tabKeys[2]": curr == tabKeys[2], "isNaN(this.selectedProduct?.id": isNaN(this.selectedProduct?.id), "!this.selectedProduct.is_stockable": !this.selectedProduct.is_stockable });
@@ -542,7 +542,22 @@ export default function () {
 
                 if (pid && isNaN(this.selectedProduct?.id)) {
                     console.error("set selected produk in init", { pid });
-                    this.selectStockProduct({ id: pid }, tab != tabKeys[2]);
+                    // this.selectStockProduct({ id: pid }, tab != tabKeys[2]);
+
+                    switch (tab) {
+                        case tabKeys[0]:
+                            this.selectProduct({ id: pid });
+                            break;
+                        case tabKeys[1]:
+                            this.selectDiscountProduct({ id: pid });
+                            break;
+                        case tabKeys[2]:
+                            this.selectStockProduct({ id: pid });
+                            break;
+                        default:
+                            break;
+                    }
+
                     console.error("selected produ", this.selectedProduct);
                 } else console.error("not set selected produk in init");
 
