@@ -8,111 +8,117 @@
 /* @impor "./node_modules/flowbite-datepicker/dist/css/datepicker.min.css" */
 
 .navlink {
-	@apply flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 gap-2;
+    @apply flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 gap-2;
 }
 
 html,
 body {
-	/* scroll-behavior: smooth; */
-	@apply scroll-smooth;
+    /* scroll-behavior: smooth; */
+    @apply scroll-smooth;
 }
 
 body {
-	min-height: 100dvh;
-	font-family: "Poppins", century-gothic !important;
+    min-height: 100dvh;
+    font-family: "Poppins", century-gothic !important;
 }
 
 [data-x-tooltip] {
-	background-color: rgba(0, 0, 0, 0.75);
-	color: white;
-	padding: 5px;
-	border-radius: 5px;
-	font-size: 12px;
-	position: absolute;
-	z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    position: absolute;
+    z-index: 9999;
 }
 
 tr {
-	@apply transition duration-300;
+    @apply transition duration-300;
 
-	&:has(.btn-remove:hover) {
-		@apply bg-red-100;
-	}
+    &:has(.btn-remove:hover) {
+        @apply bg-red-100;
+    }
 
-	.btn-remove {
-		@apply text-red-500;
-	}
+    .btn-remove {
+        @apply text-red-500;
+    }
 
-	&:has(.btn-edit:hover) {
-		@apply bg-orange-100;
-	}
+    &:has(.btn-edit:hover) {
+        @apply bg-orange-100;
+    }
 
-	.btn-edit {
-		@apply text-orange-500;
-	}
+    .btn-edit {
+        @apply text-orange-500;
+    }
 
-	&:has(.btn-struct:hover) {
-		@apply bg-green-100;
-	}
+    &:has(.btn-struct:hover) {
+        @apply bg-green-100;
+    }
 
-	.btn-struct {
-		@apply text-green-500;
-	}
+    .btn-struct {
+        @apply text-green-500;
+    }
 
-	&:has(.btn-detail:hover) {
-		@apply bg-cyan-100;
-	}
+    &:has(.btn-detail:hover) {
+        @apply bg-cyan-100;
+    }
 
-	.btn-detail {
-		@apply text-cyan-500;
-	}
+    .btn-detail {
+        @apply text-cyan-500;
+    }
 
-	&:has(.btn-sync:hover) {
-		@apply bg-teal-100;
-	}
+    &:has(.btn-sync:hover) {
+        @apply bg-teal-100;
+    }
 
-	.btn-sync {
-		@apply text-teal-500;
-	}
+    .btn-sync {
+        @apply text-teal-500;
+    }
 
-	&:has(.btn-pay:hover) {
-		@apply bg-fuchsia-100;
-	}
+    &:has(.btn-pay:hover) {
+        @apply bg-fuchsia-100;
+    }
 
-	.btn-pay {
-		@apply text-fuchsia-400;
-	}
+    .btn-pay {
+        @apply text-fuchsia-400;
+    }
 
-	&:has(.btn-select:hover) {
-		@apply bg-blue-100;
-	}
+    &:has(.btn-select:hover) {
+        @apply bg-blue-100;
+    }
 
-	&:has(.btn-find:hover) {
-		@apply bg-green-100;
-	}
+    &:has(.btn-find:hover) {
+        @apply bg-green-100;
+    }
 }
 .td-base {
-	@apply px-6 py-4 align-middle whitespace-nowrap;
+    @apply px-6 py-4 align-middle whitespace-nowrap;
 }
 
 .td-muted {
-	@apply text-gray-500 text-xs;
+    @apply text-gray-500 text-xs;
 }
 
 .td-strong {
-	@apply text-gray-900 font-semibold;
+    @apply text-gray-900 font-semibold;
 }
 
 .modal-conn {
-	@apply fixed inset-0 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto z-[150];
+    @apply fixed inset-0 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto z-[150];
 }
 
 .swal2-confirm {
-	background-color: #62c700 !important;
-	color: #fff;
+    background-color: #62c700 !important;
+    color: #fff;
 }
 
 .swal2-cancel {
-	background-color: #d33 !important;
-	color: #fff;
+    background-color: #d33 !important;
+    color: #fff;
+}
+
+#list-menu {
+    img {
+        mix-blend-mode: multiply;
+    }
 }

@@ -3935,6 +3935,12 @@ tr {
   color: #fff;
 }
 
+#list-menu {
+  img {
+    mix-blend-mode: multiply;
+  }
+}
+
 .after\:absolute::after {
   content: var(--tw-content);
   position: absolute;

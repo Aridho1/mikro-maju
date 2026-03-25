@@ -156,6 +156,30 @@ const cleanFloat = (num) => {
 const alpineInitCallback = async () => {
     console.log("ALPINE");
 
+    Alpine.directive("app-logo", (el, { value, modifiers, expression }, { evaluate, effect, cleanup }) => {
+        // logic di sini
+
+        const prev_src = el.src;
+
+        el.src = CONFIG.APP_LOGO;
+
+        // jika gambar error, fallback ke gambar sebelumnya
+        el.onerror = () => {
+            el.src = prev_src;
+
+            console.error("Error while loading app logo", { prev_src });
+        };
+
+        // effect(() => {
+        //     const src = evaluate(expression);
+        //     el.src = src;
+        // });
+    });
+
+    Alpine.directive("app-name", (el, { value, modifiers, expression }, { evaluate, effect, cleanup }) => {
+        if (CONFIG.APP_NAME) el.textContent = CONFIG.APP_NAME;
+    });
+
     // const config = await getConfigJson();
     // console.log({ config });
 
