@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+
+        <style>
+            body {
+                font-family: sans-serif;
+                display: flex;
+                gap: 40px;
+                padding: 40px;
+            }
+
+            .panel {
+                width: 300px;
+            }
+
+            ul {
+                list-style: none;
+                padding-left: 20px;
+            }
+
+            li {
+                padding: 6px 10px;
+                border: 1px solid #ddd;
+                margin: 4px 0;
+                background: #f3f3f3;
+            }
+
+            .dropzone {
+                min-height: 120px;
+                border: 2px dashed #ccc;
+                padding: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="panel">
+            <h3>Active</h3>
+            <ul id="active" class="dropzone nested"></ul>
+        </div>
+
+        <div class="panel">
+            <h3>Available</h3>
+            <ul id="available" class="dropzone nested">
+                <li data-id="1">
+                    Electronics
+                    <ul class="nested">
+                        <li data-id="2">Phones</li>
+                        <li data-id="3">Laptop</li>
+                    </ul>
+                </li>
+
+                <li data-id="4">
+                    Food
+                    <ul class="nested">
+                        <li data-id="5">Fruit</li>
+                        <li data-id="6">Snack</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+        <script>
+            document.querySelectorAll(".nested").forEach((el) => {
+                new Sortable(el, {
+                    group: {
+                        name: "categories",
+                        pull: true,
+                        put: true,
+                    },
+
+                    sort: false,
+                    animation: 150,
+
+                    onAdd(evt) {
+                        // selalu append di akhir
+                        evt.to.appendChild(evt.item);
+                    },
+
+                    onMove(evt) {
+                        // kalau drag dalam list yang sama → block
+                        if (evt.from === evt.to) {
+                            return false;
+                        }
+                    },
+                });
+            });
+        </script>
+    </body>
+</html>

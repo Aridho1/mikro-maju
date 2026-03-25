@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Multiple Category Input</title>
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #0f172a;
+                font-family: "Segoe UI", system-ui, sans-serif;
+                padding: 2rem;
+            }
+
+            .card {
+                background: #1e293b;
+                border: 1px solid #334155;
+                border-radius: 16px;
+                padding: 2rem;
+                width: 100%;
+                max-width: 540px;
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            }
+
+            .card h2 {
+                color: #f1f5f9;
+                font-size: 1.25rem;
+                font-weight: 700;
+                margin-bottom: 0.4rem;
+            }
+
+            .card p {
+                color: #94a3b8;
+                font-size: 0.85rem;
+                margin-bottom: 1.5rem;
+            }
+
+            label {
+                display: block;
+                color: #cbd5e1;
+                font-size: 0.8rem;
+                font-weight: 600;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                margin-bottom: 0.5rem;
+            }
+
+            /* ── Tag Input Box ── */
+            .tag-input-wrapper {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 0.4rem;
+                background: #0f172a;
+                border: 1.5px solid #334155;
+                border-radius: 10px;
+                padding: 0.5rem 0.75rem;
+                cursor: text;
+                transition: border-color 0.2s;
+                min-height: 52px;
+            }
+
+            .tag-input-wrapper:focus-within {
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            }
+
+            /* Each tag chip */
+            .tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.35rem;
+                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                color: #fff;
+                font-size: 0.78rem;
+                font-weight: 500;
+                padding: 0.25rem 0.55rem 0.25rem 0.65rem;
+                border-radius: 6px;
+                animation: tagIn 0.15s ease;
+            }
+
+            @keyframes tagIn {
+                from {
+                    transform: scale(0.8);
+                    opacity: 0;
+                }
+                to {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .tag-remove {
+                background: none;
+                border: none;
+                color: rgba(255, 255, 255, 0.7);
+                cursor: pointer;
+                font-size: 1rem;
+                line-height: 1;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                transition: color 0.15s;
+            }
+            .tag-remove:hover {
+                color: #fff;
+            }
+
+            /* Underlying text input */
+            #category-input {
+                flex: 1;
+                min-width: 120px;
+                background: transparent;
+                border: none;
+                outline: none;
+                color: #f1f5f9;
+                font-size: 0.9rem;
+                padding: 0.15rem 0;
+            }
+            #category-input::placeholder {
+                color: #475569;
+            }
+
+            /* Suggestion dropdown */
+            .suggestions {
+                position: relative;
+            }
+
+            .suggestions-list {
+                position: absolute;
+                top: 6px;
+                left: 0;
+                right: 0;
+                background: #1e293b;
+                border: 1px solid #334155;
+                border-radius: 10px;
+                overflow: hidden;
+                z-index: 100;
+                display: none;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            }
+
+            .suggestions-list.open {
+                display: block;
+            }
+
+            .suggestion-item {
+                padding: 0.6rem 1rem;
+                color: #cbd5e1;
+                font-size: 0.87rem;
+                cursor: pointer;
+                transition: background 0.15s;
+            }
+
+            .suggestion-item:hover,
+            .suggestion-item.active {
+                background: #334155;
+                color: #f1f5f9;
+            }
+
+            .suggestion-item span.match {
+                color: #818cf8;
+                font-weight: 700;
+            }
+
+            /* Hint text */
+            .hint {
+                margin-top: 0.5rem;
+                color: #475569;
+                font-size: 0.75rem;
+            }
+
+            /* Output preview */
+            .output-box {
+                margin-top: 1.5rem;
+                background: #0f172a;
+                border: 1px solid #1e3a5f;
+                border-radius: 10px;
+                padding: 1rem;
+            }
+
+            .output-box h3 {
+                color: #64748b;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-bottom: 0.6rem;
+            }
+
+            #output-value {
+                color: #38bdf8;
+                font-size: 0.85rem;
+                font-family: "Courier New", monospace;
+                word-break: break-all;
+            }
+
+            /* Submit button */
+            .btn-submit {
+                margin-top: 1.25rem;
+                width: 100%;
+                padding: 0.75rem;
+                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                color: #fff;
+                font-size: 0.9rem;
+                font-weight: 600;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                transition:
+                    opacity 0.2s,
+                    transform 0.1s;
+            }
+            .btn-submit:hover {
+                opacity: 0.9;
+            }
+            .btn-submit:active {
+                transform: scale(0.98);
+            }
+
+            /* Hidden real input for form submission */
+            #categories-hidden {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h2>🏷️ Multiple Category Input</h2>
+            <p>
+                Ketik kategori lalu tekan
+                <kbd>Enter</kbd>
+                ,
+                <kbd>,</kbd>
+                , atau pilih dari saran.
+            </p>
+
+            <form id="demo-form">
+                <label for="category-input">Kategori Produk</label>
+
+                <div class="suggestions">
+                    <div class="tag-input-wrapper" id="tag-box">
+                        <!-- Tags rendered here dynamically -->
+                        <input type="text" id="category-input" placeholder="Tambah kategori..." autocomplete="off" />
+                    </div>
+                    <div class="suggestions-list" id="suggestions-list"></div>
+                </div>
+
+                <p class="hint">
+                    Tekan
+                    <strong>Backspace</strong>
+                    untuk hapus tag terakhir. Maksimal 10 kategori.
+                </p>
+
+                <!-- Hidden input for actual form data -->
+                <input type="hidden" id="categories-hidden" name="categories" />
+
+                <div class="output-box">
+                    <h3>Output JSON</h3>
+                    <div id="output-value">[]</div>
+                </div>
+
+                <button type="submit" class="btn-submit">Simpan Kategori</button>
+            </form>
+        </div>
+
+        <script>
+            /* ── Configuration ── */
+            const MAX_TAGS = 10;
+
+            // Preset suggestions (bisa diganti dari API)
+            const SUGGESTIONS_POOL = [
+                "Makanan",
+                "Minuman",
+                "Elektronik",
+                "Fashion",
+                "Kesehatan",
+                "Kecantikan",
+                "Olahraga",
+                "Otomotif",
+                "Pendidikan",
+                "Teknologi",
+                "Seni",
+                "Musik",
+                "Buku",
+                "Perabot",
+                "Mainan",
+                "Alat Tulis",
+                "Pertanian",
+                "Travel",
+                "Hobi",
+                "Baby & Kids",
+            ];
+
+            /* ── State ── */
+            let tags = [];
+            let activeIndex = -1;
+
+            /* ── DOM ── */
+            const tagBox = document.getElementById("tag-box");
+            const input = document.getElementById("category-input");
+            const suggList = document.getElementById("suggestions-list");
+            const hiddenInput = document.getElementById("categories-hidden");
+            const outputValue = document.getElementById("output-value");
+
+            /* ── Render Tags ── */
+            function renderTags() {
+                // Remove old tag chips (keep the <input>)
+                tagBox.querySelectorAll(".tag").forEach((el) => el.remove());
+
+                tags.forEach((tag, i) => {
+                    const chip = document.createElement("div");
+                    chip.className = "tag";
+                    chip.innerHTML = `
+        <span>${escapeHtml(tag)}</span>
+        <button type="button" class="tag-remove" data-index="${i}" title="Hapus">&#x2715;</button>
+      `;
+                    tagBox.insertBefore(chip, input);
+                });
+
+                // Update hidden + output
+                hiddenInput.value = JSON.stringify(tags);
+                outputValue.textContent = JSON.stringify(tags);
+            }
+
+            /* ── Add Tag ── */
+            function addTag(value) {
+                const val = value.trim().replace(/,+$/, "");
+                if (!val) return;
+                if (tags.length >= MAX_TAGS) {
+                    shakebox();
+                    return;
+                }
+                if (tags.map((t) => t.toLowerCase()).includes(val.toLowerCase())) {
+                    input.value = "";
+                    return; // no duplicates
+                }
+                tags.push(val);
+                input.value = "";
+                renderTags();
+                closeSuggestions();
+            }
+
+            /* ── Remove Tag ── */
+            function removeTag(index) {
+                tags.splice(index, 1);
+                renderTags();
+            }
+
+            /* ── Suggestion logic ── */
+            function openSuggestions(query) {
+                const q = query.toLowerCase();
+                const filtered = SUGGESTIONS_POOL.filter((s) => s.toLowerCase().includes(q) && !tags.map((t) => t.toLowerCase()).includes(s.toLowerCase())).slice(0, 8);
+
+                if (!filtered.length || !q) {
+                    closeSuggestions();
+                    return;
+                }
+
+                suggList.innerHTML = filtered
+                    .map((s, i) => {
+                        const highlighted = s.replace(new RegExp(`(${escapeRegex(q)})`, "gi"), '<span class="match">$1</span>');
+                        return `<div class="suggestion-item" data-value="${escapeHtml(s)}" data-i="${i}">${highlighted}</div>`;
+                    })
+                    .join("");
+
+                activeIndex = -1;
+                suggList.classList.add("open");
+            }
+
+            function closeSuggestions() {
+                suggList.classList.remove("open");
+                suggList.innerHTML = "";
+                activeIndex = -1;
+            }
+
+            function navigateSuggestions(dir) {
+                const items = suggList.querySelectorAll(".suggestion-item");
+                if (!items.length) return;
+                items.forEach((el) => el.classList.remove("active"));
+                activeIndex = (activeIndex + dir + items.length) % items.length;
+                items[activeIndex].classList.add("active");
+                items[activeIndex].scrollIntoView({ block: "nearest" });
+            }
+
+            /* ── Shake animation on max ── */
+            function shakebox() {
+                tagBox.style.animation = "none";
+                tagBox.offsetHeight;
+                tagBox.style.borderColor = "#f43f5e";
+                setTimeout(() => {
+                    tagBox.style.borderColor = "";
+                }, 600);
+            }
+
+            /* ── Helpers ── */
+            function escapeHtml(str) {
+                return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+            }
+            function escapeRegex(str) {
+                return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            }
+
+            /* ── Events ── */
+
+            // Click on wrapper → focus input
+            tagBox.addEventListener("click", () => input.focus());
+
+            // Keydown on input
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                    e.preventDefault();
+                    if (activeIndex >= 0) {
+                        const active = suggList.querySelector(".suggestion-item.active");
+                        if (active) {
+                            addTag(active.dataset.value);
+                            return;
+                        }
+                    }
+                    addTag(input.value);
+                }
+
+                if (e.key === "Backspace" && input.value === "" && tags.length) {
+                    removeTag(tags.length - 1);
+                }
+
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    navigateSuggestions(1);
+                }
+                if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    navigateSuggestions(-1);
+                }
+                if (e.key === "Escape") {
+                    closeSuggestions();
+                }
+            });
+
+            // Input typing → show suggestions
+            input.addEventListener("input", () => openSuggestions(input.value));
+            input.addEventListener("focus", () => {
+                if (input.value) openSuggestions(input.value);
+            });
+
+            // Click on tag remove button
+            tagBox.addEventListener("click", (e) => {
+                const btn = e.target.closest("[data-index]");
+                if (btn) removeTag(parseInt(btn.dataset.index));
+            });
+
+            // Click on suggestion item
+            suggList.addEventListener("click", (e) => {
+                const item = e.target.closest(".suggestion-item");
+                if (item) addTag(item.dataset.value);
+            });
+
+            // Close suggestions when clicking outside
+            document.addEventListener("click", (e) => {
+                if (!tagBox.contains(e.target) && !suggList.contains(e.target)) closeSuggestions();
+            });
+
+            // Form submit
+            document.getElementById("demo-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                if (input.value.trim()) addTag(input.value); // flush remaining input
+                alert("Kategori disimpan:\n" + JSON.stringify(tags, null, 2));
+            });
+
+            // Initial render
+            renderTags();
+        </script>
+    </body>
+</html>
