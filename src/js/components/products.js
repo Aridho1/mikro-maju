@@ -582,6 +582,8 @@ export default function () {
                 keys.forEach((key) => (this.formSearch.categories[key] = []));
 
                 this.categories = categories;
+
+                console.log("this.categories", this.categories);
             });
         },
 

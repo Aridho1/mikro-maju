@@ -686,43 +686,7 @@
                                 class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                         </div>
 
-                        <div class="col-span-6 sm:col-span-3">
-                            <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
-                            <select
-                                id="category"
-                                x-model="form.category"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                <option value="">Pilih Kategori</option>
-                                <template x-for="(c, i, all) in ['Makanan', 'Minuman']" :key="c">
-                                    <option x-text="c" :value="c"></option>
-                                </template>
-                            </select>
-                        </div>
-
-                        <div class="col-span-6 sm:col-span-3">
-                            <label for="purchase_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Beli</label>
-                            <div class="flex gap-2">
-                                <input
-                                    type="text"
-                                    id="purchase_price"
-                                    x-model="formattedPurchase_price"
-                                    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    required="" />
-                            </div>
-                        </div>
-                        <div class="col-span-6 sm:col-span-3">
-                            <label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Jual</label>
-                            <div class="flex gap-2">
-                                <input
-                                    type="text"
-                                    id="price"
-                                    x-model="formattedPrice"
-                                    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    required="" />
-                            </div>
-                        </div>
-
-                        <div class="col-span-6 sm:col-span-3">
+                        <div class="col-span-6 sm:col-span-3 self-end">
                             <!-- <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Stok Awal</label>
 							<input
 								type="text"
@@ -744,6 +708,58 @@
                             </label>
                         </div>
 
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="purchase_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Beli</label>
+                            <div class="flex gap-2">
+                                <input
+                                    type="text"
+                                    id="purchase_price"
+                                    x-model="formattedPurchase_price"
+                                    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    required="" />
+                            </div>
+                        </div>
+                        <div class="col-span-6 sm:col-span-3 hidden">
+                            <label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Harga Jual</label>
+                            <div class="flex gap-2">
+                                <input
+                                    type="text"
+                                    id="price"
+                                    x-model="formattedPrice"
+                                    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    required="" />
+                            </div>
+                        </div>
+
+                        <div class="col-span-6 sm:col-span-3 hidden">
+                            <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
+                            <select
+                                id="category"
+                                x-model="form.category"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <option value="">Pilih Kategori</option>
+                                <template x-for="(c, i, all) in (['Jasa'] || ['Makanan', 'Minuman'])" :key="c">
+                                    <option x-text="c" :value="c" :selected="true"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kategori</label>
+                            <input
+                                type="search"
+                                id="category"
+                                x-model="form.category"
+                                list="category-list"
+                                autocomplete="off"
+                                class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+
+                            <datalist id="category-list">
+                                <template x-for="(category, _, index) in categories" :key="category + index">
+                                    <option x-text="_"></option>
+                                </template>
+                            </datalist>
+                        </div>
                         <div class="col-span-6 sm:col-span-3 hidden">
                             <label for="subcategory" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sub Kategori</label>
                             <input
